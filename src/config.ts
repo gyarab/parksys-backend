@@ -13,6 +13,9 @@ nconf.file({
   file: path.join(__dirname, "..", "config", `${process.env.NODE_ENV}.json`)
 });
 nconf.defaults({
+  impls: {
+    example: "impl1"
+  },
   mongo: {
     host: "127.0.0.1",
     port: 27017
