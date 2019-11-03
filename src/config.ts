@@ -22,7 +22,9 @@ nconf.defaults({
   },
   server: {
     port: 8080
-  }
+  },
+  ping: true,
+  cryptSecret: "bc59412d08b71442dc41437175784380"
 });
 
 export = nconf;
