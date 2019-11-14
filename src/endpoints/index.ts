@@ -11,6 +11,4 @@ rootRouter.get("/what", (req, res) => {
   res.status(200).end();
 });
 
-console.log(rootRouter.stack);
-
 export default rootRouter;

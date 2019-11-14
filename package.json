@@ -8,7 +8,10 @@
     "dev:watch": "NODE_ENV=development concurrently \"npm:compile:watch\" \"npm:start\"",
     "dev": "NODE_ENV=development npm run start",
     "start": "nodemon dist/index.js -e ts",
-    "test": "jest --detectOpenHandles --forceExit"
+    "test": "jest --detectOpenHandles --forceExit",
+    "dbSetup": "bash scripts/setup-postgres.sh",
+    "dbStart": "bash scripts/start-postgres.sh",
+    "dbStop": "bash scripts/stop-postgres.sh"
   },
   "repository": {
     "type": "git",
