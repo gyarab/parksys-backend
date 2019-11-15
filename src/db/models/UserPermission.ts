@@ -10,5 +10,5 @@ export default class UserPermission extends Model<UserPermission> {
 
   @ForeignKey(() => Permission)
   @Column
-  permissionName!: string;
+  permissionId!: number;
 }

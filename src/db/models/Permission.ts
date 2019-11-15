@@ -26,7 +26,6 @@ export enum PermissionEnum {
 }))
 @Table
 export default class Permission extends Model<Permission> {
-  @PrimaryKey
   @Column({
     type: DataType.ENUM(PermissionEnum.ALL)
   })

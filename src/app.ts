@@ -1,13 +1,12 @@
 import express from "express";
 import config from "./config";
-// This import is here to load sequelize before any models are used
 import db from "./db";
 import routes from "./endpoints/routes";
 import rootRouter from "./endpoints/index";
 import bodyParser from "body-parser";
 import cors from "cors";
 
-console.log(db);
+db().init();
 const app = express();
 
 const corsOptions = {

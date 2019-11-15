@@ -31,10 +31,14 @@ import UserPermission from "./UserPermission";
 }))
 @Table
 export default class User extends Model<User> {
-  @Column
+  @Column({
+    unique: "user"
+  })
   name!: string;
 
-  @Column
+  @Column({
+    unique: "user"
+  })
   email!: string;
 
   @HasMany(() => RefreshToken)
