@@ -29,7 +29,3 @@ export const closeDatabase = async () => {
   await mongoose.connection.close();
   await mongod.stop();
 };
-
-/**
- * Remove all the data for all db collections.
- */
