@@ -39,7 +39,7 @@ function hmac(secret: string, head: string, body: string): string {
   return toBase64Url(hmac.digest("base64"));
 }
 
-export function verifyToken(secret: string, token: string): boolean {
+export function verifyToken(secret: string, token: string): [boolean, any] {
   const parts = token.split(".");
   if (parts.length !== 3) {
     throw new Error("Invalid token");
@@ -48,7 +48,10 @@ export function verifyToken(secret: string, token: string): boolean {
   const recBody = parts[1];
   const recSignature = parts[2];
   const calcSignature = hmac(secret, recHead, recBody);
-  return recSignature === calcSignature;
+
+  const valid = recSignature === calcSignature;
+
+  return [valid, valid ? JSON.parse(fromBase64Url(recBody)) : null];
 }
 
 export function createToken(secret: string, body: any): string {

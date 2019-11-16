@@ -27,4 +27,4 @@ nconf.defaults({
   cryptSecret: "bc59412d08b71442dc41437175784380"
 });
 
-export = nconf;
+export default nconf;

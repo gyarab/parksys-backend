@@ -1,0 +1,12 @@
+type User {
+  name: String!
+  email: String!
+  permissions: [String!]!
+  authentications: [Authentication]
+  refreshTokens: [RefreshToken]
+}
+
+extend type Query {
+  currentUser: User
+  users: [User!]!
+}

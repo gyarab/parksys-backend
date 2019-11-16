@@ -1,5 +1,11 @@
-import { RefreshTokenName, IRefreshToken } from "./RefreshToken";
-import { AuthenticationSchema, IAuthentication } from "./Authentication";
+import {
+  RefreshTokenName,
+  IRefreshToken
+} from "../refreshToken/refreshToken.model";
+import {
+  AuthenticationSchema,
+  IAuthentication
+} from "../authentication/authentication.model";
 import mongoose from "mongoose";
 
 interface IUser extends mongoose.Document {

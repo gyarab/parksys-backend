@@ -1,4 +1,4 @@
-import { RefreshToken } from "../RefreshToken";
+import { RefreshToken } from "../refreshToken/refreshToken.model";
 
 describe("RefreshToken", () => {
   it("virtual isRevoked returns the right value", () => {

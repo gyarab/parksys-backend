@@ -8,4 +8,4 @@ const impls: { [key: string]: () => Example } = {
   impl2: () => new ExampleImpl2()
 };
 
-export = impls[config.get("impls:example")]();
+export default impls[config.get("impls:example")]();

@@ -6,4 +6,4 @@ class ExampleImpl1 implements Example {
   }
 }
 
-export = ExampleImpl1;
+export default ExampleImpl1;

@@ -1,0 +1,8 @@
+enum AuthenticationMethod {
+  PASSWORD
+}
+
+type Authentication {
+  payload: String!
+  method: AuthenticationMethod!
+}

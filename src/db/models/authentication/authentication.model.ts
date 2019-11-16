@@ -11,17 +11,22 @@ interface IAuthentication extends mongoose.Document {
 
 const AuthenticationName = "Authentication";
 
-const AuthenticationSchema = new mongoose.Schema({
-  payload: {
-    type: Object,
-    required: true
+const AuthenticationSchema: mongoose.Schema<
+  IAuthentication
+> = new mongoose.Schema(
+  {
+    payload: {
+      type: Object,
+      required: true
+    },
+    method: {
+      type: String,
+      require: true,
+      enum: Object.keys(AuthenticationMethod)
+    }
   },
-  method: {
-    type: String,
-    require: true,
-    enum: Object.keys(AuthenticationMethod)
-  }
-});
+  { _id: false, id: false }
+);
 
 const Authentication = mongoose.model<IAuthentication>(
   AuthenticationName,

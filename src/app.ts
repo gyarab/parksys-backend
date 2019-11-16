@@ -5,6 +5,7 @@ import routes from "./endpoints/routes";
 import rootRouter from "./endpoints/index";
 import bodyParser from "body-parser";
 import cors from "cors";
+import { constructGraphQLServer } from "./db/gql";
 
 const app = express();
 
@@ -24,12 +25,14 @@ if (config.get("ping")) {
   });
 }
 
-const startDb = async () => {
+const connectApollo = async () => {
+  const apollo = await constructGraphQLServer();
+  apollo.applyMiddleware({ app });
+};
+
+const begin = async () => {
+  await connectApollo();
   await db.connect();
 };
 
-const stopDb = async () => {
-  await db.disconnect();
-};
-
-export { app, startDb, stopDb };
+export { app, begin };

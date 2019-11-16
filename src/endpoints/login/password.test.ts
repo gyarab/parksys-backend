@@ -1,17 +1,18 @@
 import request from "supertest";
 import { hashPassword } from "./password";
-import { User } from "../../db/models/User";
-import { AuthenticationMethod } from "../../db/models/Authentication";
-import { app, startDb, stopDb } from "../../app";
+import { User } from "../../db/models/user/user.model";
+import { AuthenticationMethod } from "../../db/models/authentication/authentication.model";
+import { app, begin } from "../../app";
 import { fromBase64Url, verifyToken } from "../../auth/jwt";
 import config from "../../config";
+import { disconnect } from "../../db";
 
 const req = request(app);
 const LOGIN_ENDPOINT = "/login/password";
 
 describe("password endpoint", () => {
   beforeAll(async () => {
-    await startDb();
+    await begin();
     await User.remove({});
     await new User({
       name: "user1",
@@ -42,7 +43,7 @@ describe("password endpoint", () => {
   });
 
   afterAll(async () => {
-    await stopDb();
+    await disconnect();
   });
 
   it("authenticates a valid user", async () => {
@@ -50,7 +51,6 @@ describe("password endpoint", () => {
       .post(LOGIN_ENDPOINT)
       .send({ user: "user1", password: "1234" });
     expect(resp.status).toBe(200);
-    // TODO: Verify that we can
     expect(resp.body.refreshToken).toBeDefined;
     expect(resp.body.accessToken).toBeDefined;
 
@@ -65,11 +65,11 @@ describe("password endpoint", () => {
     // Tokens are bound with one another
     expect(aTokenData.roid).toBe(rTokenData.oid);
     // Tokens are valid
-    expect(verifyToken(config.get("cryptSecret"), refreshToken)).toBe(true);
-    expect(verifyToken(config.get("cryptSecret"), accessToken)).toBe(true);
+    expect(verifyToken(config.get("cryptSecret"), refreshToken)[0]).toBe(true);
+    expect(verifyToken(config.get("cryptSecret"), accessToken)[0]).toBe(true);
   });
 
-  it("does not authenticated invalid users", async () => {
+  it("does not authenticate invalid users", async () => {
     let resp = await req.post(LOGIN_ENDPOINT).send({
       user: "user2",
       password: "abcd"
