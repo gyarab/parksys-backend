@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CONTAINER_NAME="parksys-postgres"
+CONTAINER_NAME="parksys-mongo"
 
 if [ -z "$1" ]
 then
@@ -11,4 +11,4 @@ fi
 
 echo "--- Docker output:"
 
-docker start $CONTAINER_NAME
+docker stop $CONTAINER_NAME

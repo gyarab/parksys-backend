@@ -1,24 +1,28 @@
-import {
-  Model,
-  Column,
-  Table,
-  ForeignKey,
-  BelongsTo
-} from "sequelize-typescript";
-import User from "./User";
+import mongoose from "mongoose";
 
-@Table
-export default class RefreshToken extends Model<RefreshToken> {
-  @ForeignKey(() => User)
-  @Column
-  userId!: number;
-
-  @BelongsTo(() => User)
-  user!: User;
-
-  @Column
-  value!: string;
-
-  @Column
-  revoked: Date;
+interface IRefreshToken extends mongoose.Document {
+  revokedAt: Date;
+  isRevoked: boolean;
 }
+
+const RefreshTokenName = "RefreshToken";
+
+const RefreshTokenSchema = new mongoose.Schema({
+  revokedAt: {
+    type: Date,
+    default: null
+  }
+});
+
+RefreshTokenSchema.virtual("isRevoked").get(function() {
+  return (
+    this.revokedAt !== null && new Date().getTime() >= this.revokedAt.getTime()
+  );
+});
+
+const RefreshToken = mongoose.model<IRefreshToken>(
+  RefreshTokenName,
+  RefreshTokenSchema
+);
+
+export { RefreshTokenSchema, RefreshToken, RefreshTokenName, IRefreshToken };

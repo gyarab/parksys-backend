@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-CONTAINER_NAME="parksys-postgres"
-CONTAINER_PORT_MAP="5432:5432"
+CONTAINER_NAME="parksys-mongo"
+CONTAINER_PORT_MAP="27017:27017"
 
 if [ -z "$1" ]
 then
@@ -19,5 +19,5 @@ fi
 
 echo "--- Docker output:"
 
-docker pull postgres
-docker create --name $CONTAINER_NAME -p $CONTAINER_PORT_MAP postgres
+docker pull mongo
+docker create --name $CONTAINER_NAME -p $CONTAINER_PORT_MAP mongo

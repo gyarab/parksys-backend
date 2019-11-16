@@ -1,52 +1,45 @@
-import {
-  Model,
-  Column,
-  Table,
-  BelongsToMany,
-  Scopes,
-  HasMany
-} from "sequelize-typescript";
-import RefreshToken from "./RefreshToken";
-import Authentication from "./Authentication";
-import Permission from "./Permission";
-import UserPermission from "./UserPermission";
+import { RefreshTokenName, IRefreshToken } from "./RefreshToken";
+import { AuthenticationSchema, IAuthentication } from "./Authentication";
+import mongoose from "mongoose";
 
-@Scopes(() => ({
-  refreshToken: {
-    include: [
-      {
-        model: RefreshToken,
-        through: { attributes: [] }
-      }
-    ]
-  },
-  authentications: {
-    include: [
-      {
-        model: Authentication,
-        through: { attributes: [] }
-      }
-    ]
-  }
-}))
-@Table
-export default class User extends Model<User> {
-  @Column({
-    unique: "user"
-  })
-  name!: string;
-
-  @Column({
-    unique: "user"
-  })
-  email!: string;
-
-  @HasMany(() => RefreshToken)
-  refreshTokens?: RefreshToken[];
-
-  @HasMany(() => Authentication)
-  authentications?: Authentication[];
-
-  @BelongsToMany(() => Permission, () => UserPermission)
-  permissions?: Permission[];
+interface IUser extends mongoose.Document {
+  name: string;
+  email: string;
+  permissions: string[];
+  authentications: IAuthentication[];
+  refreshTokens: IRefreshToken[];
 }
+
+const UserName = "User";
+
+const UserSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    unique: true,
+    required: true,
+    dropDups: true
+  },
+  email: {
+    type: String,
+    unique: true,
+    required: true,
+    dropDups: true
+  },
+  permissions: [
+    {
+      type: String,
+      required: true
+    }
+  ],
+  authentications: [AuthenticationSchema],
+  refreshTokens: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: RefreshTokenName
+    }
+  ]
+});
+
+const User = mongoose.model<IUser>(UserName, UserSchema);
+
+export { User, UserSchema, UserName, IUser };

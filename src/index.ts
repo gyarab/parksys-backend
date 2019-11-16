@@ -1,10 +1,10 @@
-import app from "./app";
+import { app, startDb } from "./app";
 import config from "./config";
 
-const server = app.listen(config.get("server:port"), () =>
-  console.log(
-    `Parking System Backend listening on port ${config.get("server:port")}!`
-  )
-);
-
-export = server;
+startDb().then(() => {
+  app.listen(config.get("server:port"), () =>
+    console.log(
+      `Parking System Backend listening on port ${config.get("server:port")}!`
+    )
+  );
+});

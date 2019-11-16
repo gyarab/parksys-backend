@@ -1,31 +1,37 @@
-import {
-  Model,
-  Column,
-  Table,
-  ForeignKey,
-  DataType,
-  BelongsTo
-} from "sequelize-typescript";
-import User from "./User";
+import mongoose from "mongoose";
 
-export enum AuthenticationMethod {
+enum AuthenticationMethod {
   PASSWORD = "PASSWORD"
 }
 
-@Table
-export default class Authentication extends Model<Authentication> {
-  @ForeignKey(() => User)
-  @Column({
-    unique: "auth"
-  })
-  userId!: number;
-
-  @BelongsTo(() => User)
-  user: User;
-
-  @Column({
-    type: DataType.ENUM(AuthenticationMethod.PASSWORD),
-    unique: "auth"
-  })
+interface IAuthentication extends mongoose.Document {
+  payload: string;
   method: AuthenticationMethod;
 }
+
+const AuthenticationName = "Authentication";
+
+const AuthenticationSchema = new mongoose.Schema({
+  payload: {
+    type: Object,
+    required: true
+  },
+  method: {
+    type: String,
+    require: true,
+    enum: Object.keys(AuthenticationMethod)
+  }
+});
+
+const Authentication = mongoose.model<IAuthentication>(
+  AuthenticationName,
+  AuthenticationSchema
+);
+
+export {
+  AuthenticationSchema,
+  Authentication,
+  AuthenticationName,
+  AuthenticationMethod,
+  IAuthentication
+};

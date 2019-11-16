@@ -1,12 +1,11 @@
 import express from "express";
 import config from "./config";
-import db from "./db";
+import * as db from "./db";
 import routes from "./endpoints/routes";
 import rootRouter from "./endpoints/index";
 import bodyParser from "body-parser";
 import cors from "cors";
 
-db().init();
 const app = express();
 
 const corsOptions = {
@@ -25,4 +24,12 @@ if (config.get("ping")) {
   });
 }
 
-export = app;
+const startDb = async () => {
+  await db.connect();
+};
+
+const stopDb = async () => {
+  await db.disconnect();
+};
+
+export { app, startDb, stopDb };

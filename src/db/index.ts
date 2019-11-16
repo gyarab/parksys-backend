@@ -1,24 +1,14 @@
-import { Sequelize, SequelizeOptions } from "sequelize-typescript";
-import path from "path";
+import mongoose from "mongoose";
 
-export default () => {
-  // TODO: Move to config
-  const sequelize = new Sequelize("parksys1", "postgres", null, {
-    host: "localhost",
-    dialect: "postgres",
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    },
-    models: [path.join(__dirname, "models")]
-  });
-  return {
-    init() {
-      sequelize.sync({ force: true }).then(() => {
-        console.log("Database & Tables created!");
-      });
-    }
-  };
+const options = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+};
+
+export const connect = async () => {
+  await mongoose.connect("mongodb://localhost/test", options);
+};
+
+export const disconnect = async () => {
+  await mongoose.disconnect();
 };
