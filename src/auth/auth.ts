@@ -32,24 +32,27 @@ export const checkPermissionReqBuilder = (
   }
 };
 
-// TODO: Throw a custom error
 export const checkPermissionsGqlBuilder = (
-  requiredPermissions: Permission[]
-) => (_, __, ctx) => {
+  requiredPermissions: Permission[],
+  resolver: (obj, args, ctx, info) => any
+) => (obj, args, ctx, info) => {
   const permissions = lodash.get(ctx, "token.user.permissions", []);
-  if (!hasPermissions(requiredPermissions, permissions)) {
-    throw Error("Not sufficient permissions");
+  if (hasPermissions(requiredPermissions, permissions)) {
+    return resolver(obj, args, ctx, info);
+  } else {
+    // TODO: Throw a custom error
+    throw new Error("Insufficient permissions");
   }
 };
 
 export const hasPermissions = (
   requiredPermissions: Permission[],
   suppliedPermissions: string[]
-) => {
-  for (const rPerm of requiredPermissions) {
-    if (!suppliedPermissions.includes(rPerm)) {
-      return false;
-    }
+): boolean => {
+  if (suppliedPermissions.includes(Permission.ALL)) {
+    return true;
   }
-  return true;
+  return requiredPermissions.every(permission =>
+    suppliedPermissions.includes(permission)
+  );
 };

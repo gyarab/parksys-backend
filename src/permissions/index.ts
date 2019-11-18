@@ -1,3 +1,4 @@
 export enum Permission {
-  ALL = "ALL"
+  ALL = "ALL",
+  DEVICES = "DEVICES"
 }
