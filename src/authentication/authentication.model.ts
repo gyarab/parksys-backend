@@ -1,18 +1,21 @@
 import mongoose from "mongoose";
 
 enum AuthenticationMethod {
-  PASSWORD = "PASSWORD"
+  PASSWORD = "PASSWORD",
+  ACTIVATION_PASSWORD = "ACTIVATION_PASSWORD" // One-use
 }
 
-interface IAuthentication extends mongoose.Document {
+interface IAuthentication {
   payload: string;
   method: AuthenticationMethod;
 }
 
+interface IAuthenticationDocument extends mongoose.Document, IAuthentication {}
+
 const AuthenticationName = "Authentication";
 
 const AuthenticationSchema: mongoose.Schema<
-  IAuthentication
+  IAuthenticationDocument
 > = new mongoose.Schema(
   {
     payload: {
@@ -28,7 +31,7 @@ const AuthenticationSchema: mongoose.Schema<
   { _id: false, id: false }
 );
 
-const Authentication = mongoose.model<IAuthentication>(
+const Authentication = mongoose.model<IAuthenticationDocument>(
   AuthenticationName,
   AuthenticationSchema
 );

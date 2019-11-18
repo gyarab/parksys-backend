@@ -16,6 +16,7 @@ const clear = async () => {
 };
 
 const normalConnect = async () => {
+  console.log("Connecting to MongoDB");
   await mongoose.connect("mongodb://localhost/test", options);
 };
 

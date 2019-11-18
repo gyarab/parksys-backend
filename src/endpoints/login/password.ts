@@ -1,9 +1,9 @@
 import crypto from "crypto";
 import { createToken } from "../../auth/jwt";
 import config from "../../config";
-import { User, IUser } from "../../db/models/user/user.model";
-import { AuthenticationMethod } from "../../db/models/authentication/authentication.model";
-import { RefreshToken, IRefreshToken } from "../../db/models/refreshToken/refreshToken.model";
+import { User, IUserDocument } from "../../user/user.model";
+import { AuthenticationMethod } from "../../authentication/authentication.model";
+import { RefreshToken } from "../../refreshToken/refreshToken.model";
 
 export interface IRefreshTokenData {
   oid: string;
@@ -22,7 +22,7 @@ export function hashPassword(password: string, salt: string): string {
 const password = async (req, res) => {
   const { user: userName, password } = req.body;
 
-  let user: IUser = await User.findOne({
+  let user: IUserDocument = await User.findOne({
     $or: [{ name: userName }, { email: userName }],
     authentications: { $elemMatch: { method: AuthenticationMethod.PASSWORD } }
   });

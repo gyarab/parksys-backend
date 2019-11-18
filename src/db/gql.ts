@@ -3,12 +3,13 @@ import { ApolloServer } from "apollo-server-express";
 import { merge } from "lodash";
 import path from "path";
 import fs from "fs";
-import user from "./models/user/user.resolvers";
-import { verifyToken, fromBase64Url } from "../auth/jwt";
+import userResolvers from "../user/user.resolvers";
+import deviceResolvers from "../device/device.resolvers";
+import { verifyToken } from "../auth/jwt";
 import config from "../config";
 
 // Inspired by https://github.com/FrontendMasters/intro-to-graphql
-const types = ["user", "refreshToken", "authentication"];
+const types = ["user", "refreshToken", "authentication", "device"];
 
 function loadSchemaFile(path): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -20,15 +21,12 @@ function loadSchemaFile(path): Promise<string> {
 }
 
 function loadSchemaTypes(type: string) {
-  const schemaPath = path.join(
-    process.cwd(),
-    `src/db/models/${type}/${type}.gql`
-  );
+  const schemaPath = path.join(process.cwd(), `src/${type}/${type}.gql`);
   return loadSchemaFile(schemaPath);
 }
 
 function loadSchemaScalars() {
-  const scalarPath = path.join(process.cwd(), `src/db/models/scalars.gql`);
+  const scalarPath = path.join(process.cwd(), `src/db/scalars.gql`);
   return loadSchemaFile(scalarPath);
 }
 
@@ -44,16 +42,14 @@ export const constructGraphQLServer = async () => {
     }
   `;
 
-  // Ugly but it works
   const scalars: string = await loadSchemaScalars();
   const schemaTypes: string[] = await Promise.all(types.map(loadSchemaTypes));
   const apollo = new ApolloServer({
     typeDefs: [rootSchema, scalars, ...schemaTypes],
-    resolvers: merge({}, user),
+    resolvers: merge({}, userResolvers, deviceResolvers),
     context({ req }) {
       const authHeader = String(req.headers["authentication"]);
       const split = authHeader.split(" ");
-      // TODO: Access Token Verification and parse
       if (!authHeader || split.length !== 2 || split[0] !== "Bearer") {
         return { token: null };
       }

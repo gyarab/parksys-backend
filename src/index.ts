@@ -1,7 +1,7 @@
 import { app, begin } from "./app";
 import config from "./config";
-import { User } from "./db/models/user/user.model";
-import { AuthenticationMethod } from "./db/models/authentication/authentication.model";
+import { User } from "./user/user.model";
+import { AuthenticationMethod } from "./authentication/authentication.model";
 import { hashPassword } from "./endpoints/login/password";
 
 const port = config.get("server:port");

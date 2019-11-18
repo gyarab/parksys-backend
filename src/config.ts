@@ -1,8 +1,6 @@
 import nconf from "nconf";
 import path from "path";
 
-console.log(`NODE_ENV is set to ${process.env.NODE_ENV}`);
-
 // Setup nconf to use (in-order):
 //   1. Command-line arguments
 //   2. Environment variables

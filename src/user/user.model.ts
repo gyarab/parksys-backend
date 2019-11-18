@@ -8,13 +8,15 @@ import {
 } from "../authentication/authentication.model";
 import mongoose from "mongoose";
 
-interface IUser extends mongoose.Document {
+interface IUser {
   name: string;
   email: string;
   permissions: string[];
   authentications: IAuthentication[];
   refreshTokens: IRefreshToken[];
 }
+
+interface IUserDocument extends mongoose.Document, IUser {}
 
 const UserName = "User";
 
@@ -46,6 +48,6 @@ const UserSchema = new mongoose.Schema({
   ]
 });
 
-const User = mongoose.model<IUser>(UserName, UserSchema);
+const User = mongoose.model<IUserDocument>(UserName, UserSchema);
 
-export { User, UserSchema, UserName, IUser };
+export { User, UserSchema, UserName, IUserDocument, IUser };

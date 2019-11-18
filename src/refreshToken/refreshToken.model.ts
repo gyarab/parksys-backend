@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
 
-interface IRefreshToken extends mongoose.Document {
+interface IRefreshToken {
   revokedAt: Date;
-  isRevoked: boolean;
+  isRevoked?: boolean;
 }
+
+interface IRefreshTokenDocument extends mongoose.Document, IRefreshToken {}
 
 const RefreshTokenName = "RefreshToken";
 
@@ -20,9 +22,15 @@ RefreshTokenSchema.virtual("isRevoked").get(function() {
   );
 });
 
-const RefreshToken = mongoose.model<IRefreshToken>(
+const RefreshToken = mongoose.model<IRefreshTokenDocument>(
   RefreshTokenName,
   RefreshTokenSchema
 );
 
-export { RefreshTokenSchema, RefreshToken, RefreshTokenName, IRefreshToken };
+export {
+  RefreshTokenSchema,
+  RefreshToken,
+  RefreshTokenName,
+  IRefreshTokenDocument,
+  IRefreshToken
+};

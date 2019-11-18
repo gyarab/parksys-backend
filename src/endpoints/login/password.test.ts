@@ -1,7 +1,7 @@
 import request from "supertest";
 import { hashPassword } from "./password";
-import { User } from "../../db/models/user/user.model";
-import { AuthenticationMethod } from "../../db/models/authentication/authentication.model";
+import { User } from "../../user/user.model";
+import { AuthenticationMethod } from "../../authentication/authentication.model";
 import { app, begin } from "../../app";
 import { fromBase64Url, verifyToken } from "../../auth/jwt";
 import config from "../../config";
