@@ -51,9 +51,7 @@ const DeviceSchema = new mongoose.Schema({
     required: true,
     default: false
   },
-  activatedAt: {
-    type: Date
-  },
+  activatedAt: Date,
   refreshToken: AuthenticationSchema
 });
 
