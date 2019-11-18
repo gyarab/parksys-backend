@@ -7,4 +7,5 @@ cache:
 test:
   script:
     - npm install --silent
-    - npm test
+    - npm run compile
+    - npm run test
