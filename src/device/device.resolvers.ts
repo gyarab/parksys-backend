@@ -18,7 +18,8 @@ const notActivatedDevices = async (_, args, ctx) => {
 // Mutation
 const addDevice = async (_, args, ctx) => {
   console.log(args);
-  return new Device({ name: "name" });
+  console.log(args.input);
+  return await new Device(args.input).save();
 };
 
 export default {

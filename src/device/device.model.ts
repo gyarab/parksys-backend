@@ -25,9 +25,9 @@ interface IDevice {
   name: string;
   activated: boolean;
   activatedAt: Date;
-  activationToken: IAuthentication;
+  activationPassword: IAuthentication;
   accessToken: null;
-  activationTokenQrUrl?: string;
+  activationQrUrl?: string;
 }
 
 interface IDeviceDocument extends mongoose.Document, IDevice {}
@@ -41,7 +41,7 @@ const DeviceSchema = new mongoose.Schema({
     unique: true,
     dropDups: true
   },
-  activationToken: {
+  activationPassword: {
     type: AuthenticationSchema,
     require: true,
     default: generateDeviceActivationPassword(64)
@@ -57,7 +57,7 @@ const DeviceSchema = new mongoose.Schema({
   refreshToken: AuthenticationSchema
 });
 
-DeviceSchema.virtual("activationTokenQrUrl").get(function() {
+DeviceSchema.virtual("activationQrUrl").get(function() {
   return "path";
 });
 

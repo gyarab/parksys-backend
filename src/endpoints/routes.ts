@@ -2,13 +2,14 @@ interface IRoute {
   name: RoutableEndpoints;
   path: string;
 }
-type RoutableEndpoints = "ping" | "login/password";
+type RoutableEndpoints = "ping" | "login/password" | "devices/qr";
 
 type RouteConfig = Record<RoutableEndpoints, Omit<IRoute, "name">>;
 
 const config: RouteConfig = {
   ping: { path: "/ping" },
-  "login/password": { path: "/login/password" }
+  "login/password": { path: "/login/password" },
+  "devices/qr": { path: "/devices/qr/:name" }
 };
 
 function getRoutes(

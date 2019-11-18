@@ -6,6 +6,7 @@ import rootRouter from "./endpoints/index";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { constructGraphQLServer } from "./db/gql";
+import { checkAuthenticationHeader } from "./auth/auth";
 
 const app = express();
 
@@ -16,10 +17,14 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
+app.use((req, _, next) => {
+  req["token"] = checkAuthenticationHeader(req);
+  return next();
+});
 app.use("/", rootRouter);
 
 if (config.get("ping")) {
-  app.get(routes.ping.path, (req, res) => {
+  app.get(routes.ping.path, (_, res) => {
     res.set("Content-Type", "text/plain");
     res.send("pong");
   });

@@ -12,7 +12,10 @@ export interface IRefreshTokenData {
 export interface IAccessTokenData {
   roid: string;
   expiresAt: number;
-  user: any;
+  user: {
+    id: any;
+    permissions: string[];
+  };
 }
 
 export function hashPassword(password: string, salt: string): string {

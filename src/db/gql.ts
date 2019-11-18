@@ -5,8 +5,7 @@ import path from "path";
 import fs from "fs";
 import userResolvers from "../user/user.resolvers";
 import deviceResolvers from "../device/device.resolvers";
-import { verifyToken } from "../auth/jwt";
-import config from "../config";
+import { checkAuthenticationHeader } from "../auth/auth";
 
 // Inspired by https://github.com/FrontendMasters/intro-to-graphql
 const types = ["user", "refreshToken", "authentication", "device"];
@@ -48,19 +47,7 @@ export const constructGraphQLServer = async () => {
     typeDefs: [rootSchema, scalars, ...schemaTypes],
     resolvers: merge({}, userResolvers, deviceResolvers),
     context({ req }) {
-      const authHeader = String(req.headers["authentication"]);
-      const split = authHeader.split(" ");
-      if (!authHeader || split.length !== 2 || split[0] !== "Bearer") {
-        return { token: null };
-      }
-      const token = split[1];
-      try {
-        const [valid, body] = verifyToken(config.get("cryptSecret"), token);
-        if (valid) {
-          return { token: body };
-        }
-      } catch (e) {}
-      return { token: null };
+      return { token: req["token"] };
     }
   });
 

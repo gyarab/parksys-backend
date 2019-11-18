@@ -4,7 +4,7 @@ type Device {
   activatedAt: DateTime
   activationPassword: Authentication!
   # Calculated
-  activationTokenQrUrl: String!
+  activationQrUrl: String!
 }
 
 extend type Query {
