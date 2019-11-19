@@ -27,7 +27,7 @@ export const checkPermissionReqBuilder = (
   if (hasPermissions(requiredPermissions, permissions)) {
     return next();
   } else {
-    res.status(401).end();
+    res.status(403).end();
     return next(false);
   }
 };
