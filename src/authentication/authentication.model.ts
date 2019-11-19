@@ -6,7 +6,7 @@ enum AuthenticationMethod {
 }
 
 interface IAuthentication {
-  payload: string;
+  payload: object;
   method: AuthenticationMethod;
 }
 

@@ -25,6 +25,10 @@ export function hashPassword(password: string, salt: string): string {
 const password = async (req, res) => {
   const { user: userName, password } = req.body;
 
+  if (!userName || !password) {
+    req.status(401).end();
+    return;
+  }
   let user: IUserDocument = await User.findOne({
     $or: [{ name: userName }, { email: userName }],
     authentications: { $elemMatch: { method: AuthenticationMethod.PASSWORD } }
@@ -54,6 +58,7 @@ const password = async (req, res) => {
 
     if (hash === hashPassword(password, salt)) {
       // Authenticated
+      // TODO: DRY
       const refresh = await new RefreshToken({}).save();
       user.refreshTokens.push(refresh);
       await user.save();

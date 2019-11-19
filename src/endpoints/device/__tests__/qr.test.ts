@@ -1,11 +1,11 @@
 import request from "supertest";
-import { Device } from "../../device/device.model";
-import { app, begin } from "../../app";
-import { disconnect } from "../../db";
-import routes from "../routes";
-import { createToken } from "../../auth/jwt";
-import { Permission } from "../../permissions";
-import config from "../../config";
+import { Device } from "../../../device/device.model";
+import { app, begin } from "../../../app";
+import { disconnect } from "../../../db";
+import routes from "../../routes";
+import { createToken } from "../../../auth/jwt";
+import { Permission } from "../../../permissions";
+import config from "../../../config";
 
 const req = request(app);
 const QR_ENDPOINT = id => routes["devices/qr"].path.replace(":id", id);
@@ -31,7 +31,7 @@ describe("qr endpoint", () => {
 
   it("should not crash", async () => {
     let resp = await req
-      .get(QR_ENDPOINT("notid"))
+      .get(QR_ENDPOINT("5dd00z009b3e507dffba8b33"))
       .set(
         "Authentication",
         `Bearer ${createToken(config.get("cryptSecret"), {
@@ -68,7 +68,7 @@ describe("qr endpoint", () => {
   });
 
   afterAll(async () => {
-    await disconnect();
     await Device.remove({});
+    await disconnect();
   });
 });

@@ -5,6 +5,10 @@ import {
   AuthenticationMethod
 } from "../authentication/authentication.model";
 import crypto from "crypto";
+import {
+  IRefreshToken,
+  RefreshTokenSchema
+} from "../refreshToken/refreshToken.model";
 
 // Returns a function that generates activation passwords
 export const generateDeviceActivationPassword: (
@@ -13,7 +17,10 @@ export const generateDeviceActivationPassword: (
   // Hex string length = 2 * nBytes
   const generateDeviceActivationPassword = () => {
     const token: IAuthentication = {
-      payload: crypto.randomBytes(n).toString("hex"),
+      payload: {
+        password: crypto.randomBytes(n).toString("hex"),
+        expiresAt: new Date(new Date().getTime() + 1000 * 60 * 5) // Add 5 minutes
+      },
       method: AuthenticationMethod.ACTIVATION_PASSWORD
     };
     return token;
@@ -26,7 +33,7 @@ interface IDevice {
   activated: boolean;
   activatedAt: Date;
   activationPassword: IAuthentication;
-  accessToken: null;
+  refreshToken: IRefreshToken;
   activationQrUrl?: string;
 }
 
@@ -52,7 +59,7 @@ const DeviceSchema = new mongoose.Schema({
     default: false
   },
   activatedAt: Date,
-  refreshToken: AuthenticationSchema
+  refreshToken: RefreshTokenSchema
 });
 
 DeviceSchema.virtual("activationQrUrl").get(function() {

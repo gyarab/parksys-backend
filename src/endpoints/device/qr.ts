@@ -2,7 +2,6 @@ import { Device } from "../../device/device.model";
 import qrcode from "qrcode";
 import mongoose from "mongoose";
 
-// TODO: QR Code from activation passwod
 const qr = async (req, res) => {
   const oid = req.params.id;
   if (oid == null || !mongoose.Types.ObjectId.isValid(oid)) {
@@ -14,7 +13,7 @@ const qr = async (req, res) => {
     res.status(400).end();
     return;
   }
-  qrcode.toFileStream(res, device.activationPassword.payload);
+  qrcode.toFileStream(res, JSON.stringify(device.activationPassword.payload));
   res.status(200);
 };
 
