@@ -1,5 +1,4 @@
 import { Device } from "./device.model";
-import lodash from "lodash";
 
 // Query
 // TODO: Lockdown using permissions

@@ -58,7 +58,6 @@ describe("qr endpoint", () => {
 
   beforeAll(async () => {
     await begin();
-    await Device.remove({});
     const d1 = await Device.create([
       {
         name: "d1"
@@ -70,5 +69,6 @@ describe("qr endpoint", () => {
 
   afterAll(async () => {
     await disconnect();
+    await Device.remove({});
   });
 });
