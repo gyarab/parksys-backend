@@ -8,12 +8,13 @@ import { Permission } from "../../permissions";
 import config from "../../config";
 
 const req = request(app);
-const QR_ENDPOINT = name => routes["devices/qr"].path.replace(":name", name);
+const QR_ENDPOINT = id => routes["devices/qr"].path.replace(":id", id);
 
 describe("qr endpoint", () => {
+  let d1Id = null;
   it("should return an image", async () => {
     const resp = await req
-      .get(QR_ENDPOINT("d1"))
+      .get(QR_ENDPOINT(d1Id))
       .set(
         "Authentication",
         `Bearer ${createToken(config.get("cryptSecret"), {
@@ -28,14 +29,43 @@ describe("qr endpoint", () => {
     expect(resp.text.length).toBeGreaterThan(0);
   });
 
+  it("should not crash", async () => {
+    let resp = await req
+      .get(QR_ENDPOINT("notid"))
+      .set(
+        "Authentication",
+        `Bearer ${createToken(config.get("cryptSecret"), {
+          user: {
+            permissions: [Permission.ALL]
+          }
+        })}`
+      )
+      .send();
+    expect(resp.status).toBe(400);
+    resp = await req
+      .get(QR_ENDPOINT("5dd000009b3e507dffba8b33"))
+      .set(
+        "Authentication",
+        `Bearer ${createToken(config.get("cryptSecret"), {
+          user: {
+            permissions: [Permission.ALL]
+          }
+        })}`
+      )
+      .send();
+    expect(resp.status).toBe(400);
+  });
+
   beforeAll(async () => {
     await begin();
     await Device.remove({});
-    await Device.create([
+    const d1 = await Device.create([
       {
         name: "d1"
       }
     ]);
+    d1Id = d1[0]._id.toString();
+    if (d1Id == null) fail("Unable to create mock device");
   });
 
   afterAll(async () => {

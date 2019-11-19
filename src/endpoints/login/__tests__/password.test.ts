@@ -1,14 +1,15 @@
 import request from "supertest";
-import { hashPassword } from "./password";
-import { User } from "../../user/user.model";
-import { AuthenticationMethod } from "../../authentication/authentication.model";
-import { app, begin } from "../../app";
-import { fromBase64Url, verifyToken } from "../../auth/jwt";
-import config from "../../config";
-import { disconnect } from "../../db";
+import { hashPassword } from "../password";
+import { User } from "../../../user/user.model";
+import { AuthenticationMethod } from "../../../authentication/authentication.model";
+import { app, begin } from "../../../app";
+import { fromBase64Url, verifyToken } from "../../../auth/jwt";
+import config from "../../../config";
+import { disconnect } from "../../../db";
+import routes from "../../routes";
 
 const req = request(app);
-const LOGIN_ENDPOINT = "/login/password";
+const LOGIN_ENDPOINT = routes["login/password"].path;
 
 describe("password endpoint", () => {
   beforeAll(async () => {

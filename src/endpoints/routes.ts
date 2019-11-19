@@ -9,7 +9,7 @@ type RouteConfig = Record<RoutableEndpoints, Omit<IRoute, "name">>;
 const config: RouteConfig = {
   ping: { path: "/ping" },
   "login/password": { path: "/login/password" },
-  "devices/qr": { path: "/devices/qr/:name" }
+  "devices/qr": { path: "/devices/qr/:id" }
 };
 
 function getRoutes(
