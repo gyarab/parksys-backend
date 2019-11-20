@@ -6,7 +6,7 @@ import { Permission } from "../permissions";
 const currentUser = async (_, args, ctx) => {
   const uid = lodash.get(ctx, "token.user.id");
   if (uid) {
-    return await User.findById(uid);
+    return (await User.findById(uid)).toObject();
   }
   return null;
 };

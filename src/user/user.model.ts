@@ -11,9 +11,9 @@ import mongoose from "mongoose";
 interface IUser {
   name: string;
   email: string;
-  permissions: string[];
-  authentications: IAuthentication[];
-  refreshTokens: IRefreshToken[];
+  permissions?: string[];
+  authentications?: IAuthentication[];
+  refreshTokens?: IRefreshToken[];
 }
 
 interface IUserDocument extends mongoose.Document, IUser {}
