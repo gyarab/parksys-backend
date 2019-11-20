@@ -12,7 +12,7 @@ interface IUser {
   name: string;
   email: string;
   permissions?: string[];
-  authentications?: IAuthentication[];
+  authentications?: IAuthentication<any>[];
   refreshTokens?: IRefreshToken[];
 }
 

@@ -1,17 +1,10 @@
 import { Device } from "./device.model";
+import { checkPermissionsGqlBuilder } from "../../auth/auth";
+import { Permission } from "../../types/permissions";
 
 // Query
-// TODO: Lockdown using permissions
 const devices = async (_, args, ctx) => {
-  return await Device.find({});
-};
-
-const activatedDevices = async (_, args, ctx) => {
-  return await Device.find({ activated: true });
-};
-
-const notActivatedDevices = async (_, args, ctx) => {
-  return await Device.find({ activated: false });
+  return await Device.find(args.filter);
 };
 
 // Mutation
@@ -23,11 +16,9 @@ const addDevice = async (_, args, ctx) => {
 
 export default {
   Query: {
-    devices,
-    activatedDevices,
-    notActivatedDevices
+    devices: checkPermissionsGqlBuilder([Permission.ALL], devices),
   },
   Mutation: {
-    addDevice
+    addDevice: checkPermissionsGqlBuilder([Permission.ALL], addDevice)
   }
 };

@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 import {
   IAuthentication,
   AuthenticationSchema,
-  AuthenticationMethod
+  AuthenticationMethod,
+  IAuthenticationPayloadActivationPassword
 } from "../authentication/authentication.model";
 import crypto from "crypto";
 import {
@@ -13,10 +14,10 @@ import {
 // Returns a function that generates activation passwords
 export const generateDeviceActivationPassword: (
   nBytes: number
-) => () => IAuthentication = (n: number) => {
+) => () => IAuthentication<IAuthenticationPayloadActivationPassword> = (n: number) => {
   // Hex string length = 2 * nBytes
   const generateDeviceActivationPassword = () => {
-    const token: IAuthentication = {
+    const token: IAuthentication<IAuthenticationPayloadActivationPassword> = {
       payload: {
         password: crypto.randomBytes(n).toString("hex"),
         expiresAt: new Date(new Date().getTime() + 1000 * 60 * 5) // Add 5 minutes
@@ -33,7 +34,7 @@ interface IDevice {
   name: string;
   activated: boolean;
   activatedAt: Date;
-  activationPassword: IAuthentication;
+  activationPassword: IAuthentication<any>;
   refreshToken: IRefreshToken;
   activationQrUrl?: string;
 }
@@ -51,7 +52,7 @@ const DeviceSchema = new mongoose.Schema({
   },
   activationPassword: {
     type: AuthenticationSchema,
-    require: true,
+    required: true,
     default: generateDeviceActivationPassword(64)
   },
   activated: {

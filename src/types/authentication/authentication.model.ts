@@ -1,16 +1,28 @@
 import mongoose from "mongoose";
 
+interface IAuthenticationPayload {}
+
 enum AuthenticationMethod {
   PASSWORD = "PASSWORD",
   ACTIVATION_PASSWORD = "ACTIVATION_PASSWORD" // One-use
 }
 
-interface IAuthentication {
-  payload: object;
+interface IAuthenticationPayloadPassword extends IAuthenticationPayload {
+  h: string;
+  s: string;
+}
+
+interface IAuthenticationPayloadActivationPassword extends IAuthenticationPayload {
+  password: string;
+  expiresAt: Date;
+}
+
+interface IAuthentication<T extends IAuthenticationPayload> {
+  payload: T;
   method: AuthenticationMethod;
 }
 
-interface IAuthenticationDocument extends mongoose.Document, IAuthentication {}
+interface IAuthenticationDocument extends mongoose.Document, IAuthentication<any> {}
 
 const AuthenticationName = "Authentication";
 
@@ -24,7 +36,7 @@ const AuthenticationSchema: mongoose.Schema<
     },
     method: {
       type: String,
-      require: true,
+      required: true,
       enum: Object.keys(AuthenticationMethod)
     }
   },
@@ -41,5 +53,8 @@ export {
   Authentication,
   AuthenticationName,
   AuthenticationMethod,
-  IAuthentication
+  IAuthentication,
+  IAuthenticationPayload,
+  IAuthenticationPayloadPassword,
+  IAuthenticationPayloadActivationPassword
 };

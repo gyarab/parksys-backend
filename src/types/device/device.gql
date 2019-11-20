@@ -1,4 +1,5 @@
 type Device {
+  id: ID
   name: String!
   activated: Boolean!
   activatedAt: DateTime
@@ -7,16 +8,22 @@ type Device {
   activationQrUrl: String!
 }
 
-extend type Query {
-  devices: [Device]!
-  activatedDevices: [Device]!
-  notActivatedDevices: [Device]!
-}
 
 input NewDeviceInput {
   name: String!
 }
 
+input DeviceFilter {
+  id: ID
+  name: String
+  activated: Boolean
+  activatedAt: DateTime
+}
+
+extend type Query {
+  devices(filter: DeviceFilter): [Device]!
+}
+
 extend type Mutation {
-  addDevice(input: NewDeviceInput!): Device
+  addDevice(input: NewDeviceInput!): Device!
 }

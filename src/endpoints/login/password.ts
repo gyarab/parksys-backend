@@ -25,7 +25,7 @@ export function hashPassword(password: string, salt: string): string {
 const password = async (req, res) => {
   const { user: userName, password } = req.body;
 
-  if (!userName || !password) {
+  if (!userName || !password || !(typeof userName == 'string') || !(typeof password == 'string')) {
     req.status(401).end();
     return;
   }

@@ -22,28 +22,36 @@ export const checkAuthenticationHeader = req => {
 
 export const checkPermissionReqBuilder = (
   requiredPermissions: Permission[]
-) => (req, res, next) => {
-  const permissions = lodash.get(req, "token.user.permissions", []);
-  if (hasPermissions(requiredPermissions, permissions)) {
-    return next();
-  } else {
-    res.status(403).end();
-    return next(false);
-  }
-};
+) => {
+  const wrapper = (req, res, next) => {
+    const permissions = lodash.get(req, "token.user.permissions", []);
+    if (hasPermissions(requiredPermissions, permissions)) {
+      return next();
+    } else {
+      res.status(403).end();
+      return next(false);
+    }
+  };
+  wrapper.requiredPermissions = requiredPermissions;
+  return wrapper;
+}
 
 export const checkPermissionsGqlBuilder = (
   requiredPermissions: Permission[],
   resolver: (obj, args, ctx, info) => any
-) => (obj, args, ctx, info) => {
-  const permissions = lodash.get(ctx, "token.user.permissions", []);
-  if (hasPermissions(requiredPermissions, permissions)) {
-    return resolver(obj, args, ctx, info);
-  } else {
-    // TODO: Throw a custom error
-    throw new Error("Insufficient permissions");
-  }
-};
+) => {
+  const wrapper = (obj, args, ctx, info) => {
+    const permissions = lodash.get(ctx, "token.user.permissions", []);
+    if (hasPermissions(requiredPermissions, permissions)) {
+      return resolver(obj, args, ctx, info);
+    } else {
+      // TODO: Throw a custom error
+      throw new Error("Insufficient permissions");
+    }
+  };
+  wrapper.requiredPermissions = requiredPermissions;
+  return wrapper;
+}
 
 export const hasPermissions = (
   requiredPermissions: Permission[],
