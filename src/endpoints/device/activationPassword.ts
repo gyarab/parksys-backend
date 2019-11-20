@@ -47,8 +47,7 @@ const activationPassword = async (req, res, next) => {
   const accessToken = createToken(config.get("cryptSecret"), aTokenData);
 
   delete device.refreshToken;
-  const respDevice = device.toObject();
-  delete respDevice.refreshToken;
+  const respDevice = device.publicFields();
   res
     .status(200)
     .send({ data: { refreshToken, accessToken, device: respDevice } });
