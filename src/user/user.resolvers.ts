@@ -1,5 +1,7 @@
 import { User } from "./user.model";
 import lodash from "lodash";
+import { checkPermissionsGqlBuilder } from "../auth/auth";
+import { Permission } from "../permissions";
 
 const currentUser = async (_, args, ctx) => {
   const uid = lodash.get(ctx, "token.user.id");
@@ -10,17 +12,13 @@ const currentUser = async (_, args, ctx) => {
 };
 
 const users = async (_, args, ctx) => {
-  if (lodash.get(ctx, "token.user.permissions", []).includes("ALL")) {
-    const users = await User.find({});
-    return users;
-  }
-  throw new Error("Unauthorized");
+  return await User.find({});
 };
 
 export default {
   Query: {
     currentUser,
-    users
+    users: checkPermissionsGqlBuilder([Permission.ALL], users)
   },
   Mutation: {
     a() {

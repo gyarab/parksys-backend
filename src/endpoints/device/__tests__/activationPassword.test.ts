@@ -2,7 +2,7 @@ import request from "supertest";
 import { app, begin } from "../../../app";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
-import { Device, IDeviceDocument } from "../../../device/device.model";
+import { Device, IDeviceDocument, IDevice } from "../../../device/device.model";
 import { verifyTokenPair } from "../../login/__tests__/password.test";
 import { AuthenticationMethod } from "../../../authentication/authentication.model";
 
@@ -18,9 +18,13 @@ describe("password activation endpoint", () => {
     });
     expect(resp.status).toBe(200);
 
-    expect(
-      verifyTokenPair(resp.body.data.refreshToken, resp.body.data.accessToken)
-    ).toBe(true);
+    const { refreshToken, accessToken, device: respDevice } = resp.body.data;
+    expect(verifyTokenPair(refreshToken, accessToken)).toBe(true);
+    // Device should be active now
+    expect(respDevice.activated).toBe(true);
+    expect(respDevice.refreshToken).toBeUndefined;
+    const dbDevice: IDeviceDocument = await Device.findById(respDevice._id);
+    expect(dbDevice.activated).toBe(true);
   });
 
   it("should not accept a used activation password", async () => {

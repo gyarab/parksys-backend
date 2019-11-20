@@ -16,7 +16,7 @@ const activationPassword = async (req, res, next) => {
     "activationPassword.payload.password": activationPassword,
     "activationPassword.payload.expiresAt": { $gt: new Date() },
     activated: false
-  });
+  }).select("-activationPassword -refreshToken");
   if (!device) {
     res
       .status(401)
@@ -46,7 +46,12 @@ const activationPassword = async (req, res, next) => {
   };
   const accessToken = createToken(config.get("cryptSecret"), aTokenData);
 
-  res.status(200).send({ data: { refreshToken, accessToken } });
+  delete device.refreshToken;
+  const respDevice = device.toObject();
+  delete respDevice.refreshToken;
+  res
+    .status(200)
+    .send({ data: { refreshToken, accessToken, device: respDevice } });
   return next();
 };
 

@@ -29,6 +29,7 @@ export const generateDeviceActivationPassword: (
 };
 
 interface IDevice {
+  _id: any;
   name: string;
   activated: boolean;
   activatedAt: Date;
