@@ -1,8 +1,8 @@
 import { begin } from "../../../app";
-import { disconnect } from "../../../db";
 import resolvers from "../device.resolvers";
-import { Device, IDevice } from "../device.model";
+import { Device } from "../device.model";
 import { Permission } from "../../../types/permissions";
+import routes from "../../../endpoints/routes";
 
 describe("device resolvers", () => {
   const ctx = {
@@ -24,6 +24,9 @@ describe("device resolvers", () => {
     expect(devices).toHaveLength(1);
     expect(devices[0].name).toBe("d1");
     expect(devices[0].id).toBe(dbDevice.id);
+    expect(devices[0].activationQrUrl).toBe(
+      routes["devices/qr"].path.replace(":id", devices[0].id)
+    );
 
     expect(
       await resolvers.Query.devices(
@@ -49,6 +52,9 @@ describe("device resolvers", () => {
     expect(res.id).toBeDefined();
     expect(res.name).toBe("d1");
     expect(res.activationPassword).toBeUndefined;
+    expect(res.activationQrUrl).toBe(
+      routes["devices/qr"].path.replace(":id", res.id)
+    );
 
     const dbDevice = await Device.findById(res.id);
     expect(dbDevice.name).toBe("d1");
