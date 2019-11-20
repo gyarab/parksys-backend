@@ -1,10 +1,10 @@
 import request from "supertest";
-import { Device } from "../../../device/device.model";
+import { Device } from "../../../types/device/device.model";
 import { app, begin } from "../../../app";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
 import { createToken } from "../../../auth/jwt";
-import { Permission } from "../../../permissions";
+import { Permission } from "../../../types/permissions";
 import config from "../../../config";
 
 const req = request(app);

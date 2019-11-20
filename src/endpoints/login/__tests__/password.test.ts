@@ -1,9 +1,9 @@
 import request from "supertest";
 import { hashPassword } from "../password";
-import { User } from "../../../user/user.model";
-import { AuthenticationMethod } from "../../../authentication/authentication.model";
+import { User } from "../../../types/user/user.model";
+import { AuthenticationMethod } from "../../../types/authentication/authentication.model";
 import { app, begin } from "../../../app";
-import { fromBase64Url, verifyToken } from "../../../auth/jwt";
+import { verifyToken } from "../../../auth/jwt";
 import config from "../../../config";
 import { disconnect } from "../../../db";
 import routes from "../../routes";

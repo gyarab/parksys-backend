@@ -1,6 +1,6 @@
 import { verifyToken } from "./jwt";
 import config from "../config";
-import { Permission } from "../permissions";
+import { Permission } from "../types/permissions";
 import lodash from "lodash";
 
 // TODO: Test this against invalid input

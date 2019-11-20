@@ -1,9 +1,8 @@
 import {
   hasPermissions,
-  checkPermissionReqBuilder,
   checkAuthenticationHeader
 } from "./auth";
-import { Permission } from "../permissions";
+import { Permission } from "../types/permissions";
 import { createToken } from "./jwt";
 import config from "../config";
 

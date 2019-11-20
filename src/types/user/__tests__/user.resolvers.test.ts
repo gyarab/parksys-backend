@@ -1,7 +1,7 @@
-import { begin } from "../../app";
-import { disconnect } from "../../db";
+import { begin } from "../../../app";
+import { disconnect } from "../../../db";
 import resolvers from "../user.resolvers";
-import { User, IUser, IUserDocument } from "../../user/user.model";
+import { User, IUser, IUserDocument } from "../user.model";
 import { Permission } from "../../permissions";
 
 describe("user query resolvers", () => {

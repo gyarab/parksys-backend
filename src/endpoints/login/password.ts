@@ -1,9 +1,9 @@
 import crypto from "crypto";
 import { createToken } from "../../auth/jwt";
 import config from "../../config";
-import { User, IUserDocument } from "../../user/user.model";
-import { AuthenticationMethod } from "../../authentication/authentication.model";
-import { RefreshToken } from "../../refreshToken/refreshToken.model";
+import { User, IUserDocument } from "../../types/user/user.model";
+import { AuthenticationMethod } from "../../types/authentication/authentication.model";
+import { RefreshToken } from "../../types/refreshToken/refreshToken.model";
 
 export interface IRefreshTokenData {
   oid: string;

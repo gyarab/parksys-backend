@@ -1,7 +1,7 @@
 import {
   Authentication,
   AuthenticationMethod
-} from "../authentication/authentication.model";
+} from "../authentication.model";
 
 describe("Authentication", () => {
   it("has correct required fields", () => {

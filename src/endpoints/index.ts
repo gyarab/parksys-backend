@@ -4,7 +4,7 @@ import loginPasswordEndpoint from "./login/password";
 import qrEndpoint from "./device/qr";
 import activationEndpoint from "./device/activationPassword";
 import { checkPermissionReqBuilder } from "../auth/auth";
-import { Permission } from "../permissions";
+import { Permission } from "../types/permissions";
 
 const rootRouter = Router();
 

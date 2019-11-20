@@ -1,6 +1,6 @@
 import { User } from "./user.model";
 import lodash from "lodash";
-import { checkPermissionsGqlBuilder } from "../auth/auth";
+import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { Permission } from "../permissions";
 
 const currentUser = async (_, args, ctx) => {

@@ -1,4 +1,4 @@
-import { Device } from "../../device/device.model";
+import { Device } from "../../types/device/device.model";
 import qrcode from "qrcode";
 import mongoose from "mongoose";
 

@@ -3,24 +3,26 @@ import { ApolloServer } from "apollo-server-express";
 import { merge } from "lodash";
 import path from "path";
 import fs from "fs";
-import userResolvers from "../user/user.resolvers";
-import deviceResolvers from "../device/device.resolvers";
-import { checkAuthenticationHeader } from "../auth/auth";
+import userResolvers from "../types/user/user.resolvers";
+import deviceResolvers from "../types/device/device.resolvers";
 
 // Inspired by https://github.com/FrontendMasters/intro-to-graphql
 const types = ["user", "refreshToken", "authentication", "device"];
 
 function loadSchemaFile(path): Promise<string> {
   return new Promise((resolve, reject) => {
-    fs.readFile(path, { encoding: "UTF-8" }, (err, schema) => {
-      if (err) reject(err);
-      resolve(schema);
+    fs.exists(path, exists => {
+      if (!exists) reject(`File does not exist (${path})`);
+      fs.readFile(path, { encoding: "UTF-8" }, (err, schema) => {
+        if (err) reject(err);
+        resolve(schema);
+      });
     });
   });
 }
 
 function loadSchemaTypes(type: string) {
-  const schemaPath = path.join(process.cwd(), `src/${type}/${type}.gql`);
+  const schemaPath = path.join(process.cwd(), `src/types/${type}/${type}.gql`);
   return loadSchemaFile(schemaPath);
 }
 
@@ -42,14 +44,20 @@ export const constructGraphQLServer = async () => {
   `;
 
   const scalars: string = await loadSchemaScalars();
-  const schemaTypes: string[] = await Promise.all(types.map(loadSchemaTypes));
-  const apollo = new ApolloServer({
-    typeDefs: [rootSchema, scalars, ...schemaTypes],
-    resolvers: merge({}, userResolvers, deviceResolvers),
-    context({ req }) {
-      return { token: req["token"] };
-    }
-  });
+  try {
+    const schemaTypes: string[] = await Promise.all(types.map(loadSchemaTypes));
+    const apollo = new ApolloServer({
+      typeDefs: [rootSchema, scalars, ...schemaTypes],
+      resolvers: merge({}, userResolvers, deviceResolvers),
+      context({ req }) {
+        return { token: req["token"] };
+      }
+    });
 
-  return apollo;
+    return apollo;
+  } catch (e) {
+    const msg = `Error occured while creating ApolloServer: ${e}`
+    console.error(msg);
+    process.exit(1);
+  }
 };

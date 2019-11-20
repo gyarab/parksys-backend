@@ -2,9 +2,9 @@ import request from "supertest";
 import { app, begin } from "../../../app";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
-import { Device, IDeviceDocument, IDevice } from "../../../device/device.model";
+import { Device, IDeviceDocument } from "../../../types/device/device.model";
 import { verifyTokenPair } from "../../login/__tests__/password.test";
-import { AuthenticationMethod } from "../../../authentication/authentication.model";
+import { AuthenticationMethod } from "../../../types/authentication/authentication.model";
 
 const req = request(app);
 const ACTIVATION_ENDPOINT = () => routes["devices/activate"].path;

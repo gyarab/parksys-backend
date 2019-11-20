@@ -1,9 +1,9 @@
-import { Device } from "../../device/device.model";
-import { AuthenticationMethod } from "../../authentication/authentication.model";
+import { Device } from "../../types/device/device.model";
+import { AuthenticationMethod } from "../../types/authentication/authentication.model";
 import { createToken } from "../../auth/jwt";
 import config from "../../config";
-import { Permission } from "../../permissions";
-import { RefreshToken } from "../../refreshToken/refreshToken.model";
+import { Permission } from "../../types/permissions";
+import { RefreshToken } from "../../types/refreshToken/refreshToken.model";
 
 const activationPassword = async (req, res, next) => {
   const { activationPassword } = req.body;
