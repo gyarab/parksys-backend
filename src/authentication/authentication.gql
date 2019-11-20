@@ -3,6 +3,5 @@ enum AuthenticationMethod {
 }
 
 type Authentication {
-  payload: String!
   method: AuthenticationMethod!
 }
