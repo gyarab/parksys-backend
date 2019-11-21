@@ -1,14 +1,18 @@
-import { loadImageAndRequest, cutImageUsingLprResponse } from "../apis/lprApi";
+import ExpressOpenAlpr, {
+  cropImageRectangle
+} from "../apis/lpr/expressOpenAlpr";
 import path from "path";
+import { LicensePlateRecognition } from "apis/lpr/types";
 
 const img = process.argv[2];
 
 (async () => {
-  const response = await loadImageAndRequest(img);
-  console.log(response.data.results[0].plate);
-  await cutImageUsingLprResponse(
-    img,
-    path.join(process.cwd(), `rect_${response.data.results[0].plate}.jpg`),
-    response.data.results[0]
+  const recognizer: LicensePlateRecognition = new ExpressOpenAlpr();
+  const result = await recognizer.recognizeLicensePlate(img);
+  console.log(result);
+  const cutLicensePlateImgPath = path.join(
+    process.cwd(),
+    `rect_${result.best.plate}.jpg`
   );
+  await cropImageRectangle(img, cutLicensePlateImgPath, result.rectangle);
 })();
