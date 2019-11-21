@@ -1,0 +1,34 @@
+{
+  "results": [
+    {
+      "plate": "6AK943O",
+      "confidence": 89.894287,
+      "matches_template": 0,
+      "plate_index": 0,
+      "region": "",
+      "region_confidence": 0,
+      "processing_time_ms": 16.737091,
+      "requested_topn": 10,
+      "coordinates": [
+        { "x": 519, "y": 337 },
+        { "x": 716, "y": 362 },
+        { "x": 712, "y": 402 },
+        { "x": 515, "y": 376 }
+      ],
+      "candidates": [
+        { "plate": "6AK943O", "confidence": 89.894287, "matches_template": 0 },
+        { "plate": "6AK9430", "confidence": 87.532433, "matches_template": 0 },
+        { "plate": "6AK943Q", "confidence": 83.900604, "matches_template": 0 },
+        { "plate": "6AK943D", "confidence": 83.704239, "matches_template": 0 },
+        { "plate": "GAK943O", "confidence": 81.565186, "matches_template": 0 },
+        { "plate": "BAK943O", "confidence": 81.527687, "matches_template": 0 },
+        { "plate": "SAK943O", "confidence": 80.993637, "matches_template": 0 },
+        { "plate": "6AK943G", "confidence": 80.322098, "matches_template": 0 },
+        { "plate": "6AKS43O", "confidence": 80.089493, "matches_template": 0 },
+        { "plate": "6AK94O", "confidence": 79.316193, "matches_template": 0 }
+      ]
+    }
+  ],
+  "width": 1164,
+  "height": 873
+}
