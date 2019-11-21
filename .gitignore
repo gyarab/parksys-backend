@@ -105,3 +105,6 @@ dist/
 
 *.swp
 *.swo
+
+builds
+cache
