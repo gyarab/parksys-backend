@@ -23,7 +23,13 @@ nconf.defaults({
     port: 8080
   },
   ping: true,
-  cryptSecret: "bc59412d08b71442dc41437175784380"
+  cryptSecret: "bc59412d08b71442dc41437175784380",
+  apis: {
+    lpr: {
+      host: "127.0.0.1",
+      port: 4500
+    }
+  }
 });
 
 export default nconf;

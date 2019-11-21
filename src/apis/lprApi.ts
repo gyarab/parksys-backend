@@ -1,16 +1,19 @@
 import config from "../config";
 import axios, { AxiosResponse } from "axios";
+import Clipper from "image-clipper";
+import Canvas from "canvas";
+import base64Img from "base64-img";
 
 const { host, port } = config.get("apis").lpr;
 const url = `http://${host}:${port}/plates`;
 
 // Generated using https://jvilk.com/MakeTypes/
 export interface LprResponse {
-  results?: (ResultsEntity)[] | null;
+  results?: (Result)[] | null;
   width: number;
   height: number;
 }
-export interface ResultsEntity {
+export interface Result {
   plate: string;
   confidence: number;
   matches_template: number;
@@ -77,4 +80,42 @@ export const findRectangle = (a: Coordinate[]) => {
     width: xMax - xMin,
     height: yMax - yMin
   };
+};
+
+export const loadImageAndRequest = async imgPath => {
+  return await new Promise<AxiosResponse<LprResponse>>((resolve, reject) => {
+    base64Img.base64(imgPath, (err, img) => {
+      if (err) reject("Error while reading test image file");
+      resolve(
+        new Promise<AxiosResponse<LprResponse>>(async (resolve, reject) => {
+          try {
+            resolve(await recognizePlate(img));
+          } catch (e) {
+            reject(e);
+          }
+        })
+      );
+    });
+  });
+};
+
+export const cutImageUsingLprResponse = async (
+  imagePath: string,
+  outputPath: string,
+  result: Result
+) => {
+  return await new Promise(resolve => {
+    Clipper(imagePath, { canvas: Canvas }, function() {
+      const rect = findRectangle(result.coordinates);
+      const offset = 50;
+      const args = [
+        rect.points[0].x - offset,
+        rect.points[0].y - offset,
+        rect.width + offset * 2,
+        rect.height + offset * 2
+      ];
+      this.crop(...args);
+      this.toFile(outputPath, () => resolve(true));
+    });
+  });
 };
