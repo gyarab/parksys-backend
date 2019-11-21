@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import * as mem from "./inMemory";
+import config from "../config";
 
 const options = {
   useNewUrlParser: true,
@@ -17,7 +18,8 @@ const clear = async () => {
 
 const normalConnect = async () => {
   console.log("Connecting to MongoDB");
-  await mongoose.connect("mongodb://localhost/test", options);
+  const { host, port, db } = config.get("mongo");
+  await mongoose.connect(`mongodb://${host}:${port}/${db}`, options);
 };
 
 const normalDisconnect = async () => {
