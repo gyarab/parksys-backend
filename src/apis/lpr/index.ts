@@ -2,8 +2,12 @@ import config from "../../config";
 import { LicensePlateRecognition } from "./types";
 import ExpressOpenAlpr from "./expressOpenAlpr";
 
-const impls: { [key: string]: () => LicensePlateRecognition } = {
-  expressOpenAlpr: () => new ExpressOpenAlpr()
+const impls: { [key: string]: (config) => LicensePlateRecognition } = {
+  expressOpenAlpr: config => {
+    return new ExpressOpenAlpr(config);
+  }
 };
 
-export default impls[config.get("impls:apis:lpr:i")]();
+const localConfig = config.get("impls:apis:lpr");
+const key = localConfig["i"];
+export default impls[key](localConfig[key]);

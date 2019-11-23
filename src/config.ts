@@ -18,8 +18,10 @@ nconf.defaults({
         // Chosen Implementation
         i: "expressOpenAlpr",
         expressOpenAlpr: {
+          protocol: "http",
           host: "127.0.0.1",
-          port: 4500
+          port: 4500,
+          country_code: "eu"
         }
       }
     }

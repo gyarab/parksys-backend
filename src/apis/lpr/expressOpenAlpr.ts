@@ -1,4 +1,3 @@
-import config from "../../config";
 import axios from "axios";
 import base64Img from "base64-img";
 import {
@@ -8,10 +7,23 @@ import {
 import { OAlprResponse } from "./openAlprTypes";
 import { findRectangle } from "../../utils/image";
 
-const { host, port } = config.get("impls:apis:lpr:expressOpenAlpr");
-const url = `http://${host}:${port}/plates`;
+export interface Config {
+  protocol: string;
+  host: string;
+  port: number;
+  country_code: string;
+}
 
 export default class ExpressOpenAlpr extends LicensePlateRecognition {
+  config: Config;
+  apiUrl: string;
+
+  constructor(config: Config) {
+    super();
+    this.apiUrl = `${config.protocol}://${config.host}:${config.port}/plates`;
+    this.config = config;
+  }
+
   private transformResponse(
     response: OAlprResponse
   ): LicensePlateRecognitionResult {
@@ -35,11 +47,11 @@ export default class ExpressOpenAlpr extends LicensePlateRecognition {
   recognizeLicensePlateB64(
     image: string
   ): Promise<LicensePlateRecognitionResult> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       axios
-        .post(url, {
+        .post(this.apiUrl, {
           image,
-          country_code: "eu"
+          country_code: this.config.country_code
         })
         .then(response => resolve(this.transformResponse(response.data)))
         .catch(error => reject(error));

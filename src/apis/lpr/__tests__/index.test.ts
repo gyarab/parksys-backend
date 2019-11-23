@@ -1,4 +1,4 @@
-import LicensePlateRecognition from "..";
+import Recognizer from "..";
 import path from "path";
 
 const testImagePath = path.join(
@@ -7,10 +7,8 @@ const testImagePath = path.join(
 );
 
 describe("LicensePlateRecognition", () => {
-  it("chosen api works", async () => {
-    const result = await LicensePlateRecognition.recognizeLicensePlate(
-      testImagePath
-    );
+  it("chosen api is instance of LicensePlateRecognition", async () => {
+    const result = await Recognizer.recognizeLicensePlate(testImagePath);
     expect(result.best.plate).toBe("1AN9714");
     expect(result.best.confidence).toBeGreaterThanOrEqual(80);
   });

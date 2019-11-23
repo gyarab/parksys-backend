@@ -8,7 +8,12 @@ const testImagePath = path.join(
 
 describe("ExpressOpenAlpr", () => {
   it("api works", async () => {
-    const recognition = new ExpressOpenAlpr();
+    const recognition = new ExpressOpenAlpr({
+      protocol: "http",
+      host: "localhost",
+      port: 4500,
+      country_code: "eu"
+    });
     const result = await recognition.recognizeLicensePlate(testImagePath);
     expect(result.best.plate).toBe("1AN9714");
     expect(result.best.confidence).toBeGreaterThanOrEqual(80);
