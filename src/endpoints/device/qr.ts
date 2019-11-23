@@ -13,7 +13,9 @@ const qr = async (req, res) => {
     res.status(400).end();
     return;
   }
-  qrcode.toFileStream(res, JSON.stringify(device.activationPassword.payload));
+  const payload = device.activationPassword.payload;
+  payload.expiresAt = payload.expiresAt.getTime();
+  qrcode.toFileStream(res, JSON.stringify(payload));
   res.status(200);
 };
 

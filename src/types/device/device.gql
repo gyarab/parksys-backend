@@ -3,11 +3,9 @@ type Device {
   name: String!
   activated: Boolean!
   activatedAt: DateTime
-  activationPassword: Authentication!
   # Calculated
   activationQrUrl: String!
 }
-
 
 input NewDeviceInput {
   name: String!
@@ -26,4 +24,5 @@ extend type Query {
 
 extend type Mutation {
   addDevice(input: NewDeviceInput!): Device!
+  regenerateActivationPassword(id: ID!): Device!
 }

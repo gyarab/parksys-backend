@@ -1,4 +1,5 @@
-import { Candidate, Coordinate } from "./types";
+import { Candidate } from "./types";
+import { Coordinate } from "utils/image";
 
 // Generated using https://jvilk.com/MakeTypes/
 export interface OAlprResponse {

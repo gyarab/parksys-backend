@@ -46,6 +46,7 @@ interface IDeviceDocument extends mongoose.Document, IDevice {}
 
 const DeviceName = "Device";
 
+const defaultActivationPasswordGenerator = generateDeviceActivationPassword(64);
 const DeviceSchema = new mongoose.Schema(
   {
     name: {
@@ -57,7 +58,7 @@ const DeviceSchema = new mongoose.Schema(
     activationPassword: {
       type: AuthenticationSchema,
       required: true,
-      default: generateDeviceActivationPassword(64)
+      default: defaultActivationPasswordGenerator
     },
     activated: {
       type: Boolean,
@@ -92,5 +93,6 @@ export {
   DeviceName,
   IDevice,
   IDeviceDocument,
-  DeviceOmittedFields
+  DeviceOmittedFields,
+  defaultActivationPasswordGenerator
 };

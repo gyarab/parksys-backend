@@ -1,4 +1,8 @@
-import { Device, DeviceOmittedFields } from "./device.model";
+import {
+  Device,
+  DeviceOmittedFields,
+  defaultActivationPasswordGenerator
+} from "./device.model";
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { Permission } from "../../types/permissions";
 
@@ -12,11 +16,21 @@ const addDevice = async (_, args, ctx) => {
   return (await new Device(args.input).save()).publicFields();
 };
 
+const regenerateActivationPassword = async (_, args, ctx) => {
+  const device = await Device.findById(args.id);
+  device.activationPassword = defaultActivationPasswordGenerator();
+  return (await device.save()).publicFields();
+};
+
 export default {
   Query: {
     devices: checkPermissionsGqlBuilder([Permission.ALL], devices)
   },
   Mutation: {
-    addDevice: checkPermissionsGqlBuilder([Permission.ALL], addDevice)
+    addDevice: checkPermissionsGqlBuilder([Permission.ALL], addDevice),
+    regenerateActivationPassword: checkPermissionsGqlBuilder(
+      [Permission.ALL],
+      regenerateActivationPassword
+    )
   }
 };

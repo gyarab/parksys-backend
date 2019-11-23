@@ -1,8 +1,7 @@
-import ExpressOpenAlpr, {
-  cropImageRectangle
-} from "../apis/lpr/expressOpenAlpr";
+import { cropImageRectangle } from "../utils/image";
 import path from "path";
-import { LicensePlateRecognition } from "apis/lpr/types";
+import { LicensePlateRecognition } from "../apis/lpr/types";
+import ExpressOpenAlpr from "../apis/lpr/expressOpenAlpr";
 
 const img = process.argv[2];
 
