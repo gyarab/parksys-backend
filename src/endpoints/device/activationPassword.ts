@@ -1,9 +1,7 @@
 import { Device } from "../../types/device/device.model";
 import { AuthenticationMethod } from "../../types/authentication/authentication.model";
-import { createToken } from "../../auth/jwt";
-import config from "../../config";
 import { Permission } from "../../types/permissions";
-import { RefreshToken } from "../../types/refreshToken/refreshToken.model";
+import { createTokenPair } from "../../auth/auth";
 
 const activationPassword = async (req, res, next) => {
   const { activationPassword } = req.body;
@@ -26,25 +24,19 @@ const activationPassword = async (req, res, next) => {
   // OK -> activate
   device.activated = true;
 
-  // TODO: DRY
-  const refresh = await new RefreshToken({}).save();
-  device.refreshToken = refresh;
-  await device.save();
-
-  const rTokenData = {
-    oid: refresh._id.toString()
-  };
-  const refreshToken = createToken(config.get("cryptSecret"), rTokenData);
-
-  const aTokenData = {
-    roid: rTokenData.oid,
+  const {
+    accessToken,
+    refreshToken: { str: refreshToken, obj: refreshTokenObj }
+  } = await createTokenPair({
     expiresAt: new Date().getTime() + 1000 * 60 * 30, // +30 minutes
     device: {
       id: device.id,
       permissions: [Permission.ALL]
     }
-  };
-  const accessToken = createToken(config.get("cryptSecret"), aTokenData);
+  });
+
+  device.refreshToken = refreshTokenObj;
+  await device.save();
 
   delete device.refreshToken;
   const respDevice = device.publicFields();
