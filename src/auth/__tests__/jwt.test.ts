@@ -1,4 +1,4 @@
-import { verifyToken, createToken } from "./jwt";
+import { verifyToken, createToken } from "../jwt";
 
 const secret = "1234567890";
 

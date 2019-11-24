@@ -51,7 +51,7 @@ describe("device resolvers", () => {
     );
     expect(res.id).toBeDefined();
     expect(res.name).toBe("d1");
-    expect(res.activationPassword).toBeUndefined;
+    expect(res.activationPassword).toBeUndefined();
     expect(res.activationQrUrl).toBe(
       routes["devices/qr"].path.replace(":id", res.id)
     );

@@ -5,12 +5,9 @@ describe("Device", () => {
     const empty = new Device();
 
     empty.validate(errors => {
-      expect(errors.errors.name).toBeDefined;
-      expect(errors.errors.activationPassword).toBeDefined;
-      expect(errors.errors.activated).toBeDefined;
+      expect(errors.errors.name).toBeDefined();
     });
     expect(empty.activated).toBe(false);
     expect(empty.activationPassword.payload).toBeDefined();
   });
 });
-

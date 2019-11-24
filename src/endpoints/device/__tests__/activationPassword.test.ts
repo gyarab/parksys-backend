@@ -67,8 +67,6 @@ describe("password activation endpoint", () => {
   });
 
   afterAll(async () => {
-    // Remove any created models
-    await Device.remove({});
     await disconnect();
   });
 });

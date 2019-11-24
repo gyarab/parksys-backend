@@ -4,19 +4,7 @@ import config from "../../config";
 import { User, IUserDocument } from "../../types/user/user.model";
 import { AuthenticationMethod } from "../../types/authentication/authentication.model";
 import { RefreshToken } from "../../types/refreshToken/refreshToken.model";
-
-export interface IRefreshTokenData {
-  oid: string;
-}
-
-export interface IAccessTokenData {
-  roid: string;
-  expiresAt: number;
-  user: {
-    id: any;
-    permissions: string[];
-  };
-}
+import { createTokenPair, IAccessTokenData } from "../../auth/auth";
 
 export function hashPassword(password: string, salt: string): string {
   return crypto.scryptSync(password, salt, 64).toString("hex");
@@ -25,7 +13,12 @@ export function hashPassword(password: string, salt: string): string {
 const password = async (req, res) => {
   const { user: userName, password } = req.body;
 
-  if (!userName || !password || !(typeof userName == 'string') || !(typeof password == 'string')) {
+  if (
+    !userName ||
+    !password ||
+    !(typeof userName == "string") ||
+    !(typeof password == "string")
+  ) {
     req.status(401).end();
     return;
   }
@@ -58,25 +51,19 @@ const password = async (req, res) => {
 
     if (hash === hashPassword(password, salt)) {
       // Authenticated
-      // TODO: DRY
-      const refresh = await new RefreshToken({}).save();
-      user.refreshTokens.push(refresh);
-      await user.save();
-
-      const rTokenData: IRefreshTokenData = {
-        oid: refresh._id.toString()
-      };
-      const refreshToken = createToken(config.get("cryptSecret"), rTokenData);
-
       const aTokenData: IAccessTokenData = {
-        roid: rTokenData.oid,
         expiresAt: new Date().getTime() + 1000 * 60 * 10, // +10 minutes
         user: {
           id: user.id,
           permissions: user.permissions
         }
       };
-      const accessToken = createToken(config.get("cryptSecret"), aTokenData);
+      const {
+        accessToken,
+        refreshToken: { str: refreshToken, obj: refreshTokenObj }
+      } = await createTokenPair(aTokenData);
+      user.refreshTokens.push(refreshTokenObj);
+      await user.save();
 
       res.send({ data: { refreshToken, accessToken } });
       return;

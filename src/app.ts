@@ -17,8 +17,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
-app.use((req, _, next) => {
-  req["token"] = checkAuthenticationHeader(req);
+app.use(async (req, _, next) => {
+  req["token"] = await checkAuthenticationHeader(req);
   return next();
 });
 app.use("/", rootRouter);

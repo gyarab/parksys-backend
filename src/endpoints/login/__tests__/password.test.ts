@@ -68,7 +68,6 @@ describe("password endpoint", () => {
   });
 
   afterAll(async () => {
-    await User.remove({});
     await disconnect();
   });
 });

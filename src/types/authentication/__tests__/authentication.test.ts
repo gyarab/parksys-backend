@@ -1,15 +1,12 @@
-import {
-  Authentication,
-  AuthenticationMethod
-} from "../authentication.model";
+import { Authentication, AuthenticationMethod } from "../authentication.model";
 
 describe("Authentication", () => {
   it("has correct required fields", () => {
     const empty = new Authentication();
 
     empty.validate(errors => {
-      expect(errors.errors.payload).toBeDefined;
-      expect(errors.errors.method).toBeDefined;
+      expect(errors.errors.payload).toBeDefined();
+      expect(errors.errors.method).toBeDefined();
     });
   });
 
@@ -27,7 +24,7 @@ describe("Authentication", () => {
       method: "..."
     });
     nada.validate(errors => {
-      expect(errors.errors.method).toBeDefined;
+      expect(errors.errors.method).toBeDefined();
     });
   });
 });
