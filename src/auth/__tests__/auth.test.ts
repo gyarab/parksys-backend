@@ -9,7 +9,7 @@ import {
 import { begin } from "../../app";
 import { disconnect } from "../../db";
 
-const cryptSecret = config.get("cryptSecret");
+const cryptSecret = config.get("security:cryptSecret");
 const createReq = (authHeader: string) => {
   return {
     headers: {
@@ -39,7 +39,7 @@ describe("checkAuthenticationHeader", () => {
     expect(await checkAuthenticationHeader(createReq(token2))).toBeNull();
 
     const rt3 = await new RefreshToken({}).save();
-    const token3 = `What ${createToken(config.get("cryptSecret"), {
+    const token3 = `What ${createToken(cryptSecret, {
       roid: rt3.id,
       b: { c: 456 }
     })}`;
@@ -53,14 +53,14 @@ describe("checkAuthenticationHeader", () => {
     const rt4 = await new RefreshToken({
       revokedAt: new Date() // now
     }).save();
-    const token4 = `Bearer ${createToken(config.get("cryptSecret"), {
+    const token4 = `Bearer ${createToken(config.get("security:cryptSecret"), {
       roid: rt4.id,
       b: { c: 456 }
     })}`;
     expect(await checkAuthenticationHeader(createReq(token4))).toBeNull();
 
     // Non-existent RefreshToken
-    const token5 = `Bearer ${createToken(config.get("cryptSecret"), {
+    const token5 = `Bearer ${createToken(cryptSecret, {
       roid: "5dd93feac000005bf9eff50d",
       b: { c: 456 }
     })}`;

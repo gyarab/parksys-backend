@@ -3,6 +3,7 @@ import config from "./config";
 import { User } from "./types/user/user.model";
 import { AuthenticationMethod } from "./types/authentication/authentication.model";
 import { hashPassword } from "./endpoints/login/password";
+import { Permission } from "./types/permissions";
 
 const port = config.get("server:port");
 
@@ -20,7 +21,7 @@ begin().then(() => {
       {
         name: "user1",
         email: "user1@example.com",
-        permissions: ["ALL"],
+        permissions: [Permission.ALL],
         authentications: [
           {
             method: AuthenticationMethod.PASSWORD,

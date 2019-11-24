@@ -26,6 +26,12 @@ nconf.defaults({
       }
     }
   },
+  security: {
+    cryptSecret: "bc59412d08b71442dc41437175784380",
+    userAccessTokenDuration: 1000 * 60 * 10, // 10 minutes
+    deviceAccessTokenDuration: 1000 * 60 * 30, // 30 minutes
+    activationPasswordDuration: 1000 * 60 // 1 minutes
+  },
   mongo: {
     host: "127.0.0.1",
     port: 27017,
@@ -34,8 +40,7 @@ nconf.defaults({
   server: {
     port: 8080
   },
-  ping: true,
-  cryptSecret: "bc59412d08b71442dc41437175784380"
+  ping: true
 });
 
 export default nconf;

@@ -18,6 +18,7 @@ const addDevice = async (_, args, ctx) => {
 
 const regenerateActivationPassword = async (_, args, ctx) => {
   const device = await Device.findById(args.id);
+  if (!device) return null;
   device.activationPassword = defaultActivationPasswordGenerator();
   return (await device.save()).publicFields();
 };

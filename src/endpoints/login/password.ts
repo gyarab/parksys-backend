@@ -1,9 +1,7 @@
 import crypto from "crypto";
-import { createToken } from "../../auth/jwt";
 import config from "../../config";
 import { User, IUserDocument } from "../../types/user/user.model";
 import { AuthenticationMethod } from "../../types/authentication/authentication.model";
-import { RefreshToken } from "../../types/refreshToken/refreshToken.model";
 import { createTokenPair, IAccessTokenData } from "../../auth/auth";
 
 export function hashPassword(password: string, salt: string): string {
@@ -52,7 +50,9 @@ const password = async (req, res) => {
     if (hash === hashPassword(password, salt)) {
       // Authenticated
       const aTokenData: IAccessTokenData = {
-        expiresAt: new Date().getTime() + 1000 * 60 * 10, // +10 minutes
+        expiresAt:
+          new Date().getTime() +
+          config.get("security:deviceAccessTokenDuration"),
         user: {
           id: user.id,
           permissions: user.permissions

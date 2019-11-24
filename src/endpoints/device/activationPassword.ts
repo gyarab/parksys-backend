@@ -2,6 +2,7 @@ import { Device } from "../../types/device/device.model";
 import { AuthenticationMethod } from "../../types/authentication/authentication.model";
 import { Permission } from "../../types/permissions";
 import { createTokenPair } from "../../auth/auth";
+import config from "../../config";
 
 const activationPassword = async (req, res, next) => {
   const { activationPassword } = req.body;
@@ -28,7 +29,8 @@ const activationPassword = async (req, res, next) => {
     accessToken,
     refreshToken: { str: refreshToken, obj: refreshTokenObj }
   } = await createTokenPair({
-    expiresAt: new Date().getTime() + 1000 * 60 * 30, // +30 minutes
+    expiresAt:
+      new Date().getTime() + config.get("security:userAccessTokenDuration"),
     device: {
       id: device.id,
       permissions: [Permission.ALL]

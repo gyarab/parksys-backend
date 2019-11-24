@@ -10,6 +10,7 @@ import routes from "../../routes";
 
 const req = request(app);
 const LOGIN_ENDPOINT = routes["login/password"].path;
+const cryptSecret = config.get("security:cryptSecret");
 
 describe("password endpoint", () => {
   it("authenticates a valid user", async () => {
@@ -76,7 +77,7 @@ export const verifyTokenPair = (
   refreshToken: string,
   accessToken: string
 ): boolean => {
-  const [rValid, rBody] = verifyToken(config.get("cryptSecret"), refreshToken);
-  const [aValid, aBody] = verifyToken(config.get("cryptSecret"), accessToken);
+  const [rValid, rBody] = verifyToken(cryptSecret, refreshToken);
+  const [aValid, aBody] = verifyToken(cryptSecret, accessToken);
   return rValid && aValid && rBody.oid === aBody.roid;
 };

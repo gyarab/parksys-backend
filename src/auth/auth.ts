@@ -8,6 +8,8 @@ import {
 } from "../types/refreshToken/refreshToken.model";
 import mongoose from "mongoose";
 
+const cryptSecret = config.get("security:cryptSecret");
+
 const verifyAccessTokenBody = (body, time: Date): boolean => {
   // No Date -> valid, invalid Date -> invalid
   if (body.expiresAt != null) {
@@ -40,7 +42,7 @@ export const checkAuthenticationHeader = async req => {
   }
   const token = split[1];
   try {
-    const [valid, body] = verifyToken(config.get("cryptSecret"), token);
+    const [valid, body] = verifyToken(cryptSecret, token);
     if (valid && verifyAccessTokenBody(body, now)) {
       // Find refresh token
       const refreshToken = await RefreshToken.findOne({
@@ -64,7 +66,7 @@ export const checkPermissionReqBuilder = (
     if (hasPermissions(requiredPermissions, permissions)) {
       return next();
     } else {
-      res.status(403).end();
+      res.status(403);
       return next(false);
     }
   };
@@ -110,11 +112,11 @@ export interface IAccessTokenData {
   expiresAt?: number;
   user?: {
     id: any;
-    permissions: Permission[];
+    permissions: Permission[] | string[];
   };
   device?: {
     id: any;
-    permissions: Permission[];
+    permissions: Permission[] | string[];
   };
 }
 
@@ -131,10 +133,10 @@ export const createTokenPair = async (
   const rTokenData: IRefreshTokenData = {
     oid: refreshTokenDb.id.toString()
   };
-  const refreshTokenStr = createToken(config.get("cryptSecret"), rTokenData);
+  const refreshTokenStr = createToken(cryptSecret, rTokenData);
 
   aTokenData.roid = refreshTokenDb.id.toString();
-  const accessTokenStr = createToken(config.get("cryptSecret"), aTokenData);
+  const accessTokenStr = createToken(cryptSecret, aTokenData);
 
   return {
     accessToken: accessTokenStr,

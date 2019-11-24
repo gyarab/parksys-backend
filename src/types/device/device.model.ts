@@ -11,6 +11,7 @@ import {
   RefreshTokenSchema
 } from "../refreshToken/refreshToken.model";
 import routes from "../../endpoints/routes";
+import config from "../../config";
 
 // Returns a function that generates activation passwords
 export const generateDeviceActivationPassword: (
@@ -23,7 +24,10 @@ export const generateDeviceActivationPassword: (
     const token: IAuthentication<IAuthenticationPayloadActivationPassword> = {
       payload: {
         password: crypto.randomBytes(n).toString("hex"),
-        expiresAt: new Date(new Date().getTime() + 1000 * 60 * 5) // Add 5 minutes
+        expiresAt: new Date(
+          new Date().getTime() +
+            config.get("security:activationPasswordDuration")
+        )
       },
       method: AuthenticationMethod.ACTIVATION_PASSWORD
     };
