@@ -7,7 +7,7 @@ const mongod = new MongoMemoryServer();
 /**
  * Connect to the in-memory database.
  */
-export const connect = async options => {
+export const connect = async (options: mongoose.ConnectionOptions) => {
   const uri = await mongod.getConnectionString();
 
   const mongooseOpts = {

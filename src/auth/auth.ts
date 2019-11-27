@@ -7,10 +7,12 @@ import {
   IRefreshTokenDocument
 } from "../types/refreshToken/refreshToken.model";
 import mongoose from "mongoose";
+import { NextFunction, Request, Response } from "express";
+import { Resolver, ResolverWithPermissions } from "../db/gql";
 
 const cryptSecret = config.get("security:cryptSecret");
 
-const verifyAccessTokenBody = (body, time: Date): boolean => {
+const verifyAccessTokenBody = (body: any, time: Date): boolean => {
   // No Date -> valid, invalid Date -> invalid
   if (body.expiresAt != null) {
     const expiresAt = new Date(body.expiresAt);
@@ -26,7 +28,9 @@ const verifyAccessTokenBody = (body, time: Date): boolean => {
 };
 
 // TODO: Test this against invalid input
-export const checkAuthenticationHeader = async req => {
+export const checkAuthenticationHeader = async (
+  req: Request
+): Promise<IAccessTokenData | null> => {
   if (
     req == null ||
     req.headers == null ||
@@ -42,7 +46,10 @@ export const checkAuthenticationHeader = async req => {
   }
   const token = split[1];
   try {
-    const [valid, body] = verifyToken(cryptSecret, token);
+    const [valid, body]: [boolean, IAccessTokenData] = verifyToken(
+      cryptSecret,
+      token
+    );
     if (valid && verifyAccessTokenBody(body, now)) {
       // Find refresh token
       const refreshToken = await RefreshToken.findOne({
@@ -61,7 +68,7 @@ export const checkAuthenticationHeader = async req => {
 export const checkPermissionReqBuilder = (
   requiredPermissions: Permission[]
 ) => {
-  const wrapper = (req, res, next) => {
+  const wrapper = (req: Request, res: Response, next: NextFunction) => {
     const permissions = lodash.get(req, "token.user.permissions", []);
     if (hasPermissions(requiredPermissions, permissions)) {
       return next();
@@ -76,9 +83,9 @@ export const checkPermissionReqBuilder = (
 
 export const checkPermissionsGqlBuilder = (
   requiredPermissions: Permission[],
-  resolver: (obj, args, ctx, info) => any
+  resolver: Resolver
 ) => {
-  const wrapper = (obj, args, ctx, info) => {
+  const wrapper: ResolverWithPermissions = (obj, args, ctx, info) => {
     const permissions = lodash.get(ctx, "token.user.permissions", []);
     if (hasPermissions(requiredPermissions, permissions)) {
       return resolver(obj, args, ctx, info);

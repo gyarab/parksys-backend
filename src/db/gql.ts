@@ -5,11 +5,13 @@ import path from "path";
 import fs from "fs";
 import userResolvers from "../types/user/user.resolvers";
 import deviceResolvers from "../types/device/device.resolvers";
+import { Permission } from "../types/permissions";
+import { PRequest } from "../app";
 
 // Inspired by https://github.com/FrontendMasters/intro-to-graphql
 const types = ["user", "refreshToken", "authentication", "device"];
 
-function loadSchemaFile(path): Promise<string> {
+function loadSchemaFile(path: string): Promise<string> {
   return new Promise((resolve, reject) => {
     fs.exists(path, exists => {
       if (!exists) reject(`File does not exist (${path})`);
@@ -31,7 +33,22 @@ function loadSchemaScalars() {
   return loadSchemaFile(scalarPath);
 }
 
-export const constructGraphQLServer = async () => {
+export type Context = Pick<PRequest, "token">;
+
+export type Resolver = (
+  obj?: any,
+  args?: any,
+  ctx?: Context,
+  info?: any
+) => any;
+
+export interface ResolverWithPermissions extends Resolver {
+  requiredPermissions: Permission[];
+}
+
+export const constructGraphQLServer = async ():
+  | Promise<ApolloServer>
+  | never => {
   const rootSchema = `
     type Query
     type Mutation {
@@ -49,15 +66,13 @@ export const constructGraphQLServer = async () => {
     const apollo = new ApolloServer({
       typeDefs: [rootSchema, scalars, ...schemaTypes],
       resolvers: merge({}, userResolvers, deviceResolvers),
-      context({ req }) {
-        return { token: req["token"] };
+      context({ req }: { req: PRequest }): Context {
+        return { token: req.token };
       }
     });
 
     return apollo;
   } catch (e) {
-    const msg = `Error occured while creating ApolloServer: ${e}`
-    console.error(msg);
-    process.exit(1);
+    throw new Error(`Error occured while creating ApolloServer: ${e}`);
   }
 };

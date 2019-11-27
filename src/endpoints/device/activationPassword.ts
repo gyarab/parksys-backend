@@ -3,8 +3,9 @@ import { AuthenticationMethod } from "../../types/authentication/authentication.
 import { Permission } from "../../types/permissions";
 import { createTokenPair } from "../../auth/auth";
 import config from "../../config";
+import { AsyncHandler } from "../../app";
 
-const activationPassword = async (req, res, next) => {
+const activationPassword: AsyncHandler = async (req, res, next) => {
   const { activationPassword } = req.body;
   if (!activationPassword) {
     res.status(401).send({ error: "activation password must be supplied" });

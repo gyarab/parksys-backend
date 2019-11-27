@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import config from "./config";
 import * as db from "./db";
 import routes from "./endpoints/routes";
@@ -6,7 +6,15 @@ import rootRouter from "./endpoints/index";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { constructGraphQLServer } from "./db/gql";
-import { checkAuthenticationHeader } from "./auth/auth";
+import { checkAuthenticationHeader, IAccessTokenData } from "./auth/auth";
+
+export interface PRequest extends Request {
+  token?: IAccessTokenData | null;
+}
+
+type THandler<T> = (req: Request, res: Response, next: NextFunction) => T;
+export type AsyncHandler = THandler<Promise<any>>;
+export type Handler = THandler<any>;
 
 const app = express();
 
@@ -17,8 +25,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
-app.use(async (req, _, next) => {
-  req["token"] = await checkAuthenticationHeader(req);
+app.use(async (req: PRequest, _, next) => {
+  req.token = await checkAuthenticationHeader(req);
   return next();
 });
 app.use("/", rootRouter);

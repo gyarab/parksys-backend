@@ -43,7 +43,7 @@ interface IDevice {
   activationPassword: IAuthentication<any>;
   refreshToken: IRefreshToken;
   activationQrUrl?: string;
-  publicFields?(): IDevice;
+  publicFields(): IDevice;
 }
 
 interface IDeviceDocument extends mongoose.Document, IDevice {}

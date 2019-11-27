@@ -18,13 +18,16 @@ const config: RouteConfig = {
 };
 
 function getRoutes(
-  routeConfig: RouteConfig
+  // TODO: Find a way to add types (was RouteConfig)
+  routeConfig: any
 ): Record<RoutableEndpoints, IRoute> {
   return Object.keys(routeConfig)
-    .map(key => ({
-      name: key,
-      path: routeConfig[key].path
-    }))
+    .map(key => {
+      return {
+        name: key,
+        path: routeConfig[key].path
+      };
+    })
     .reduce(
       (a, c) => {
         a[c.name] = c;
