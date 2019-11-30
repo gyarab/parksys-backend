@@ -27,7 +27,6 @@ const verifyAccessTokenBody = (body: any, time: Date): boolean => {
   );
 };
 
-// TODO: Test this against invalid input
 export const checkAuthenticationHeader = async (
   req: any
 ): Promise<IAccessTokenData | null> => {
@@ -41,7 +40,7 @@ export const checkAuthenticationHeader = async (
   const now = new Date();
   const authHeader = String(req.headers.authentication);
   const split = authHeader.split(" ");
-  if (!authHeader || split.length !== 2 || split[0] !== "Bearer") {
+  if (split.length !== 2 || split[0] !== "Bearer") {
     return null;
   }
   const token = split[1];

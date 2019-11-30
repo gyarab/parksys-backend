@@ -8,7 +8,7 @@ import {
 import crypto from "crypto";
 import {
   IRefreshToken,
-  RefreshTokenSchema
+  RefreshTokenName
 } from "../refreshToken/refreshToken.model";
 import routes from "../../endpoints/routes";
 import config from "../../config";
@@ -70,7 +70,10 @@ const DeviceSchema = new mongoose.Schema(
       default: false
     },
     activatedAt: Date,
-    refreshToken: RefreshTokenSchema
+    refreshToken: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: RefreshTokenName
+    }
   },
   { toObject: { virtuals: true }, toJSON: { virtuals: true } }
 );
