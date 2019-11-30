@@ -1,13 +1,17 @@
-import { hasPermissions, checkAuthenticationHeader } from "../auth";
+import {
+  hasPermissions,
+  checkAuthenticationHeader,
+  checkPermissionReqBuilder,
+  checkPermissionsGqlBuilder
+} from "../auth";
 import { Permission } from "../../types/permissions";
 import { createToken } from "../jwt";
 import config from "../../config";
-import {
-  RefreshToken,
-  IRefreshTokenDocument
-} from "../../types/refreshToken/refreshToken.model";
+import { RefreshToken } from "../../types/refreshToken/refreshToken.model";
 import { begin } from "../../app";
 import { disconnect } from "../../db";
+import mockReqRes from "mock-req-res";
+import { Context } from "../../db/gql";
 
 const cryptSecret = config.get("security:cryptSecret");
 const createReq = (authHeader: string) => {
@@ -105,4 +109,71 @@ describe("hasPermissions", () => {
   });
 });
 
-// TODO: Test the rest of the permission checkers that use hasPermissions
+describe("checkPermissionReqBuilder", () => {
+  function shouldWork(key: "user" | "device") {
+    hasPermissionsCases.forEach(([required, supplied, expectedResult]) => {
+      const next = jest.fn();
+      const req = mockReqRes.mockRequest();
+      const res = mockReqRes.mockResponse();
+      req["token"] = {
+        [key]: {
+          id: "",
+          permissions: supplied
+        }
+      };
+      checkPermissionReqBuilder(required)(req, res, next);
+      expect(next).toHaveBeenCalledTimes(1);
+      if (expectedResult === false) {
+        // Should fail
+        expect(next.mock.calls[0][0]).toBeInstanceOf(Error);
+        expect(res.status.getCall(0).args[0]).toBe(403);
+      } else {
+        // Should be ok
+        expect(next.mock.calls[0].length).toBe(0);
+      }
+    });
+  }
+
+  it("should work for users", () => {
+    shouldWork("user");
+  });
+
+  it("should work for devices", () => {
+    shouldWork("device");
+  });
+});
+
+describe("checkPermissionGqlBuilder", () => {
+  function shouldWork(key: "user" | "device") {
+    hasPermissionsCases.forEach(([required, supplied, expectedResult]) => {
+      const resolver = jest.fn();
+      const ctx: Context = {
+        token: {
+          [key]: {
+            id: "",
+            permissions: supplied
+          }
+        }
+      };
+      const func = () =>
+        checkPermissionsGqlBuilder(required, resolver)("1", "2", ctx, "3");
+      if (expectedResult === false) {
+        // Should fail
+        expect(func).toThrowError();
+      } else {
+        // Should be ok
+        func();
+        expect(resolver).toHaveBeenCalledTimes(1);
+        expect(resolver.mock.calls[0]).toMatchObject(["1", "2", ctx, "3"]);
+      }
+    });
+  }
+
+  it("should work for users", () => {
+    shouldWork("user");
+  });
+
+  it("should work for devices", () => {
+    shouldWork("device");
+  });
+});

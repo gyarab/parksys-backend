@@ -13,7 +13,7 @@ export interface PRequest extends Request {
   token?: IAccessTokenData | null;
 }
 
-type THandler<T> = (req: Request, res: Response, next: NextFunction) => T;
+type THandler<T> = (req: PRequest, res: Response, next: NextFunction) => T;
 export type AsyncHandler = THandler<Promise<any>>;
 export type Handler = THandler<any>;
 

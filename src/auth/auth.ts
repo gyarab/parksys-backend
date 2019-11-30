@@ -69,12 +69,16 @@ export const checkPermissionReqBuilder = (
   requiredPermissions: Permission[]
 ) => {
   const wrapper = (req: Request, res: Response, next: NextFunction) => {
-    const permissions = lodash.get(req, "token.user.permissions", []);
+    const permissions = lodash.get(
+      req,
+      "token.user.permissions",
+      lodash.get(req, "token.device.permissions", [])
+    );
     if (hasPermissions(requiredPermissions, permissions)) {
-      return next();
+      next();
     } else {
       res.status(403);
-      return next(false);
+      next(new Error("Unauthorized"));
     }
   };
   wrapper.requiredPermissions = requiredPermissions;
@@ -86,7 +90,11 @@ export const checkPermissionsGqlBuilder = (
   resolver: Resolver
 ) => {
   const wrapper: ResolverWithPermissions = (obj, args, ctx, info) => {
-    const permissions = lodash.get(ctx, "token.user.permissions", []);
+    const permissions = lodash.get(
+      ctx,
+      "token.user.permissions",
+      lodash.get(ctx, "token.device.permissions", [])
+    );
     if (hasPermissions(requiredPermissions, permissions)) {
       return resolver(obj, args, ctx, info);
     } else {

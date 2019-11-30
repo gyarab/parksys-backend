@@ -28,7 +28,6 @@ export default class ExpressOpenAlpr extends LicensePlateRecognition {
   private transformResponse(
     response: OAlprResponse
   ): LicensePlateRecognitionResult {
-    console.log(response);
     if (response.results.length == 0) {
       return {
         best: null

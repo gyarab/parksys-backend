@@ -33,6 +33,11 @@ describe("qr endpoint", () => {
       .set("Authentication", `Bearer ${validAccessToken}`)
       .send();
     expect(resp.status).toBe(400);
+    resp = await req
+      .get(QR_ENDPOINT(d1Id))
+      .set("Authentication", `Bearer ASD`)
+      .send();
+    expect(resp.status).toBe(403);
   });
 
   beforeAll(async () => {
