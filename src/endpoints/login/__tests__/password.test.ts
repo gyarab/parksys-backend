@@ -77,7 +77,7 @@ export const verifyTokenPair = (
   refreshToken: string,
   accessToken: string
 ): boolean => {
-  const [rValid, rBody] = verifyToken(cryptSecret, refreshToken);
-  const [aValid, aBody] = verifyToken(cryptSecret, accessToken);
+  const [rValid, rBody]: [any, any] = verifyToken(cryptSecret, refreshToken);
+  const [aValid, aBody]: [any, any] = verifyToken(cryptSecret, accessToken);
   return rValid && aValid && rBody.oid === aBody.roid;
 };

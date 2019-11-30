@@ -7,6 +7,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import { constructGraphQLServer } from "./db/gql";
 import { checkAuthenticationHeader, IAccessTokenData } from "./auth/auth";
+import fileUpload from "express-fileupload";
 
 export interface PRequest extends Request {
   token?: IAccessTokenData | null;
@@ -23,12 +24,18 @@ const corsOptions = {
   origin: "*"
 };
 
+// CORS protection
 app.use(cors(corsOptions));
+// File upload middleware
+app.use(fileUpload({}));
+// JSON parser
 app.use(bodyParser.json());
+// Token authentication middleware
 app.use(async (req: PRequest, _, next) => {
   req.token = await checkAuthenticationHeader(req);
   return next();
 });
+// Mount the root router
 app.use("/", rootRouter);
 
 if (config.get("ping")) {

@@ -6,6 +6,7 @@ import {
 } from "./types";
 import { OAlprResponse } from "./openAlprTypes";
 import { findRectangle } from "../../utils/image";
+import lodash from "lodash";
 
 export interface Config {
   protocol: string;
@@ -27,6 +28,12 @@ export default class ExpressOpenAlpr extends LicensePlateRecognition {
   private transformResponse(
     response: OAlprResponse
   ): LicensePlateRecognitionResult {
+    console.log(response);
+    if (response.results.length == 0) {
+      return {
+        best: null
+      };
+    }
     const best = response.results[0];
     const rectangle = findRectangle(best.coordinates);
     return {
@@ -54,7 +61,17 @@ export default class ExpressOpenAlpr extends LicensePlateRecognition {
           country_code: this.config.country_code
         })
         .then(response => resolve(this.transformResponse(response.data)))
-        .catch(error => reject(error));
+        .catch(error => {
+          const msg = lodash.get(error, "response.data.error", "");
+          const status = lodash.get(error, "response.status", 0);
+          if (msg === "No plates found in image" && status === 400) {
+            resolve({
+              best: null
+            });
+          } else {
+            reject(error);
+          }
+        });
     });
   }
 

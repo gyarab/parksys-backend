@@ -2,7 +2,7 @@ import base64Img from "base64-img";
 import { Coordinate, Rectangle } from "../../utils/image";
 
 export interface LicensePlateRecognitionResult {
-  best: Candidate;
+  best: Candidate | null;
   candidates?: (Candidate[]) | null;
   coordinates?: (Coordinate[]) | null;
   rectangle?: (Rectangle) | null;
@@ -25,7 +25,7 @@ export abstract class LicensePlateRecognition {
 
   protected loadImage(path: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      base64Img.base64(path, (err, img) => {
+      base64Img.base64(path, (err: Error | null, img: string) => {
         if (err) {
           reject(err);
           return;

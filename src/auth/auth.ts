@@ -29,7 +29,7 @@ const verifyAccessTokenBody = (body: any, time: Date): boolean => {
 
 // TODO: Test this against invalid input
 export const checkAuthenticationHeader = async (
-  req: Request
+  req: any
 ): Promise<IAccessTokenData | null> => {
   if (
     req == null ||

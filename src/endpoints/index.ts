@@ -5,6 +5,7 @@ import qrEndpoint from "./device/qr";
 import activationEndpoint from "./device/activationPassword";
 import { checkPermissionReqBuilder } from "../auth/auth";
 import { Permission } from "../types/permissions";
+import capture from "./capture/capture";
 
 const rootRouter = Router();
 
@@ -17,5 +18,6 @@ rootRouter.get(
   qrEndpoint
 );
 rootRouter.post(routes["devices/activate"].path, activationEndpoint);
+rootRouter.post(routes["capture"].path, capture);
 
 export default rootRouter;

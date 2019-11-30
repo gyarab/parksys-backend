@@ -3,11 +3,13 @@ import resolvers from "../device.resolvers";
 import { Device } from "../device.model";
 import { Permission } from "../../../types/permissions";
 import routes from "../../../endpoints/routes";
+import { Context } from "../../../db/gql";
 
 describe("device resolvers", () => {
-  const ctx = {
+  const ctx: Context = {
     token: {
       user: {
+        id: "",
         permissions: [Permission.ALL]
       }
     }

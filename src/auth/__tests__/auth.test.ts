@@ -45,10 +45,6 @@ describe("checkAuthenticationHeader", () => {
     })}`;
     expect(await checkAuthenticationHeader(createReq(token3))).toBeNull();
 
-    // Invalid inputs should be handled well
-    expect(await checkAuthenticationHeader(createReq(null))).toBeNull();
-    expect(await checkAuthenticationHeader(null)).toBeNull();
-
     // Valid token with an invalid or non-existent RefreshToken
     const rt4 = await new RefreshToken({
       revokedAt: new Date() // now

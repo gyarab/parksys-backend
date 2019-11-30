@@ -9,9 +9,7 @@ describe("user query resolvers", () => {
     const userData: IUser = {
       name: "user1",
       email: "user1@example.com",
-      permissions: [
-        Permission.ALL
-      ]
+      permissions: [Permission.ALL]
     };
 
     const dbUser: IUserDocument = (await User.create([userData]))[0];
@@ -19,7 +17,8 @@ describe("user query resolvers", () => {
     const user = await resolvers.Query.currentUser(null, null, {
       token: {
         user: {
-          id: dbUser.id
+          id: dbUser.id,
+          permissions: []
         }
       }
     });

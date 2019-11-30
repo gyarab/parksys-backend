@@ -3,7 +3,7 @@ import { Coordinate } from "utils/image";
 
 // Generated using https://jvilk.com/MakeTypes/
 export interface OAlprResponse {
-  results?: (OAlprResult)[] | null;
+  results: OAlprResult[];
   width: number;
   height: number;
 }
