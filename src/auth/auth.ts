@@ -74,7 +74,6 @@ export const checkPermissionReqBuilder = (
       "token.user.permissions",
       lodash.get(req, "token.device.permissions", [])
     );
-    console.log(req.token);
     if (hasPermissions(requiredPermissions, permissions)) {
       next();
     } else {

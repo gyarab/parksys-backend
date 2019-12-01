@@ -8,8 +8,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const image_clipper_1 = __importDefault(require("image-clipper"));
 const canvas_1 = __importDefault(require("canvas"));
 
-// TODO: Move to an image cropper
-// TODO: Return the cropped image
 exports.cropImageRectangle = (
   imagePath,
   outputPath,

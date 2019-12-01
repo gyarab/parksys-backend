@@ -63,6 +63,27 @@ describe("device resolvers", () => {
     expect(dbDevice).toMatchObject(res);
   });
 
+  it("regenerateActivationPassword", async () => {
+    const dbDevices = await Device.create([{ name: "d1" }]);
+    const resp = await resolvers.Mutation.regenerateActivationPassword(
+      null,
+      {
+        id: dbDevices[0].id
+      },
+      ctx,
+      null
+    );
+    // Activation password should not be returned
+    expect(resp.activationPassword).toBeUndefined();
+    expect(resp.activated).toBe(false);
+    // Verify DB
+    const d1 = await Device.findById(dbDevices[0].id);
+    expect(d1.activationPassword).not.toMatchObject(
+      dbDevices[0].activationPassword
+    );
+    expect(d1.activated).toBe(false);
+  });
+
   afterEach(async () => {
     await Device.remove({});
   });

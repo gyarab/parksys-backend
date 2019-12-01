@@ -8,6 +8,7 @@ import { Permission } from "../types/permissions";
 import captureEndpoint from "./device/capture";
 import { Handler } from "../app";
 import lodash from "lodash";
+import updateConfigEndpoint from "./device/updateConfig";
 
 const rootRouter = Router();
 
@@ -28,6 +29,8 @@ rootRouter.get(
   checkPermissionReqBuilder([Permission.ALL]),
   qrEndpoint
 );
+
+// Device
 rootRouter.post(routes["devices/activate"].path, deviceAactivationEndpoint);
 rootRouter.post(
   routes["devices/capture"].path,
@@ -35,5 +38,6 @@ rootRouter.post(
   checkPermissionReqBuilder([Permission.ALL]),
   captureEndpoint
 );
+rootRouter.put(routes["devices/config"].path, deviceOnly, updateConfigEndpoint);
 
 export default rootRouter;

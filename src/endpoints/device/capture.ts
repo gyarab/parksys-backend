@@ -36,7 +36,7 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
     return next();
   }
 
-  if (device.shouldUpdateConfig) {
+  if (device.shouldSendConfig) {
     res.send({
       data: { config: device.config }
     });
@@ -51,7 +51,8 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
   getLprResult(files[Object.keys(files)[0]])
     .then(result => {
       // Handle result, based on device mode, etc. do stuff
-      console.log(result);
+      // console.log(result);
+      return next();
     })
     .catch(err => {
       console.error(err);

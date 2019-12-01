@@ -44,7 +44,7 @@ interface IDevice {
   refreshToken: IRefreshToken;
   activationQrUrl?: string;
   config?: object;
-  shouldUpdateConfig: boolean;
+  shouldSendConfig: boolean;
   publicFields(): IDevice;
 }
 

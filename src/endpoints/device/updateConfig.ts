@@ -1,9 +1,9 @@
 import { AsyncHandler } from "../../app";
-import { Device } from "types/device/device.model";
+import { Device } from "../../types/device/device.model";
 import lodash from "lodash";
 
 // Called by the device to update the server's device config.
-const capture: AsyncHandler<{ any }> = async (req, res, next) => {
+const updateConfig: AsyncHandler<{ any }> = async (req, res, next) => {
   // Send back device config if updated
   const device = await Device.findById(req.token.device.id);
   if (!device) {
@@ -21,4 +21,4 @@ const capture: AsyncHandler<{ any }> = async (req, res, next) => {
   return next();
 };
 
-export default capture;
+export default updateConfig;
