@@ -3,7 +3,7 @@ import qrcode from "qrcode";
 import mongoose from "mongoose";
 import { AsyncHandler } from "../../app";
 
-const qr: AsyncHandler = async (req, res) => {
+const qr: AsyncHandler<{ id: any }> = async (req, res) => {
   const oid = req.params.id;
   if (oid == null || !mongoose.Types.ObjectId.isValid(oid)) {
     res.status(400).end();

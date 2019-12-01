@@ -33,7 +33,7 @@ function loadSchemaScalars() {
   return loadSchemaFile(scalarPath);
 }
 
-export type Context = Pick<PRequest, "token">;
+export type Context = Pick<PRequest<any>, "token">;
 
 export type Resolver = (
   obj?: any,
@@ -66,7 +66,7 @@ export const constructGraphQLServer = async ():
     const apollo = new ApolloServer({
       typeDefs: [rootSchema, scalars, ...schemaTypes],
       resolvers: merge({}, userResolvers, deviceResolvers),
-      context({ req }: { req: PRequest }): Context {
+      context({ req }: { req: PRequest<any> }): Context {
         return { token: req.token };
       }
     });

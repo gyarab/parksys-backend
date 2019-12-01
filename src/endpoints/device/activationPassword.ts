@@ -5,7 +5,7 @@ import { createTokenPair } from "../../auth/auth";
 import config from "../../config";
 import { AsyncHandler } from "../../app";
 
-const activationPassword: AsyncHandler = async (req, res, next) => {
+const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
   const { activationPassword } = req.body;
   if (!activationPassword) {
     res.status(401).send({ error: "activation password must be supplied" });
@@ -42,11 +42,10 @@ const activationPassword: AsyncHandler = async (req, res, next) => {
   await device.save();
 
   delete device.refreshToken;
-  const respDevice = device.publicFields();
-  res
-    .status(200)
-    .send({ data: { refreshToken, accessToken, device: respDevice } });
+  res.send({
+    data: { refreshToken, accessToken, device: device.publicFields() }
+  });
   return next();
 };
 
-export default activationPassword;
+export default deviceActivationEndpoint;

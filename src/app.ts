@@ -8,14 +8,19 @@ import cors from "cors";
 import { constructGraphQLServer } from "./db/gql";
 import { checkAuthenticationHeader, IAccessTokenData } from "./auth/auth";
 import fileUpload from "express-fileupload";
+import { Params } from "express-serve-static-core";
 
-export interface PRequest extends Request {
+export interface PRequest<T extends Params> extends Request<T> {
   token?: IAccessTokenData | null;
 }
 
-type THandler<T> = (req: PRequest, res: Response, next: NextFunction) => T;
-export type AsyncHandler = THandler<Promise<any>>;
-export type Handler = THandler<any>;
+export type THandler<T, P extends Params> = (
+  req: PRequest<P>,
+  res: Response,
+  next: NextFunction
+) => T;
+export type AsyncHandler<P extends Params> = THandler<Promise<any>, P>;
+export type Handler<P extends Params> = THandler<any, P>;
 
 const app = express();
 
@@ -31,7 +36,7 @@ app.use(fileUpload({}));
 // JSON parser
 app.use(bodyParser.json());
 // Token authentication middleware
-app.use(async (req: PRequest, _, next) => {
+app.use(async (req: PRequest<any>, _, next) => {
   req.token = await checkAuthenticationHeader(req);
   return next();
 });

@@ -25,6 +25,7 @@ describe("password activation endpoint", () => {
     const { refreshToken, accessToken, device: respDevice } = resp.body.data;
     expect(verifyTokenPair(refreshToken, accessToken)).toBe(true);
 
+    // Check the accessToken body
     const [_, accessTokenBody] = verifyToken(cryptSecret, accessToken);
     expect(lodash.get(accessTokenBody, "device.id", undefined)).toBeDefined();
     expect(

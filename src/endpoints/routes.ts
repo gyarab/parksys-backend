@@ -2,12 +2,13 @@ interface IRoute {
   name: RoutableEndpoints;
   path: string;
 }
+
 type RoutableEndpoints =
   | "ping"
   | "login/password"
   | "devices/qr"
   | "devices/activate"
-  | "capture";
+  | "devices/capture";
 
 type RouteConfig = Record<RoutableEndpoints, Omit<IRoute, "name">>;
 
@@ -16,7 +17,7 @@ const config: RouteConfig = {
   "login/password": { path: "/login/password" },
   "devices/qr": { path: "/devices/qr/:id" },
   "devices/activate": { path: "/devices/activate" },
-  capture: { path: "/capture" }
+  "devices/capture": { path: "/capture" }
 };
 
 function getRoutes(
@@ -27,7 +28,7 @@ function getRoutes(
     .map(key => {
       return {
         name: key,
-        path: routeConfig[key].path
+        ...routeConfig[key]
       };
     })
     .reduce(

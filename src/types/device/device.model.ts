@@ -43,6 +43,8 @@ interface IDevice {
   activationPassword: IAuthentication<any>;
   refreshToken: IRefreshToken;
   activationQrUrl?: string;
+  config?: object;
+  shouldUpdateConfig: boolean;
   publicFields(): IDevice;
 }
 
@@ -73,6 +75,15 @@ const DeviceSchema = new mongoose.Schema(
     refreshToken: {
       type: mongoose.Schema.Types.ObjectId,
       ref: RefreshTokenName
+    },
+    config: {
+      type: {},
+      default: {}
+    },
+    shouldSendConfig: {
+      type: Boolean,
+      required: true,
+      default: false
     }
   },
   { toObject: { virtuals: true }, toJSON: { virtuals: true } }

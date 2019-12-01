@@ -7,8 +7,9 @@ import {
   IRefreshTokenDocument
 } from "../types/refreshToken/refreshToken.model";
 import mongoose from "mongoose";
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import { Resolver, ResolverWithPermissions } from "../db/gql";
+import { PRequest } from "../app";
 
 const cryptSecret = config.get("security:cryptSecret");
 
@@ -67,12 +68,13 @@ export const checkAuthenticationHeader = async (
 export const checkPermissionReqBuilder = (
   requiredPermissions: Permission[]
 ) => {
-  const wrapper = (req: Request, res: Response, next: NextFunction) => {
+  const wrapper = (req: PRequest<any>, res: Response, next: NextFunction) => {
     const permissions = lodash.get(
       req,
       "token.user.permissions",
       lodash.get(req, "token.device.permissions", [])
     );
+    console.log(req.token);
     if (hasPermissions(requiredPermissions, permissions)) {
       next();
     } else {
