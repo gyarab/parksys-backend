@@ -84,6 +84,9 @@
     }
   },
   "jest": {
+    "preset": "ts-jest",
+    "cacheDirectory": "<rootDir>/.jest/cache",
+    "coverageDirectory": "<rootDir>/coverage",
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
       "/node_modules/"
