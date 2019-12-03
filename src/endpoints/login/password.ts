@@ -65,7 +65,16 @@ const password = async (req, res) => {
       user.refreshTokens.push(refreshTokenObj);
       await user.save();
 
-      res.send({ data: { refreshToken, accessToken } });
+      res.send({
+        data: {
+          refreshToken,
+          accessToken,
+          user: {
+            email: user.name,
+            name: user.name
+          }
+        }
+      });
       return;
     }
   }
