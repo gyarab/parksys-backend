@@ -6,7 +6,7 @@ import rootRouter from "./endpoints/index";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { constructGraphQLServer } from "./db/gql";
-import { checkAuthenticationHeader, IAccessTokenData } from "./auth/auth";
+import { checkAuthorizationHeader, IAccessTokenData } from "./auth/auth";
 import fileUpload from "express-fileupload";
 import { Params } from "express-serve-static-core";
 
@@ -37,7 +37,7 @@ app.use(fileUpload({}));
 app.use(bodyParser.json());
 // Token authentication middleware
 app.use(async (req: PRequest<any>, _, next) => {
-  req.token = await checkAuthenticationHeader(req);
+  req.token = await checkAuthorizationHeader(req);
   return next();
 });
 // Mount the root router

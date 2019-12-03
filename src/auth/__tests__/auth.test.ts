@@ -1,6 +1,6 @@
 import {
   hasPermissions,
-  checkAuthenticationHeader,
+  checkAuthorizationHeader,
   checkPermissionReqBuilder,
   checkPermissionsGqlBuilder
 } from "../auth";
@@ -17,7 +17,7 @@ const cryptSecret = config.get("security:cryptSecret");
 const createReq = (authHeader: string) => {
   return {
     headers: {
-      authentication: authHeader
+      authorization: authHeader
     }
   };
 };
@@ -32,7 +32,7 @@ describe("checkAuthenticationHeader", () => {
       a: 123,
       expiresAt: in10min
     })}`;
-    expect(await checkAuthenticationHeader(createReq(token1))).toStrictEqual({
+    expect(await checkAuthorizationHeader(createReq(token1))).toStrictEqual({
       roid: rt1.id,
       a: 123,
       expiresAt: in10min
@@ -40,14 +40,14 @@ describe("checkAuthenticationHeader", () => {
 
     // Invalid tokens
     const token2 = "Bearer abcd";
-    expect(await checkAuthenticationHeader(createReq(token2))).toBeNull();
+    expect(await checkAuthorizationHeader(createReq(token2))).toBeNull();
 
     const rt3 = await new RefreshToken({}).save();
     const token3 = `What ${createToken(cryptSecret, {
       roid: rt3.id,
       b: { c: 456 }
     })}`;
-    expect(await checkAuthenticationHeader(createReq(token3))).toBeNull();
+    expect(await checkAuthorizationHeader(createReq(token3))).toBeNull();
 
     // Valid token with an invalid or non-existent RefreshToken
     const rt4 = await new RefreshToken({
@@ -57,14 +57,14 @@ describe("checkAuthenticationHeader", () => {
       roid: rt4.id,
       b: { c: 456 }
     })}`;
-    expect(await checkAuthenticationHeader(createReq(token4))).toBeNull();
+    expect(await checkAuthorizationHeader(createReq(token4))).toBeNull();
 
     // Non-existent RefreshToken
     const token5 = `Bearer ${createToken(cryptSecret, {
       roid: "5dd93feac000005bf9eff50d",
       b: { c: 456 }
     })}`;
-    expect(await checkAuthenticationHeader(createReq(token5))).toBeNull();
+    expect(await checkAuthorizationHeader(createReq(token5))).toBeNull();
 
     const rt6 = await new RefreshToken({}).save();
     const token6 = `Bearer ${createToken(cryptSecret, {
@@ -72,14 +72,14 @@ describe("checkAuthenticationHeader", () => {
       a: 123,
       expiresAt: new Date(new Date().getTime() - 1)
     })}`;
-    expect(await checkAuthenticationHeader(createReq(token6))).toBeNull();
+    expect(await checkAuthorizationHeader(createReq(token6))).toBeNull();
 
     // Valid token without expiration
     const rt7 = await new RefreshToken({}).save();
     const token7 = `Bearer ${createToken(cryptSecret, {
       roid: rt7.id
     })}`;
-    expect(await checkAuthenticationHeader(createReq(token7))).toStrictEqual({
+    expect(await checkAuthorizationHeader(createReq(token7))).toStrictEqual({
       roid: rt7.id
     });
   });

@@ -15,7 +15,7 @@ describe("qr endpoint", () => {
   it("should return an image", async () => {
     const resp = await req
       .get(QR_ENDPOINT(d1Id))
-      .set("Authentication", `Bearer ${validAccessToken}`)
+      .set("Authorization", `Bearer ${validAccessToken}`)
       .send();
     expect(resp.status).toBe(200);
     // TODO: Better check
@@ -25,17 +25,17 @@ describe("qr endpoint", () => {
   it("should not crash", async () => {
     let resp = await req
       .get(QR_ENDPOINT("5dd00z009b3e507dffba8b33"))
-      .set("Authentication", `Bearer ${validAccessToken}`)
+      .set("Authorization", `Bearer ${validAccessToken}`)
       .send();
     expect(resp.status).toBe(400);
     resp = await req
       .get(QR_ENDPOINT("5dd000009b3e507dffba8b33"))
-      .set("Authentication", `Bearer ${validAccessToken}`)
+      .set("Authorization", `Bearer ${validAccessToken}`)
       .send();
     expect(resp.status).toBe(400);
     resp = await req
       .get(QR_ENDPOINT(d1Id))
-      .set("Authentication", `Bearer ASD`)
+      .set("Authorization", `Bearer ASD`)
       .send();
     expect(resp.status).toBe(403);
   });

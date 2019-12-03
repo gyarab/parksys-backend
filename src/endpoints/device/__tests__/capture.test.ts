@@ -20,7 +20,7 @@ describe("capture endpoint", () => {
     const resp = await req
       .post(CAPTURE_ENDPOINT())
       .attach("capture_" + new Date().getTime(), testImagePath)
-      .set("Authentication", `Bearer ${validAccessToken}`);
+      .set("Authorization", `Bearer ${validAccessToken}`);
     expect(resp.status).toBe(200);
     expect(resp.body).toMatchObject({
       data: {

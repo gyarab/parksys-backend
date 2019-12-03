@@ -28,18 +28,14 @@ const verifyAccessTokenBody = (body: any, time: Date): boolean => {
   );
 };
 
-export const checkAuthenticationHeader = async (
+export const checkAuthorizationHeader = async (
   req: any
 ): Promise<IAccessTokenData | null> => {
-  if (
-    req == null ||
-    req.headers == null ||
-    req.headers.authentication == null
-  ) {
+  if (req == null || req.headers == null || req.headers.authorization == null) {
     return null;
   }
   const now = new Date();
-  const authHeader = String(req.headers.authentication);
+  const authHeader = String(req.headers.authorization);
   const split = authHeader.split(" ");
   if (split.length !== 2 || split[0] !== "Bearer") {
     return null;

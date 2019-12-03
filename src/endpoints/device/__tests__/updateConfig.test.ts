@@ -16,7 +16,7 @@ describe("updateConfig endpoint", () => {
   it("should fail", async () => {
     const resp = await req
       .put(UPDATE_CONFIG_ENDPOINT())
-      .set("Authentication", `Bearer ${validAccessToken}`)
+      .set("Authorization", `Bearer ${validAccessToken}`)
       .send({
         config: "string"
       });
@@ -32,7 +32,7 @@ describe("updateConfig endpoint", () => {
   it("should work", async () => {
     const resp = await req
       .put(UPDATE_CONFIG_ENDPOINT())
-      .set("Authentication", `Bearer ${validAccessToken}`)
+      .set("Authorization", `Bearer ${validAccessToken}`)
       .send({
         config: {
           key1: "value2",
