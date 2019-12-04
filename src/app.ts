@@ -19,8 +19,8 @@ export type THandler<T, P extends Params> = (
   res: Response,
   next: NextFunction
 ) => T;
-export type AsyncHandler<P extends Params> = THandler<Promise<any>, P>;
-export type Handler<P extends Params> = THandler<any, P>;
+export type AsyncHandler<P extends Params = Params> = THandler<Promise<any>, P>;
+export type Handler<P extends Params = Params> = THandler<any, P>;
 
 const app = express();
 

@@ -26,7 +26,7 @@ begin().then(() => {
           {
             method: AuthenticationMethod.PASSWORD,
             payload: {
-              h: hashPassword("1234", "NaCl"),
+              h: await hashPassword("1234", "NaCl"),
               s: "NaCl"
             }
           }

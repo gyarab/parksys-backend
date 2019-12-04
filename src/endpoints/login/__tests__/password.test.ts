@@ -38,6 +38,11 @@ describe("password endpoint", () => {
     expect(resp.status).toBe(401);
   });
 
+  it("empty request yields 401", async () => {
+    const resp = await req.post(LOGIN_ENDPOINT).send({});
+    expect(resp.status).toBe(401);
+  });
+
   beforeAll(async () => {
     await begin();
     await new User({
@@ -47,7 +52,7 @@ describe("password endpoint", () => {
         {
           method: AuthenticationMethod.PASSWORD,
           payload: {
-            h: hashPassword("1234", "NaCl"),
+            h: await hashPassword("1234", "NaCl"),
             s: "NaCl"
           }
         }
@@ -60,7 +65,7 @@ describe("password endpoint", () => {
         {
           method: AuthenticationMethod.PASSWORD,
           payload: {
-            h: hashPassword("5678", "KCl"),
+            h: await hashPassword("5678", "KCl"),
             s: "KCl"
           }
         }
