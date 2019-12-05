@@ -9,6 +9,7 @@ import { constructGraphQLServer } from "./db/gql";
 import { checkAuthorizationHeader, IAccessTokenData } from "./auth/auth";
 import fileUpload from "express-fileupload";
 import { Params } from "express-serve-static-core";
+import compression from "compression";
 
 export interface PRequest<T extends Params> extends Request<T> {
   token?: IAccessTokenData | null;
@@ -29,6 +30,8 @@ const corsOptions = {
   origin: "*"
 };
 
+// Compression
+// app.use(compression());
 // CORS protection
 app.use(cors(corsOptions));
 // File upload middleware
