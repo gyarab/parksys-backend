@@ -16,7 +16,7 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
     "activationPassword.payload.password": activationPassword,
     "activationPassword.payload.expiresAt": { $gt: new Date() },
     activated: false
-  }).select("-activationPassword -refreshToken");
+  });
   if (!device) {
     res
       .status(401)
@@ -41,9 +41,8 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
   device.refreshToken = refreshTokenObj;
   await device.save();
 
-  delete device.refreshToken;
   res.send({
-    data: { refreshToken, accessToken, device: device.publicFields() }
+    data: { refreshToken, accessToken, device: device.toJSON() }
   });
   return next();
 };

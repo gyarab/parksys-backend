@@ -14,9 +14,11 @@ const qr: AsyncHandler<{ id: any }> = async (req, res) => {
     res.status(400).end();
     return;
   }
-  const payload = device.activationPassword.payload;
-  payload.expiresAt = payload.expiresAt.getTime();
-  qrcode.toFileStream(res, JSON.stringify(payload));
+  const imagePayload = {
+    password: device.activationPassword.payload.password,
+    expiresAt: device.activationPassword.payload.expiresAt.getTime()
+  };
+  qrcode.toFileStream(res, JSON.stringify(imagePayload));
   res.status(200);
 };
 

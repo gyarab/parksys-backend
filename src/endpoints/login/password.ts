@@ -20,7 +20,6 @@ export function hashPassword(password: string, salt: string): Promise<string> {
 
 const password: AsyncHandler = async (req, res, next) => {
   const { user: userName, password } = req.body;
-
   if (
     !userName ||
     !password ||

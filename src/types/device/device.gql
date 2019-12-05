@@ -5,6 +5,7 @@ type Device {
   activatedAt: DateTime
   # Calculated
   activationQrUrl: String!
+  activationPasswordExpiresAt: DateTime
 }
 
 input NewDeviceInput {

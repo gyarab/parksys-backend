@@ -40,12 +40,12 @@ interface IDevice {
   name: string;
   activated: boolean;
   activatedAt: Date;
-  activationPassword: IAuthentication<any>;
+  activationPassword: IAuthentication<IAuthenticationPayloadActivationPassword>;
   refreshToken: IRefreshToken;
   activationQrUrl?: string;
   config?: object;
   shouldSendConfig: boolean;
-  publicFields(): IDevice;
+  activationPasswordExpiresAt: Date;
 }
 
 interface IDeviceDocument extends mongoose.Document, IDevice {}
@@ -86,21 +86,30 @@ const DeviceSchema = new mongoose.Schema(
       default: false
     }
   },
-  { toObject: { virtuals: true }, toJSON: { virtuals: true } }
+  {
+    toObject: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        delete ret.activationPassword;
+        delete ret.refreshToken;
+      }
+    },
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        delete ret.activationPassword;
+        delete ret.refreshToken;
+      }
+    }
+  }
 );
-
-const DeviceOmittedFields = "-activationPassword -refreshToken";
-
-DeviceSchema.methods.publicFields = function() {
-  const device = this.toObject();
-  delete device._id;
-  delete device.activationPassword;
-  delete device.refreshToken;
-  return device;
-};
 
 DeviceSchema.virtual("activationQrUrl").get(function() {
   return routes["devices/qr"].path.replace(":id", this.id);
+});
+
+DeviceSchema.virtual("activationPasswordExpiresAt").get(function() {
+  return this.activationPassword.payload.expiresAt;
 });
 
 const Device = mongoose.model<IDeviceDocument>(DeviceName, DeviceSchema);
@@ -111,6 +120,5 @@ export {
   DeviceName,
   IDevice,
   IDeviceDocument,
-  DeviceOmittedFields,
   defaultActivationPasswordGenerator
 };

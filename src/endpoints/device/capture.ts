@@ -19,6 +19,7 @@ const getLprResult = (file: any): Promise<LicensePlateRecognitionResult> => {
             .then(result => {
               // Handle result
               removeTmpFile();
+              // console.log(result);
               resolve(result);
             })
             .catch(err => reject(err));
