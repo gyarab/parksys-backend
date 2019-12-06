@@ -21,10 +21,5 @@ export default {
   Query: {
     currentUser,
     users: checkPermissionsGqlBuilder([Permission.ALL], users)
-  },
-  Mutation: {
-    a() {
-      return "asd";
-    }
   }
 };

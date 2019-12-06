@@ -51,9 +51,7 @@ export const constructGraphQLServer = async ():
   | never => {
   const rootSchema = `
     type Query
-    type Mutation {
-      a: String
-    }
+    type Mutation
     schema {
       query: Query
       mutation: Mutation
@@ -68,7 +66,8 @@ export const constructGraphQLServer = async ():
       resolvers: merge({}, userResolvers, deviceResolvers),
       context({ req }: { req: PRequest<any> }): Context {
         return { token: req.token };
-      }
+      },
+      tracing: process.env.NODE_ENV === "development"
     });
 
     return apollo;
