@@ -36,9 +36,6 @@ describe("password activation endpoint", () => {
     expect(respDevice.activated).toBe(true);
     expect(respDevice.refreshToken).toBeUndefined();
     expect(respDevice.activationPassword).toBeUndefined();
-    expect(respDevice.activationQrUrl).toBe(
-      routes["devices/qr"].path.replace(":id", respDevice.id)
-    );
     const dbDevice: IDeviceDocument = await Device.findById(respDevice.id);
     expect(dbDevice.activated).toBe(true);
   });

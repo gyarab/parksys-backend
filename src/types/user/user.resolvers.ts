@@ -21,5 +21,6 @@ export default {
   Query: {
     currentUser,
     users: checkPermissionsGqlBuilder([Permission.ALL], users)
-  }
+  },
+  User: {}
 };

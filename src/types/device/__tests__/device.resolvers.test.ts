@@ -26,9 +26,6 @@ describe("device resolvers", () => {
     expect(devices).toHaveLength(1);
     expect(devices[0].name).toBe("d1");
     expect(devices[0].id).toBe(dbDevice.id);
-    expect(devices[0].activationQrUrl).toBe(
-      routes["devices/qr"].path.replace(":id", devices[0].id)
-    );
 
     expect(
       await resolvers.Query.devices(
@@ -53,9 +50,6 @@ describe("device resolvers", () => {
     )).toJSON();
     expect(res.id).toBeDefined();
     expect(res.name).toBe("d1");
-    expect(res.activationQrUrl).toBe(
-      routes["devices/qr"].path.replace(":id", res.id)
-    );
 
     const dbDevice = await Device.findById(res.id);
     expect(dbDevice.name).toBe("d1");

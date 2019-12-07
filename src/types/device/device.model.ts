@@ -42,10 +42,8 @@ interface IDevice {
   activatedAt: Date;
   activationPassword: IAuthentication<IAuthenticationPayloadActivationPassword>;
   refreshToken: IRefreshToken;
-  activationQrUrl?: string;
   config?: object;
   shouldSendConfig: boolean;
-  activationPasswordExpiresAt: Date;
 }
 
 interface IDeviceDocument extends mongoose.Document, IDevice {}
@@ -103,14 +101,6 @@ const DeviceSchema = new mongoose.Schema(
     }
   }
 );
-
-DeviceSchema.virtual("activationQrUrl").get(function() {
-  return routes["devices/qr"].path.replace(":id", this.id);
-});
-
-DeviceSchema.virtual("activationPasswordExpiresAt").get(function() {
-  return this.activationPassword.payload.expiresAt;
-});
 
 const Device = mongoose.model<IDeviceDocument>(DeviceName, DeviceSchema);
 

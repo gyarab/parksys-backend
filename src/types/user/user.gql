@@ -1,8 +1,8 @@
 type User {
   _id: ID!
   name: String!
-  email: String!
-  permissions: [String!]!
+  email: EmailAddress!
+  permissions: [String]!
   authentications: [Authentication]
   refreshTokens: [RefreshToken]
 }

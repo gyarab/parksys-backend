@@ -61,13 +61,16 @@ export const constructGraphQLServer = async ():
   const scalars: string = await loadSchemaScalars();
   try {
     const schemaTypes: string[] = await Promise.all(types.map(loadSchemaTypes));
+    const isDev = process.env.NODE_ENV === "development";
     const apollo = new ApolloServer({
       typeDefs: [rootSchema, scalars, ...schemaTypes],
       resolvers: merge({}, userResolvers, deviceResolvers),
       context({ req }: { req: PRequest<any> }): Context {
         return { token: req.token };
       },
-      tracing: process.env.NODE_ENV === "development"
+      tracing: isDev,
+      playground: isDev,
+      introspection: isDev
     });
 
     return apollo;

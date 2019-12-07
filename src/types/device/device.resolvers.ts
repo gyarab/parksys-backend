@@ -1,6 +1,11 @@
-import { Device, defaultActivationPasswordGenerator } from "./device.model";
+import {
+  Device,
+  defaultActivationPasswordGenerator,
+  IDeviceDocument
+} from "./device.model";
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { Permission } from "../../types/permissions";
+import routes from "../../endpoints/routes";
 
 // Query
 const devices = async (_, args, ctx) => {
@@ -20,6 +25,15 @@ const regenerateActivationPassword = async (_, args, ctx) => {
   return await device.save();
 };
 
+// Device
+const activationQrUrl = (obj: IDeviceDocument) => {
+  return routes["devices/qr"].path.replace(":id", obj.id);
+};
+
+const activationPasswordExpiresAt = (obj: IDeviceDocument) => {
+  return obj.activationPassword.payload.expiresAt;
+};
+
 export default {
   Query: {
     devices: checkPermissionsGqlBuilder([Permission.ALL], devices)
@@ -30,5 +44,9 @@ export default {
       [Permission.ALL],
       regenerateActivationPassword
     )
+  },
+  Device: {
+    activationQrUrl,
+    activationPasswordExpiresAt
   }
 };
