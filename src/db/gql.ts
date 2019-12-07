@@ -7,6 +7,7 @@ import userResolvers from "../types/user/user.resolvers";
 import deviceResolvers from "../types/device/device.resolvers";
 import { Permission } from "../types/permissions";
 import { PRequest } from "../app";
+import { resolvers as scalarResolvers } from "graphql-scalars";
 
 // Inspired by https://github.com/FrontendMasters/intro-to-graphql
 const types = ["user", "refreshToken", "authentication", "device"];
@@ -64,7 +65,7 @@ export const constructGraphQLServer = async ():
     const isDev = process.env.NODE_ENV === "development";
     const apollo = new ApolloServer({
       typeDefs: [rootSchema, scalars, ...schemaTypes],
-      resolvers: merge({}, userResolvers, deviceResolvers),
+      resolvers: merge({}, scalarResolvers, userResolvers, deviceResolvers),
       context({ req }: { req: PRequest<any> }): Context {
         return { token: req.token };
       },

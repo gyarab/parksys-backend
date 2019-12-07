@@ -14,8 +14,8 @@ const currentUser: Resolver = async (_, args, ctx) => {
   return null;
 };
 
-const users: Resolver = async (_, args, ctx) => {
-  return await User.find({});
+const users: Resolver = async (_, { filter }) => {
+  return await User.find(!!filter ? filter : {});
 };
 
 // User
