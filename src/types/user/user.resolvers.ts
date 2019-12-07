@@ -7,11 +7,11 @@ import { Resolver } from "../../db/gql";
 // Query
 const currentUser: Resolver = async (_, args, ctx) => {
   const uid = lodash.get(ctx, "token.user.id");
-  if (uid) {
+  if (!!uid) {
     const user = await User.findById(uid);
     return user == null ? null : user.toObject();
   }
-  return null;
+  throw new Error("No current user");
 };
 
 const users: Resolver = async (_, { filter }) => {

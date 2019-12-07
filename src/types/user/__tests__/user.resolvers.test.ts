@@ -23,6 +23,16 @@ describe("user query resolvers", () => {
 
     expect(user._id).toStrictEqual(user1._id);
     expect(user.name).toBe("user1");
+
+    // No current user -> error
+    resolvers.Query.currentUser()
+      .then(r => {
+        console.log(r);
+        fail();
+      })
+      .catch(err => {
+        expect(err).toBeInstanceOf(Error);
+      });
   });
 
   it("User.authentications", async () => {
