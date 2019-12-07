@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Model } from "mongoose";
 import {
   IAuthentication,
   AuthenticationSchema,
@@ -10,7 +10,6 @@ import {
   IRefreshToken,
   RefreshTokenName
 } from "../refreshToken/refreshToken.model";
-import routes from "../../endpoints/routes";
 import config from "../../config";
 
 // Returns a function that generates activation passwords
@@ -44,6 +43,7 @@ interface IDevice {
   refreshToken: IRefreshToken;
   config?: object;
   shouldSendConfig: boolean;
+  defaultActivationPasswordGenerator: string;
 }
 
 interface IDeviceDocument extends mongoose.Document, IDevice {}
@@ -101,6 +101,8 @@ const DeviceSchema = new mongoose.Schema(
     }
   }
 );
+
+DeviceSchema.statics.defaultActivationPasswordGenerator = defaultActivationPasswordGenerator;
 
 const Device = mongoose.model<IDeviceDocument>(DeviceName, DeviceSchema);
 

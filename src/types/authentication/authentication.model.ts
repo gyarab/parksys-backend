@@ -12,7 +12,8 @@ interface IAuthenticationPayloadPassword extends IAuthenticationPayload {
   s: string;
 }
 
-interface IAuthenticationPayloadActivationPassword extends IAuthenticationPayload {
+interface IAuthenticationPayloadActivationPassword
+  extends IAuthenticationPayload {
   password: string;
   expiresAt: Date;
 }
@@ -22,7 +23,9 @@ interface IAuthentication<T extends IAuthenticationPayload> {
   method: AuthenticationMethod;
 }
 
-interface IAuthenticationDocument extends mongoose.Document, IAuthentication<any> {}
+interface IAuthenticationDocument
+  extends mongoose.Document,
+    IAuthentication<any> {}
 
 const AuthenticationName = "Authentication";
 
@@ -53,6 +56,7 @@ export {
   Authentication,
   AuthenticationName,
   AuthenticationMethod,
+  IAuthenticationDocument,
   IAuthentication,
   IAuthenticationPayload,
   IAuthenticationPayloadPassword,

@@ -7,6 +7,7 @@ import {
   Authentication,
   AuthenticationMethod
 } from "../../../types/authentication/authentication.model";
+import { models } from "../../../db/models";
 
 describe("user query resolvers", () => {
   let user1: IUserDocument;
@@ -18,7 +19,8 @@ describe("user query resolvers", () => {
           id: user1.id,
           permissions: user1.permissions
         }
-      }
+      },
+      models
     });
 
     expect(user._id).toStrictEqual(user1._id);
@@ -28,7 +30,7 @@ describe("user query resolvers", () => {
     resolvers.Query.currentUser()
       .then(r => {
         console.log(r);
-        fail();
+        fail("Resolver should have thrown an error");
       })
       .catch(err => {
         expect(err).toBeInstanceOf(Error);
@@ -44,7 +46,8 @@ describe("user query resolvers", () => {
           id: user2.id,
           permissions: user2.permissions
         }
-      }
+      },
+      models
     });
     expect(authentications1).toHaveLength(1);
     expect(authentications1[0]).toMatchObject(user2.authentications[0]);
@@ -56,7 +59,8 @@ describe("user query resolvers", () => {
           id: user1.id,
           permissions: user1.permissions
         }
-      }
+      },
+      models
     });
     expect(authentications2).toHaveLength(1);
     expect(authentications2[0]).toMatchObject(user2.authentications[0]);
@@ -69,7 +73,8 @@ describe("user query resolvers", () => {
             id: user2.id,
             permissions: user2.permissions
           }
-        }
+        },
+        models
       });
     };
     expect(authentications3).toThrowError();

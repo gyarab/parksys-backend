@@ -1,25 +1,25 @@
 import {
-  Device,
   defaultActivationPasswordGenerator,
   IDeviceDocument
 } from "./device.model";
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { Permission } from "../../types/permissions";
 import routes from "../../endpoints/routes";
+import { Resolver } from "../../db/gql";
 
 // Query
 const devices = async (_, args, ctx) => {
-  const devices = await Device.find(args.filter);
+  const devices = await ctx.models.Device.find(args.filter);
   return devices;
 };
 
 // Mutation
 const addDevice = async (_, args, ctx) => {
-  return await new Device(args.input).save();
+  return await new ctx.models.Device(args.input).save();
 };
 
-const regenerateActivationPassword = async (_, args, ctx) => {
-  const device = await Device.findById(args.id);
+const regenerateActivationPassword: Resolver = async (_, args, ctx) => {
+  const device = await ctx.models.Device.findById(args.id);
   if (!device) return null;
   device.activationPassword = defaultActivationPasswordGenerator();
   return await device.save();

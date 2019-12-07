@@ -12,6 +12,7 @@ import { begin } from "../../app";
 import { disconnect } from "../../db";
 import mockReqRes from "mock-req-res";
 import { Context } from "../../db/gql";
+import { models } from "../../db/models";
 
 const cryptSecret = config.get("security:cryptSecret");
 const createReq = (authHeader: string) => {
@@ -153,7 +154,8 @@ describe("checkPermissionGqlBuilder", () => {
             id: "",
             permissions: supplied
           }
-        }
+        },
+        models
       };
       const func = () =>
         checkPermissionsGqlBuilder(required, resolver)("1", "2", ctx, "3");

@@ -2,7 +2,7 @@ import { begin } from "../../../app";
 import resolvers from "../device.resolvers";
 import { Device } from "../device.model";
 import { Permission } from "../../../types/permissions";
-import routes from "../../../endpoints/routes";
+import { models } from "../../../db/models";
 import { Context } from "../../../db/gql";
 
 describe("device resolvers", () => {
@@ -12,7 +12,8 @@ describe("device resolvers", () => {
         id: "",
         permissions: [Permission.ALL]
       }
-    }
+    },
+    models
   };
 
   it("device(filter)", async () => {

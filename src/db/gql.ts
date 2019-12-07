@@ -8,6 +8,12 @@ import deviceResolvers from "../types/device/device.resolvers";
 import { Permission } from "../types/permissions";
 import { PRequest } from "../app";
 import { resolvers as scalarResolvers } from "graphql-scalars";
+import { Model } from "mongoose";
+import { IUserDocument } from "../types/user/user.model";
+import { IDeviceDocument } from "../types/device/device.model";
+import { IRefreshTokenDocument } from "../types/refreshToken/refreshToken.model";
+import { IAuthenticationDocument } from "../types/authentication/authentication.model";
+import { models } from "./models";
 
 // Inspired by https://github.com/FrontendMasters/intro-to-graphql
 const types = ["user", "refreshToken", "authentication", "device"];
@@ -34,7 +40,14 @@ function loadSchemaScalars() {
   return loadSchemaFile(scalarPath);
 }
 
-export type Context = Pick<PRequest<any>, "token">;
+export type Context = Pick<PRequest<any>, "token"> & {
+  models: {
+    User: Model<IUserDocument, {}>;
+    Device: Model<IDeviceDocument, {}>;
+    RefreshToken: Model<IRefreshTokenDocument, {}>;
+    Authentication: Model<IAuthenticationDocument, {}>;
+  };
+};
 
 export type Resolver = (
   obj?: any,
@@ -67,7 +80,10 @@ export const constructGraphQLServer = async ():
       typeDefs: [rootSchema, scalars, ...schemaTypes],
       resolvers: merge({}, scalarResolvers, userResolvers, deviceResolvers),
       context({ req }: { req: PRequest<any> }): Context {
-        return { token: req.token };
+        return {
+          token: req.token,
+          models
+        };
       },
       tracing: isDev,
       playground: isDev,

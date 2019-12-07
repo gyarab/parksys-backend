@@ -5,17 +5,17 @@ import { Permission } from "../permissions";
 import { Resolver } from "../../db/gql";
 
 // Query
-const currentUser: Resolver = async (_, args, ctx) => {
+const currentUser: Resolver = async (_, __, ctx) => {
   const uid = lodash.get(ctx, "token.user.id");
   if (!!uid) {
-    const user = await User.findById(uid);
-    return user == null ? null : user.toObject();
+    const user = await ctx.models.User.findById(uid);
+    return user == null ? null : user;
   }
   throw new Error("No current user");
 };
 
-const users: Resolver = async (_, { filter }) => {
-  return await User.find(!!filter ? filter : {});
+const users: Resolver = async (_, { filter }, ctx) => {
+  return await ctx.models.User.find(!!filter ? filter : {});
 };
 
 // User
