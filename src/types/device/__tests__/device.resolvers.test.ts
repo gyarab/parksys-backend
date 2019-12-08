@@ -6,6 +6,8 @@ import { models } from "../../../db/models";
 import { Context } from "../../../db/gql";
 import routes from "../../../endpoints/routes";
 import { disconnect } from "../../../db";
+import gql from "graphql-tag";
+import { runQuery } from "../../../utils/testRunGqlQuery";
 
 describe("device resolvers", () => {
   const ctx: Context = {
@@ -38,6 +40,27 @@ describe("device resolvers", () => {
         null
       )
     ).toStrictEqual([]);
+  });
+
+  it.skip("run Query.device(filter)", async () => {
+    const query = gql`
+      query device($name: String!) {
+        device(filter: { name: $name }) {
+          id
+          name
+        }
+      }
+    `;
+    const result = await runQuery(
+      query,
+      {
+        models: {
+          Device
+        }
+      },
+      { name: "d1" }
+    );
+    console.log(result);
   });
 
   it("Query.addDevice(input)", async () => {

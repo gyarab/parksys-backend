@@ -1,6 +1,6 @@
 // Load schema types, create the ApolloServer
 import { ApolloServer } from "apollo-server-express";
-import { merge } from "lodash";
+import _ from "lodash";
 import path from "path";
 import fs from "fs";
 import userResolvers from "../types/user/user.resolvers";
@@ -14,6 +14,27 @@ import { IDeviceDocument } from "../types/device/device.model";
 import { IRefreshTokenDocument } from "../types/refreshToken/refreshToken.model";
 import { IAuthenticationDocument } from "../types/authentication/authentication.model";
 import { models } from "./models";
+import gql from "graphql-tag";
+
+export type Context = Pick<PRequest<any>, "token"> & {
+  models: {
+    User: Model<IUserDocument, {}>;
+    Device: Model<IDeviceDocument, {}>;
+    RefreshToken: Model<IRefreshTokenDocument, {}>;
+    Authentication: Model<IAuthenticationDocument, {}>;
+  };
+};
+
+export type Resolver = (
+  obj?: any,
+  args?: any,
+  ctx?: Context,
+  info?: any
+) => any;
+
+export interface ResolverWithPermissions extends Resolver {
+  requiredPermissions: Permission[];
+}
 
 // Inspired by https://github.com/FrontendMasters/intro-to-graphql
 const types = ["user", "refreshToken", "authentication", "device"];
@@ -40,45 +61,40 @@ function loadSchemaScalars() {
   return loadSchemaFile(scalarPath);
 }
 
-export type Context = Pick<PRequest<any>, "token"> & {
-  models: {
-    User: Model<IUserDocument, {}>;
-    Device: Model<IDeviceDocument, {}>;
-    RefreshToken: Model<IRefreshTokenDocument, {}>;
-    Authentication: Model<IAuthenticationDocument, {}>;
-  };
+let typeDefs = null;
+
+export const getTypeDefs = async () => {
+  if (typeDefs == null) {
+    const rootSchema = gql`
+      type Query
+      type Mutation
+      schema {
+        query: Query
+        mutation: Mutation
+      }
+    `;
+    const scalars: string = await loadSchemaScalars();
+    const schemaTypes: string[] = await Promise.all(types.map(loadSchemaTypes));
+    typeDefs = [rootSchema, scalars, ...schemaTypes];
+  }
+  return typeDefs;
 };
 
-export type Resolver = (
-  obj?: any,
-  args?: any,
-  ctx?: Context,
-  info?: any
-) => any;
-
-export interface ResolverWithPermissions extends Resolver {
-  requiredPermissions: Permission[];
-}
+export const resolvers = _.merge(
+  {},
+  scalarResolvers,
+  userResolvers,
+  deviceResolvers
+);
 
 export const constructGraphQLServer = async ():
   | Promise<ApolloServer>
   | never => {
-  const rootSchema = `
-    type Query
-    type Mutation
-    schema {
-      query: Query
-      mutation: Mutation
-    }
-  `;
-
-  const scalars: string = await loadSchemaScalars();
   try {
-    const schemaTypes: string[] = await Promise.all(types.map(loadSchemaTypes));
     const isDev = process.env.NODE_ENV === "development";
     const apollo = new ApolloServer({
-      typeDefs: [rootSchema, scalars, ...schemaTypes],
-      resolvers: merge({}, scalarResolvers, userResolvers, deviceResolvers),
+      typeDefs: await getTypeDefs(),
+      resolvers: resolvers,
       context({ req }: { req: PRequest<any> }): Context {
         return {
           token: req.token,
