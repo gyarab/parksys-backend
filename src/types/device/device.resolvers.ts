@@ -26,8 +26,8 @@ const regenerateActivationPassword: Resolver = async (_, args, ctx) => {
 };
 
 // Device
-const activationQrUrl = (obj: IDeviceDocument) => {
-  return routes["devices/qr"].path.replace(":id", obj.id);
+const activationQrUrl = (device: IDeviceDocument) => {
+  return routes["devices/qr"].path.replace(":id", device.id);
 };
 
 const activationPasswordExpiresAt = (obj: IDeviceDocument) => {

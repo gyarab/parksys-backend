@@ -1,9 +1,11 @@
 import { begin } from "../../../app";
 import resolvers from "../device.resolvers";
-import { Device } from "../device.model";
+import { Device, IDeviceDocument } from "../device.model";
 import { Permission } from "../../../types/permissions";
 import { models } from "../../../db/models";
 import { Context } from "../../../db/gql";
+import routes from "../../../endpoints/routes";
+import { disconnect } from "../../../db";
 
 describe("device resolvers", () => {
   const ctx: Context = {
@@ -15,9 +17,9 @@ describe("device resolvers", () => {
     },
     models
   };
+  let d1: IDeviceDocument = null;
 
-  it("device(filter)", async () => {
-    const dbDevice = (await Device.create([{ name: "d1" }, { name: "d2" }]))[0];
+  it("Query.device(filter)", async () => {
     const devices = await resolvers.Query.devices(
       null,
       { filter: { name: "d1" } },
@@ -26,7 +28,7 @@ describe("device resolvers", () => {
     );
     expect(devices).toHaveLength(1);
     expect(devices[0].name).toBe("d1");
-    expect(devices[0].id).toBe(dbDevice.id);
+    expect(devices[0].id).toBe(d1.id);
 
     expect(
       await resolvers.Query.devices(
@@ -38,31 +40,30 @@ describe("device resolvers", () => {
     ).toStrictEqual([]);
   });
 
-  it("addDevice(input)", async () => {
+  it("Query.addDevice(input)", async () => {
     const res = (await resolvers.Mutation.addDevice(
       null,
       {
         input: {
-          name: "d1"
+          name: "d2"
         }
       },
       ctx,
       null
     )).toJSON();
     expect(res.id).toBeDefined();
-    expect(res.name).toBe("d1");
+    expect(res.name).toBe("d2");
 
     const dbDevice = await Device.findById(res.id);
-    expect(dbDevice.name).toBe("d1");
+    expect(dbDevice.name).toBe("d2");
     expect(dbDevice).toMatchObject(res);
   });
 
-  it("regenerateActivationPassword", async () => {
-    const dbDevices = await Device.create([{ name: "d1" }]);
+  it("Mutation.regenerateActivationPassword", async () => {
     const resp = (await resolvers.Mutation.regenerateActivationPassword(
       null,
       {
-        id: dbDevices[0].id
+        id: d1.id
       },
       ctx,
       null
@@ -70,24 +71,28 @@ describe("device resolvers", () => {
     // Activation password should not be returned
     expect(resp.activated).toBe(false);
     // Verify DB
-    const d1 = await Device.findById(dbDevices[0].id);
-    expect(d1.activationPassword).not.toMatchObject(
-      dbDevices[0].activationPassword
-    );
+    const d1Db = await Device.findById(d1.id);
+    expect(d1Db.activationPassword).not.toMatchObject(d1.activationPassword);
     expect(d1.activated).toBe(false);
   });
 
-  afterEach(async () => {
-    await Device.remove({});
+  it("Device.activationQrUrl", () => {
+    const result = resolvers.Device.activationQrUrl(d1);
+    expect(result).toBe(routes["devices/qr"].path.replace(":id", d1.id));
+  });
+
+  it("Device.activationPasswordExpiresAt", () => {
+    const result = resolvers.Device.activationPasswordExpiresAt(d1);
+    expect(result).toBe(d1.activationPassword.payload.expiresAt);
   });
 
   beforeAll(async () => {
     await begin();
-    // Create any required models
+    d1 = await new Device({ name: "d1" }).save();
   });
 
   afterAll(async () => {
-    // await disconnect();
+    await disconnect();
     // Remve any created models
   });
 });
