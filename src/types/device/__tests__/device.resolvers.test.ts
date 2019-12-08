@@ -5,7 +5,7 @@ import { Permission } from "../../../types/permissions";
 import { models } from "../../../db/models";
 import { Context } from "../../../db/gql";
 import routes from "../../../endpoints/routes";
-import { disconnect } from "../../../db";
+import { disconnect, connect } from "../../../db";
 import gql from "graphql-tag";
 import { runQuery } from "../../../utils/testRunGqlQuery";
 
@@ -44,8 +44,8 @@ describe("device resolvers", () => {
 
   it.skip("run Query.device(filter)", async () => {
     const query = gql`
-      query device($name: String!) {
-        device(filter: { name: $name }) {
+      query device($filter: DeviceFilter!) {
+        device(filter: $filter) {
           id
           name
         }
@@ -110,7 +110,7 @@ describe("device resolvers", () => {
   });
 
   beforeAll(async () => {
-    await begin();
+    await connect();
     d1 = await new Device({ name: "d1" }).save();
   });
 

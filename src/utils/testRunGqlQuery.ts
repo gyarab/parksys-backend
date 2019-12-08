@@ -4,8 +4,9 @@ import { graphql } from "graphql";
 
 // TODO: Fix for integration tests
 export const runQuery = async (query, ctx = {}, variables = {}) => {
+  const tD = await getTypeDefs();
   const schema = makeExecutableSchema({
-    typeDefs: await getTypeDefs(),
+    typeDefs: tD,
     resolvers: resolvers
   });
   return graphql(schema, query, null, { ...ctx }, variables);

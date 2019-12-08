@@ -31,7 +31,7 @@ const corsOptions = {
 };
 
 // Compression
-// app.use(compression());
+app.use(compression());
 // CORS protection
 app.use(cors(corsOptions));
 // File upload middleware

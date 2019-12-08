@@ -64,7 +64,7 @@ function loadSchemaScalars() {
 let typeDefs = null;
 
 export const getTypeDefs = async () => {
-  if (typeDefs == null) {
+  if (typeDefs === null) {
     const rootSchema = gql`
       type Query
       type Mutation
@@ -92,8 +92,9 @@ export const constructGraphQLServer = async ():
   | never => {
   try {
     const isDev = process.env.NODE_ENV === "development";
+    const tDefs = await getTypeDefs();
     const apollo = new ApolloServer({
-      typeDefs: await getTypeDefs(),
+      typeDefs: tDefs,
       resolvers: resolvers,
       context({ req }: { req: PRequest<any> }): Context {
         return {
