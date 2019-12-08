@@ -69,7 +69,9 @@ const password: AsyncHandler = async (req, res, next) => {
       const {
         accessToken,
         refreshToken: { str: refreshToken, obj: refreshTokenObj }
-      } = await createTokenPair(aTokenData);
+      } = await createTokenPair(aTokenData, {
+        method: AuthenticationMethod.PASSWORD
+      });
       user.refreshTokens.push(refreshTokenObj);
       await user.save();
 

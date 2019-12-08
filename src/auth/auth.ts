@@ -10,6 +10,7 @@ import mongoose from "mongoose";
 import { NextFunction, Response } from "express";
 import { Resolver, ResolverWithPermissions } from "../db/gql";
 import { PRequest } from "../app";
+import { AuthenticationMethod } from "../types/authentication/authentication.model";
 
 const cryptSecret = config.get("security:cryptSecret");
 
@@ -116,6 +117,7 @@ export const hasPermissions = (
 
 export interface IRefreshTokenData {
   oid?: string;
+  method: AuthenticationMethod;
 }
 
 export interface IAccessTokenData {
@@ -132,7 +134,8 @@ export interface IAccessTokenData {
 }
 
 export const createTokenPair = async (
-  aTokenData: IAccessTokenData
+  aTokenData: IAccessTokenData,
+  rTokenData: IRefreshTokenData
 ): Promise<{
   accessToken: string;
   refreshToken: {
@@ -140,10 +143,10 @@ export const createTokenPair = async (
     obj: IRefreshTokenDocument;
   };
 }> => {
-  const refreshTokenDb = await new RefreshToken({}).save();
-  const rTokenData: IRefreshTokenData = {
-    oid: refreshTokenDb.id.toString()
-  };
+  const refreshTokenDb = await new RefreshToken({
+    method: rTokenData.method
+  }).save();
+  rTokenData.oid = refreshTokenDb.id.toString();
   const refreshTokenStr = createToken(cryptSecret, rTokenData);
 
   aTokenData.roid = refreshTokenDb.id.toString();

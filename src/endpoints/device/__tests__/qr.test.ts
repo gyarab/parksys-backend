@@ -5,6 +5,7 @@ import { disconnect } from "../../../db";
 import routes from "../../routes";
 import { Permission } from "../../../types/permissions";
 import { createTokenPair } from "../../../auth/auth";
+import { AuthenticationMethod } from "../../../types/authentication/authentication.model";
 
 const req = request(app);
 const QR_ENDPOINT = id => routes["devices/qr"].path.replace(":id", id);
@@ -42,12 +43,15 @@ describe("qr endpoint", () => {
 
   beforeAll(async () => {
     await begin();
-    validAccessToken = (await createTokenPair({
-      user: {
-        id: "",
-        permissions: [Permission.ALL]
-      }
-    })).accessToken;
+    validAccessToken = (await createTokenPair(
+      {
+        user: {
+          id: "",
+          permissions: [Permission.ALL]
+        }
+      },
+      { method: AuthenticationMethod.TEST }
+    )).accessToken;
     const d1 = await Device.create([
       {
         name: "d1"

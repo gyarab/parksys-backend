@@ -32,6 +32,12 @@ describe("password activation endpoint", () => {
       lodash.get(accessTokenBody, "device.permissions", undefined)
     ).toBeDefined();
 
+    // Check the refreshToken body
+    const [__, refreshTokenBody] = verifyToken(cryptSecret, refreshToken);
+    expect(lodash.get(refreshTokenBody, "method")).toBe(
+      AuthenticationMethod.ACTIVATION_PASSWORD
+    );
+
     // Device should be active now
     expect(respDevice.activated).toBe(true);
     expect(respDevice.refreshToken).toBeUndefined();

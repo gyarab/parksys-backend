@@ -7,6 +7,7 @@ import { verifyToken } from "../../../auth/jwt";
 import config from "../../../config";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
+import lodash from "lodash";
 
 const req = request(app);
 const LOGIN_ENDPOINT = routes["login/password"].path;
@@ -19,9 +20,22 @@ describe("password endpoint", () => {
       .send({ user: "user1", password: "1234" });
     expect(resp.status).toBe(200);
 
+    const { refreshToken, accessToken } = resp.body.data;
+
+    expect(verifyTokenPair(refreshToken, accessToken)).toBe(true);
+
+    // Check the accessToken body
+    const [_, accessTokenBody] = verifyToken(cryptSecret, accessToken);
+    expect(lodash.get(accessTokenBody, "user.id", undefined)).toBeDefined();
     expect(
-      verifyTokenPair(resp.body.data.refreshToken, resp.body.data.accessToken)
-    ).toBe(true);
+      lodash.get(accessTokenBody, "user.permissions", undefined)
+    ).toBeDefined();
+
+    // Check the refreshToken body
+    const [__, refreshTokenBody] = verifyToken(cryptSecret, refreshToken);
+    expect(lodash.get(refreshTokenBody, "method")).toBe(
+      AuthenticationMethod.PASSWORD
+    );
   });
 
   it("does not authenticate invalid users", async () => {

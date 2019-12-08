@@ -1,6 +1,16 @@
 import { RefreshToken } from "../refreshToken.model";
 
 describe("RefreshToken", () => {
+  it("has correct required files", () => {
+    const empty = new RefreshToken();
+
+    empty.validate(errors => {
+      expect(errors).not.toBeNull();
+      expect(errors.errors).toBeDefined();
+      expect(errors.errors.method).toBeDefined();
+    });
+  });
+
   it("virtual isRevoked returns the right value", () => {
     // Not revoked
     const rt1 = new RefreshToken({

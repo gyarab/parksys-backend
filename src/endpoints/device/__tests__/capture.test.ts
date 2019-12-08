@@ -6,6 +6,7 @@ import routes from "../../routes";
 import { Permission } from "../../../types/permissions";
 import { createTokenPair } from "../../../auth/auth";
 import path from "path";
+import { AuthenticationMethod } from "../../../types/authentication/authentication.model";
 
 const testImagePath = path.join(
   process.cwd(),
@@ -46,12 +47,17 @@ describe("capture endpoint", () => {
         }
       }
     ]);
-    const tokens = await createTokenPair({
-      device: {
-        id: devices[0].id,
-        permissions: [Permission.ALL]
+    const tokens = await createTokenPair(
+      {
+        device: {
+          id: devices[0].id,
+          permissions: [Permission.ALL]
+        }
+      },
+      {
+        method: AuthenticationMethod.TEST
       }
-    });
+    );
     validAccessToken = tokens.accessToken;
     devices[0].refreshToken = tokens.refreshToken.obj;
     await devices[0].save();

@@ -37,7 +37,16 @@ export interface ResolverWithPermissions extends Resolver {
 }
 
 // Inspired by https://github.com/FrontendMasters/intro-to-graphql
-const types = ["user", "refreshToken", "authentication", "device"];
+const types = [
+  "user",
+  "refreshToken",
+  "authentication",
+  "device",
+  "permissions",
+  "parkingSession",
+  "parkingRule",
+  "vehicle"
+];
 
 function loadSchemaFile(path: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -84,7 +93,24 @@ export const resolvers = _.merge(
   {},
   scalarResolvers,
   userResolvers,
-  deviceResolvers
+  deviceResolvers,
+  {
+    ParkingRule: {
+      __resolveType() {
+        return "ParkingRuleTimedFee";
+      }
+    },
+    VehicleSelector: {
+      __resolveType() {
+        return "VehicleFilter";
+      }
+    },
+    ParkingRuleSelector: {
+      __resolveType() {
+        return "ParkingRuleTimedFee";
+      }
+    }
+  }
 );
 
 export const constructGraphQLServer = async ():

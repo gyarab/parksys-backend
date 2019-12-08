@@ -7,8 +7,8 @@ describe("User", () => {
     const empty = new User();
 
     empty.validate(errors => {
-      expect(errors.errors.name).toBeDefined;
-      expect(errors.errors.email).toBeDefined;
+      expect(errors.errors.name).toBeDefined();
+      expect(errors.errors.email).toBeDefined();
     });
   });
 

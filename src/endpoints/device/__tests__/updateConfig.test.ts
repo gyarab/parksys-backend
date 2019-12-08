@@ -5,6 +5,7 @@ import { disconnect } from "../../../db";
 import routes from "../../routes";
 import { Permission } from "../../../types/permissions";
 import { createTokenPair } from "../../../auth/auth";
+import { AuthenticationMethod } from "../../../types/authentication/authentication.model";
 
 const req = request(app);
 const UPDATE_CONFIG_ENDPOINT = () => routes["devices/config"].path;
@@ -62,12 +63,17 @@ describe("updateConfig endpoint", () => {
       }
     ]);
     d1Id = devices[0].id;
-    const tokens = await createTokenPair({
-      device: {
-        id: d1Id,
-        permissions: [Permission.ALL]
+    const tokens = await createTokenPair(
+      {
+        device: {
+          id: d1Id,
+          permissions: [Permission.ALL]
+        }
+      },
+      {
+        method: AuthenticationMethod.TEST
       }
-    });
+    );
     validAccessToken = tokens.accessToken;
     devices[0].refreshToken = tokens.refreshToken.obj;
     await devices[0].save();

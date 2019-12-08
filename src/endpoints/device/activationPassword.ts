@@ -29,14 +29,19 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
   const {
     accessToken,
     refreshToken: { str: refreshToken, obj: refreshTokenObj }
-  } = await createTokenPair({
-    expiresAt:
-      new Date().getTime() + config.get("security:userAccessTokenDuration"),
-    device: {
-      id: device.id,
-      permissions: [Permission.ALL]
+  } = await createTokenPair(
+    {
+      expiresAt:
+        new Date().getTime() + config.get("security:userAccessTokenDuration"),
+      device: {
+        id: device.id,
+        permissions: [Permission.ALL]
+      }
+    },
+    {
+      method: AuthenticationMethod.ACTIVATION_PASSWORD
     }
-  });
+  );
 
   device.refreshToken = refreshTokenObj;
   await device.save();

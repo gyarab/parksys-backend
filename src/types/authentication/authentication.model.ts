@@ -4,7 +4,8 @@ interface IAuthenticationPayload {}
 
 enum AuthenticationMethod {
   PASSWORD = "PASSWORD",
-  ACTIVATION_PASSWORD = "ACTIVATION_PASSWORD" // One-use
+  ACTIVATION_PASSWORD = "ACTIVATION_PASSWORD", // One-use
+  TEST = "TEST"
 }
 
 interface IAuthenticationPayloadPassword extends IAuthenticationPayload {

@@ -13,6 +13,7 @@ import { disconnect } from "../../db";
 import mockReqRes from "mock-req-res";
 import { Context } from "../../db/gql";
 import { models } from "../../db/models";
+import { AuthenticationMethod } from "../../types/authentication/authentication.model";
 
 const cryptSecret = config.get("security:cryptSecret");
 const createReq = (authHeader: string) => {
@@ -22,12 +23,13 @@ const createReq = (authHeader: string) => {
     }
   };
 };
+const rTokenPayload = { method: AuthenticationMethod.TEST };
 
 describe("checkAuthenticationHeader", () => {
   it("should return correct results", async () => {
     const in10min = new Date(new Date().getTime() + 600 * 1000);
     // Ok token
-    const rt1 = await new RefreshToken({}).save();
+    const rt1 = await new RefreshToken(rTokenPayload).save();
     const token1 = `Bearer ${createToken(cryptSecret, {
       roid: rt1.id,
       a: 123,
@@ -43,7 +45,7 @@ describe("checkAuthenticationHeader", () => {
     const token2 = "Bearer abcd";
     expect(await checkAuthorizationHeader(createReq(token2))).toBeNull();
 
-    const rt3 = await new RefreshToken({}).save();
+    const rt3 = await new RefreshToken(rTokenPayload).save();
     const token3 = `What ${createToken(cryptSecret, {
       roid: rt3.id,
       b: { c: 456 }
@@ -52,7 +54,8 @@ describe("checkAuthenticationHeader", () => {
 
     // Valid token with an invalid or non-existent RefreshToken
     const rt4 = await new RefreshToken({
-      revokedAt: new Date() // now
+      revokedAt: new Date(), // now
+      ...rTokenPayload
     }).save();
     const token4 = `Bearer ${createToken(config.get("security:cryptSecret"), {
       roid: rt4.id,
@@ -67,7 +70,7 @@ describe("checkAuthenticationHeader", () => {
     })}`;
     expect(await checkAuthorizationHeader(createReq(token5))).toBeNull();
 
-    const rt6 = await new RefreshToken({}).save();
+    const rt6 = await new RefreshToken(rTokenPayload).save();
     const token6 = `Bearer ${createToken(cryptSecret, {
       roid: rt6.id,
       a: 123,
@@ -76,7 +79,7 @@ describe("checkAuthenticationHeader", () => {
     expect(await checkAuthorizationHeader(createReq(token6))).toBeNull();
 
     // Valid token without expiration
-    const rt7 = await new RefreshToken({}).save();
+    const rt7 = await new RefreshToken(rTokenPayload).save();
     const token7 = `Bearer ${createToken(cryptSecret, {
       roid: rt7.id
     })}`;

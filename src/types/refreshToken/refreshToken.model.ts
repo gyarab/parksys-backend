@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
+import { AuthenticationMethod } from "../authentication/authentication.model";
 
 interface IRefreshToken {
   revokedAt: Date;
+  method: AuthenticationMethod;
   isRevoked?: boolean;
 }
 
@@ -13,6 +15,11 @@ const RefreshTokenSchema = new mongoose.Schema({
   revokedAt: {
     type: Date,
     default: null
+  },
+  method: {
+    type: String,
+    required: true,
+    enum: Object.keys(AuthenticationMethod)
   }
 });
 
