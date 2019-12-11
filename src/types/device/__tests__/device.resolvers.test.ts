@@ -1,4 +1,3 @@
-import { begin } from "../../../app";
 import resolvers from "../device.resolvers";
 import { Device, IDeviceDocument } from "../device.model";
 import { Permission } from "../../../types/permissions";

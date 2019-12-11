@@ -12,7 +12,7 @@ const updateConfig: AsyncHandler<{ any }> = async (req, res, next) => {
   }
 
   if (typeof lodash.get(req.body, "config", undefined) === "object") {
-    device.config = req.body.config;
+    device.config = { ...device.config, ...req.body.config };
     await device.save();
     res.status(200).end();
   } else {

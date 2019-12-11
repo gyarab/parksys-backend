@@ -8,13 +8,13 @@ import routes from "../../endpoints/routes";
 import { Resolver } from "../../db/gql";
 
 // Query
-const devices = async (_, args, ctx) => {
+const devices: Resolver = async (_, args, ctx) => {
   const devices = await ctx.models.Device.find(args.filter);
   return devices;
 };
 
 // Mutation
-const addDevice = async (_, args, ctx) => {
+const addDevice: Resolver = async (_, args, ctx) => {
   return await new ctx.models.Device(args.input).save();
 };
 

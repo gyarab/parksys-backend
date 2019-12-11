@@ -40,6 +40,7 @@ const password: AsyncHandler = async (req, res, next) => {
     return next();
   }
 
+  // Loop over every PASSWORD authentication
   for (const auth of user.authentications.filter(
     auth => auth.method == AuthenticationMethod.PASSWORD
   )) {
@@ -52,8 +53,7 @@ const password: AsyncHandler = async (req, res, next) => {
       res.status(500).end();
       return next(new Error(msg));
     }
-    const salt = auth.payload["s"];
-    const hash = auth.payload["h"];
+    const { s: salt, h: hash } = auth.payload;
 
     const hashResult = await hashPassword(password, salt);
     if (hash === hashResult) {
