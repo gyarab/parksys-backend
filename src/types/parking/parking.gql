@@ -1,0 +1,87 @@
+type Check {
+  time: DateTime!
+  image: URL
+}
+
+type ParkingSession {
+  id: ID!
+  active: Boolean!
+  checkIn: Check!
+  checkOut: Check
+  vehicle: Vehicle!
+  appliedRules: [ParkingRule!]!
+  finalFee: NonNegativeInt
+}
+
+# ParkingRuleGroup (not yet) and all implementations of ParkingRule
+union ParkingRuleSelector = ParkingRulePermitAccess | ParkingRuleTimedFee
+
+enum VehicleFilterAction {
+  EXCLUDE
+  INCLUDE
+}
+
+# Filter for ParkingRules.
+type VehicleFilter {
+  id: ID!
+  name: String!
+  action: VehicleFilterAction!
+  vehicles: [Vehicle!]!
+  """
+  Relationships form a tree. VehicleFilter overrides previous VehicleFilters.
+  """
+  inheritsFrom: [VehicleSelector!]!
+}
+
+enum VehicleSelectorEnum {
+  ALL
+  NONE
+}
+
+# Wrapper around VehicleSelectorEnum.
+type VehicleSelectorSingleton {
+  value: VehicleSelectorEnum!
+}
+
+union VehicleSelector = VehicleFilter | VehicleSelectorSingleton
+
+interface ParkingRule {
+  id: ID!
+  name: String!
+  vehicles: [VehicleSelector!]!
+}
+
+# TODO: Solve periodic assignments
+type ParkingRuleAssignment {
+  rule: ParkingRule!
+  from: DateTime
+  until: DateTime
+  """
+  Relationships form a tree.
+  """
+  hasLowerPriorityThan: [ParkingRuleSelector!]!
+  """
+  Relationships form a tree.
+  """
+  hasHigherPriorityThan: [ParkingRuleSelector!]!
+}
+
+enum ParkingTimeUnit {
+  MINUTE
+  HOUR
+}
+
+type ParkingRuleTimedFee implements ParkingRule {
+  id: ID!
+  name: String!
+  vehicles: [VehicleSelector!]!
+  centsPerUnitTime: NonNegativeInt!
+  unitTime: ParkingTimeUnit!
+}
+
+type ParkingRulePermitAccess implements ParkingRule {
+  id: ID!
+  name: String!
+  vehicles: [VehicleSelector!]!
+  permit: Boolean!
+}

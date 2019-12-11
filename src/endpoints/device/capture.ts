@@ -13,13 +13,11 @@ const getLprResult = (file: any): Promise<LicensePlateRecognitionResult> => {
       sharp(file.data)
         .resize(1000, 1000)
         .toFile(fname)
-        .then(info => {
+        .then(_ => {
           lpr
             .recognizeLicensePlate(fname)
             .then(result => {
-              // Handle result
               removeTmpFile();
-              // console.log(result);
               resolve(result);
             })
             .catch(err => reject(err));
@@ -49,16 +47,12 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
   if (req.files == null) return next();
   const files = req.files;
 
-  getLprResult(files[Object.keys(files)[0]])
-    .then(result => {
-      // Handle result, based on device mode, etc. do stuff
-      // console.log(result);
-      return next();
-    })
-    .catch(err => {
-      console.error(err);
-      return next(err);
-    });
+  try {
+    const result = await getLprResult(files[Object.keys(files)[0]]);
+    // console.log(result);
+  } catch (err) {
+    return next(err);
+  }
 };
 
 export default capture;

@@ -26,12 +26,20 @@ const normalDisconnect = async () => {
   await mongoose.disconnect();
 };
 
+const memConnect = async () => {
+  await mem.connect(options);
+};
+
+const memDisconnect = async () => {
+  await mem.closeDatabase();
+};
+
 let connect: () => Promise<any>;
 let disconnect: () => Promise<any>;
 
 if (process.env.NODE_ENV === "test") {
-  connect = async () => await mem.connect(options);
-  disconnect = mem.closeDatabase;
+  connect = memConnect;
+  disconnect = memDisconnect;
 } else {
   connect = normalConnect;
   disconnect = normalDisconnect;

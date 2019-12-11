@@ -43,8 +43,7 @@ const types = [
   "authentication",
   "device",
   "permissions",
-  "parkingSession",
-  "parkingRule",
+  "parking",
   "vehicle"
 ];
 

@@ -1,19 +1,20 @@
 import {
   RefreshTokenName,
-  IRefreshToken
+  IRefreshTokenDocument
 } from "../refreshToken/refreshToken.model";
 import {
   AuthenticationSchema,
-  IAuthentication
+  IAuthenticationDocument
 } from "../authentication/authentication.model";
 import mongoose from "mongoose";
+import { Permission } from "../permissions";
 
 interface IUser {
   name: string;
   email: string;
   permissions?: string[];
-  authentications?: IAuthentication<any>[];
-  refreshTokens?: IRefreshToken[];
+  authentications?: IAuthenticationDocument[];
+  refreshTokens?: IRefreshTokenDocument[];
 }
 
 interface IUserDocument extends mongoose.Document, IUser {}
@@ -36,7 +37,8 @@ const UserSchema = new mongoose.Schema({
   permissions: [
     {
       type: String,
-      required: true
+      required: true,
+      enum: Object.keys(Permission)
     }
   ],
   authentications: [AuthenticationSchema],

@@ -8,8 +8,8 @@
     "dev:watch": "NODE_ENV=development concurrently \"npm:compile:watch\" \"npm:start\"",
     "dev": "NODE_ENV=development npm run start",
     "start": "nodemon dist/index.js -e ts",
-    "test": "jest --detectOpenHandles --forceExit --runInBand",
-    "test:cov": "jest --detectOpenHandles --forceExit --runInBand --collectCoverage",
+    "test": "jest",
+    "test:cov": "jest --collectCoverage",
     "dbSetup": "bash scripts/setup-mongo.sh",
     "dbStart": "bash scripts/start-mongo.sh",
     "dbStop": "bash scripts/stop-mongo.sh"

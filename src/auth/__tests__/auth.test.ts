@@ -26,6 +26,9 @@ const createReq = (authHeader: string) => {
 const rTokenPayload = { method: AuthenticationMethod.TEST };
 
 describe("checkAuthenticationHeader", () => {
+  beforeAll(begin);
+  afterAll(disconnect);
+
   it("should return correct results", async () => {
     const in10min = new Date(new Date().getTime() + 600 * 1000);
     // Ok token
@@ -86,15 +89,6 @@ describe("checkAuthenticationHeader", () => {
     expect(await checkAuthorizationHeader(createReq(token7))).toStrictEqual({
       roid: rt7.id
     });
-  });
-
-  beforeAll(async () => {
-    await begin();
-  });
-
-  afterAll(async () => {
-    await RefreshToken.remove({});
-    await disconnect();
   });
 });
 
