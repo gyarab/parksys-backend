@@ -11,7 +11,6 @@ describe("model ParkingSession", () => {
       await session1.validate();
       fail("expected an error");
     } catch (err) {
-      expect(err).not.toBeNull();
       expect(err.errors.vehicle).toBeDefined();
     }
   });

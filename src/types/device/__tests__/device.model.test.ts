@@ -3,11 +3,14 @@ import { RefreshTokenName } from "../../refreshToken/refreshToken.model";
 import lodash from "lodash";
 
 describe("Device", () => {
-  it("has correct required fields", () => {
+  it("has correct required fields", async () => {
     const empty = new Device();
-    empty.validate(errors => {
-      expect(errors.errors.name).toBeDefined();
-    });
+    try {
+      await empty.validate();
+      fail("expected an error");
+    } catch (err) {
+      expect(err.errors.name).toBeDefined();
+    }
   });
 
   it("has correct defaults", () => {

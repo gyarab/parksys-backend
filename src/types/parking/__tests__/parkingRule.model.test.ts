@@ -20,9 +20,11 @@ describe("model ParkingRule", () => {
         filter: "5deeaed22ac8dd0db99c9d8a"
       }
     });
-    rule1.validate(err => {
-      expect(err).toBeNull();
-    });
+    try {
+      await rule1.validate();
+    } catch (err) {
+      fail(err);
+    }
 
     const rule2 = new ParkingRule({
       name: "rule2",
@@ -30,9 +32,11 @@ describe("model ParkingRule", () => {
         singleton: VehicleSelectorEnum.ALL
       }
     });
-    rule2.validate(err => {
-      expect(err).toBeNull();
-    });
+    try {
+      await rule2.validate();
+    } catch (err) {
+      fail(err);
+    }
 
     // Both fields are not allowed
     const rule3 = new ParkingRule({
@@ -42,19 +46,23 @@ describe("model ParkingRule", () => {
         filter: "5deeaed22ac8dd0db99c9d8a"
       }
     });
-    rule3.validate(err => {
-      expect(err).not.toBeNull();
+    try {
+      await rule3.validate();
+      fail("expected an error");
+    } catch (err) {
       expect(err.errors["vehicles.singleton"]).toBeDefined();
       expect(err.errors["vehicles.filter"]).toBeDefined();
-    });
+    }
 
     // None of the fields is not allowed either
     const rule4 = new ParkingRule({});
-    rule4.validate(err => {
-      expect(err).not.toBeNull();
+    try {
+      await rule4.validate();
+      fail("expected an error");
+    } catch (err) {
       expect(err.errors["vehicles.singleton"]).toBeDefined();
       expect(err.errors["vehicles.filter"]).toBeDefined();
-    });
+    }
   });
 
   // Discriminators
@@ -79,7 +87,6 @@ describe("model ParkingRule", () => {
         await rule2.validate();
         fail("expected an error");
       } catch (err) {
-        expect(err).not.toBeNull();
         expect(err.errors.unitTime).toBeDefined();
         expect(err.errors.centsPerUnitTime).toBeDefined();
       }
@@ -106,7 +113,6 @@ describe("model ParkingRule", () => {
         await rule2.validate();
         fail("expected an error");
       } catch (err) {
-        expect(err).not.toBeNull();
         expect(err.errors.permit).toBeDefined();
       }
     });

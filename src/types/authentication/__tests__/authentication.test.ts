@@ -1,30 +1,38 @@
 import { Authentication, AuthenticationMethod } from "../authentication.model";
 
 describe("Authentication", () => {
-  it("has correct required fields", () => {
+  it("has correct required fields", async () => {
     const empty = new Authentication();
 
-    empty.validate(errors => {
-      expect(errors.errors.payload).toBeDefined();
-      expect(errors.errors.method).toBeDefined();
-    });
+    try {
+      await empty.validate();
+      fail("expected an error");
+    } catch (err) {
+      expect(err.errors.payload).toBeDefined();
+      expect(err.errors.method).toBeDefined();
+    }
   });
 
-  it("method enum", () => {
+  it("method enum", async () => {
     const password = new Authentication({
       payload: "{}",
       method: AuthenticationMethod.PASSWORD
     });
-    password.validate(errors => {
-      expect(errors).toBeNull;
-    });
+    try {
+      await password.validate();
+    } catch (err) {
+      fail(err);
+    }
 
     const nada = new Authentication({
       payload: "{}",
       method: "..."
     });
-    nada.validate(errors => {
-      expect(errors.errors.method).toBeDefined();
-    });
+    try {
+      await nada.validate();
+      fail("expected an error");
+    } catch (err) {
+      expect(err.errors.method).toBeDefined();
+    }
   });
 });

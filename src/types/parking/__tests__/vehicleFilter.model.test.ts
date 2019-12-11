@@ -18,7 +18,6 @@ describe("model VehicleFilter", () => {
       await vf2.validate();
       fail("expected an error");
     } catch (err) {
-      expect(err).not.toBeNull();
       expect(err.errors.name).toBeDefined();
     }
   });
@@ -29,7 +28,7 @@ describe("model VehicleFilter", () => {
       await filter1.save();
       fail("expected an error");
     } catch (err) {
-      expect(err).not.toBeNull();
+      expect(err.message).toBe("Cyclic VehicleFilter dependency found");
     }
   });
 

@@ -1,14 +1,16 @@
 import { RefreshToken } from "../refreshToken.model";
 
 describe("RefreshToken", () => {
-  it("has correct required files", () => {
+  it("has correct required files", async () => {
     const empty = new RefreshToken();
 
-    empty.validate(errors => {
-      expect(errors).not.toBeNull();
-      expect(errors.errors).toBeDefined();
-      expect(errors.errors.method).toBeDefined();
-    });
+    try {
+      await empty.validate();
+      fail("expected an error");
+    } catch (err) {
+      expect(err.errors).toBeDefined();
+      expect(err.errors.method).toBeDefined();
+    }
   });
 
   it("virtual isRevoked returns the right value", () => {

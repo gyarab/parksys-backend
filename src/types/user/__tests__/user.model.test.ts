@@ -3,13 +3,16 @@ import lodash from "lodash";
 import { RefreshTokenName } from "../../refreshToken/refreshToken.model";
 
 describe("User", () => {
-  it("has correct required fields", () => {
+  it("has correct required fields", async () => {
     const empty = new User();
 
-    empty.validate(errors => {
-      expect(errors.errors.name).toBeDefined();
-      expect(errors.errors.email).toBeDefined();
-    });
+    try {
+      await empty.validate();
+      fail("expected an error");
+    } catch (err) {
+      expect(err.errors.name).toBeDefined();
+      expect(err.errors.email).toBeDefined();
+    }
   });
 
   it("refreshTokens are references", () => {
