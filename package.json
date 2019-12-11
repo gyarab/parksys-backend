@@ -9,6 +9,7 @@
     "dev": "NODE_ENV=development npm run start",
     "start": "nodemon dist/index.js -e ts",
     "test": "jest",
+    "test:ci": "jest --detectOpenHandles --forceExit --collectCoverage --testPathIgnorePatterns \"src/apis/lpr\"",
     "test:cov": "jest --collectCoverage",
     "dbSetup": "bash scripts/setup-mongo.sh",
     "dbStart": "bash scripts/start-mongo.sh",

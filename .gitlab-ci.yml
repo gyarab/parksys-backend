@@ -8,4 +8,4 @@ test:
   script:
     - npm install --silent
     - npm run compile
-    - npm run test
+    - npm run test:ci
