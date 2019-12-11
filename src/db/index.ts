@@ -31,7 +31,7 @@ const memConnect = async () => {
 };
 
 const memDisconnect = async () => {
-  await mem.closeDatabase();
+  await mem.softCloseDatabase();
 };
 
 let connect: () => Promise<any>;

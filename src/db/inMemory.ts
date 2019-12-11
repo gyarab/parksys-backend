@@ -21,8 +21,9 @@ export const connect = async (options: mongoose.ConnectionOptions = {}) => {
   await mongoose.connect(uri, mongooseOpts);
 };
 
-export const clearDatabase = async () => {
+export const softCloseDatabase = async () => {
   await mongoose.connection.dropDatabase();
+  await mongoose.connection.close();
 };
 
 /**
