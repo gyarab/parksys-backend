@@ -1,7 +1,7 @@
 import { begin } from "../../../app";
 import { disconnect } from "../../../db";
 import resolvers from "../user.resolvers";
-import { User, IUserDocument } from "../user.model";
+import { User, IUser } from "../user.model";
 import { Permission } from "../../permissions";
 import {
   Authentication,
@@ -10,8 +10,8 @@ import {
 import { models } from "../../../db/models";
 
 describe("user query resolvers", () => {
-  let user1: IUserDocument;
-  let user2: IUserDocument;
+  let user1: IUser;
+  let user2: IUser;
   it("currentUser", async () => {
     const user = await resolvers.Query.currentUser(null, null, {
       token: {

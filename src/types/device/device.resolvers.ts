@@ -1,7 +1,4 @@
-import {
-  defaultActivationPasswordGenerator,
-  IDeviceDocument
-} from "./device.model";
+import { defaultActivationPasswordGenerator, IDevice } from "./device.model";
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { Permission } from "../../types/permissions";
 import routes from "../../endpoints/routes";
@@ -26,11 +23,11 @@ const regenerateActivationPassword: Resolver = async (_, args, ctx) => {
 };
 
 // Device
-const activationQrUrl = (device: IDeviceDocument) => {
+const activationQrUrl = (device: IDevice) => {
   return routes["devices/qr"].path.replace(":id", device.id);
 };
 
-const activationPasswordExpiresAt = (obj: IDeviceDocument) => {
+const activationPasswordExpiresAt = (obj: IDevice) => {
   return obj.activationPassword.payload.expiresAt;
 };
 

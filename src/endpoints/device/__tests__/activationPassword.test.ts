@@ -2,7 +2,7 @@ import request from "supertest";
 import { app, begin } from "../../../app";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
-import { Device, IDeviceDocument } from "../../../types/device/device.model";
+import { Device, IDevice } from "../../../types/device/device.model";
 import { verifyTokenPair } from "../../login/__tests__/password.test";
 import { AuthenticationMethod } from "../../../types/authentication/authentication.model";
 import lodash from "lodash";
@@ -42,7 +42,7 @@ describe("password activation endpoint", () => {
     expect(respDevice.activated).toBe(true);
     expect(respDevice.refreshToken).toBeUndefined();
     expect(respDevice.activationPassword).toBeUndefined();
-    const dbDevice: IDeviceDocument = await Device.findById(respDevice.id);
+    const dbDevice: IDevice = await Device.findById(respDevice.id);
     expect(dbDevice.activated).toBe(true);
   });
 
@@ -63,7 +63,7 @@ describe("password activation endpoint", () => {
   beforeAll(async () => {
     await begin();
     // Create any required models
-    const devices: IDeviceDocument[] = await Device.create([
+    const devices: IDevice[] = await Device.create([
       {
         name: "d1"
       },

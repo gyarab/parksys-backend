@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import config from "../../config";
-import { User, IUserDocument } from "../../types/user/user.model";
+import { User, IUser } from "../../types/user/user.model";
 import { AuthenticationMethod } from "../../types/authentication/authentication.model";
 import { createTokenPair, IAccessTokenData } from "../../auth/auth";
 import { AsyncHandler } from "../../app";
@@ -29,7 +29,7 @@ const password: AsyncHandler = async (req, res, next) => {
     res.status(401).end();
     return next();
   }
-  let user: IUserDocument = await User.findOne({
+  let user: IUser = await User.findOne({
     $or: [{ name: userName }, { email: userName }],
     authentications: { $elemMatch: { method: AuthenticationMethod.PASSWORD } }
   });

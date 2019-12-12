@@ -19,20 +19,15 @@ interface IAuthenticationPayloadActivationPassword
   expiresAt: Date;
 }
 
-interface IAuthentication<T extends IAuthenticationPayload> {
+interface IAuthentication<T extends IAuthenticationPayload = any>
+  extends mongoose.Document {
   payload: T;
   method: AuthenticationMethod;
 }
 
-interface IAuthenticationDocument
-  extends mongoose.Document,
-    IAuthentication<any> {}
-
 const AuthenticationName = "Authentication";
 
-const AuthenticationSchema: mongoose.Schema<
-  IAuthenticationDocument
-> = new mongoose.Schema(
+const AuthenticationSchema = new mongoose.Schema(
   {
     payload: {
       type: Object,
@@ -47,7 +42,7 @@ const AuthenticationSchema: mongoose.Schema<
   { _id: false, id: false }
 );
 
-const Authentication = mongoose.model<IAuthenticationDocument>(
+const Authentication = mongoose.model<IAuthentication<any>>(
   AuthenticationName,
   AuthenticationSchema
 );
@@ -57,7 +52,6 @@ export {
   Authentication,
   AuthenticationName,
   AuthenticationMethod,
-  IAuthenticationDocument,
   IAuthentication,
   IAuthenticationPayload,
   IAuthenticationPayloadPassword,

@@ -1,5 +1,5 @@
 import request from "supertest";
-import { Device, IDeviceDocument } from "../../../types/device/device.model";
+import { Device, IDevice } from "../../../types/device/device.model";
 import { app, begin } from "../../../app";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
@@ -36,7 +36,7 @@ describe("capture endpoint", () => {
 
   beforeAll(async () => {
     await begin();
-    const devices: IDeviceDocument[] = await Device.create([
+    const devices: IDevice[] = await Device.create([
       {
         name: "d1",
         shouldSendConfig: true,

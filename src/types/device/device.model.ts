@@ -3,7 +3,8 @@ import {
   IAuthentication,
   AuthenticationSchema,
   AuthenticationMethod,
-  IAuthenticationPayloadActivationPassword
+  IAuthenticationPayloadActivationPassword,
+  Authentication
 } from "../authentication/authentication.model";
 import crypto from "crypto";
 import {
@@ -20,7 +21,7 @@ export const generateDeviceActivationPassword: (
 ) => {
   // Hex string length = 2 * nBytes
   const generateDeviceActivationPassword = () => {
-    const token: IAuthentication<IAuthenticationPayloadActivationPassword> = {
+    const token = new Authentication({
       payload: {
         password: crypto.randomBytes(n).toString("hex"),
         expiresAt: new Date(
@@ -29,13 +30,13 @@ export const generateDeviceActivationPassword: (
         )
       },
       method: AuthenticationMethod.ACTIVATION_PASSWORD
-    };
+    });
     return token;
   };
   return generateDeviceActivationPassword;
 };
 
-interface IDevice {
+interface IDevice extends mongoose.Document {
   name: string;
   activated: boolean;
   activatedAt: Date;
@@ -45,8 +46,6 @@ interface IDevice {
   shouldSendConfig: boolean;
   defaultActivationPasswordGenerator: string;
 }
-
-interface IDeviceDocument extends mongoose.Document, IDevice {}
 
 const DeviceName = "Device";
 
@@ -104,13 +103,12 @@ const DeviceSchema = new mongoose.Schema(
 
 DeviceSchema.statics.defaultActivationPasswordGenerator = defaultActivationPasswordGenerator;
 
-const Device = mongoose.model<IDeviceDocument>(DeviceName, DeviceSchema);
+const Device = mongoose.model<IDevice>(DeviceName, DeviceSchema);
 
 export {
   DeviceSchema,
   Device,
   DeviceName,
   IDevice,
-  IDeviceDocument,
   defaultActivationPasswordGenerator
 };

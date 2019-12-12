@@ -1,23 +1,21 @@
 import {
   RefreshTokenName,
-  IRefreshTokenDocument
+  IRefreshToken
 } from "../refreshToken/refreshToken.model";
 import {
   AuthenticationSchema,
-  IAuthenticationDocument
+  IAuthentication
 } from "../authentication/authentication.model";
 import mongoose from "mongoose";
 import { Permission } from "../permissions";
 
-interface IUser {
+interface IUser extends mongoose.Document {
   name: string;
   email: string;
   permissions?: string[];
-  authentications?: IAuthenticationDocument[];
-  refreshTokens?: IRefreshTokenDocument[];
+  authentications?: IAuthentication<any>["_id"][];
+  refreshTokens?: IRefreshToken["_id"][];
 }
-
-interface IUserDocument extends mongoose.Document, IUser {}
 
 const UserName = "User";
 
@@ -50,6 +48,6 @@ const UserSchema = new mongoose.Schema({
   ]
 });
 
-const User = mongoose.model<IUserDocument>(UserName, UserSchema);
+const User = mongoose.model<IUser>(UserName, UserSchema);
 
-export { User, UserSchema, UserName, IUserDocument, IUser };
+export { User, UserSchema, UserName, IUser };

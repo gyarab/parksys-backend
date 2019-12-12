@@ -5,23 +5,26 @@ import path from "path";
 import fs from "fs";
 import userResolvers from "../types/user/user.resolvers";
 import deviceResolvers from "../types/device/device.resolvers";
+import vehicleFilterResolvers from "../types/parking/vehicleFilter.resolvers";
 import { Permission } from "../types/permissions";
 import { PRequest } from "../app";
 import { resolvers as scalarResolvers } from "graphql-scalars";
 import { Model } from "mongoose";
-import { IUserDocument } from "../types/user/user.model";
-import { IDeviceDocument } from "../types/device/device.model";
-import { IRefreshTokenDocument } from "../types/refreshToken/refreshToken.model";
-import { IAuthenticationDocument } from "../types/authentication/authentication.model";
+import { IUser } from "../types/user/user.model";
+import { IDevice } from "../types/device/device.model";
+import { IRefreshToken } from "../types/refreshToken/refreshToken.model";
+import { IAuthentication } from "../types/authentication/authentication.model";
 import { models } from "./models";
 import gql from "graphql-tag";
+import { IVehicleFilter } from "../types/parking/vehicleFilter.model";
 
 export type Context = Pick<PRequest<any>, "token"> & {
   models: {
-    User: Model<IUserDocument, {}>;
-    Device: Model<IDeviceDocument, {}>;
-    RefreshToken: Model<IRefreshTokenDocument, {}>;
-    Authentication: Model<IAuthenticationDocument, {}>;
+    User: Model<IUser, {}>;
+    Device: Model<IDevice, {}>;
+    RefreshToken: Model<IRefreshToken, {}>;
+    Authentication: Model<IAuthentication, {}>;
+    VehicleFilter: Model<IVehicleFilter, {}>;
   };
 };
 
@@ -93,6 +96,7 @@ export const resolvers = _.merge(
   scalarResolvers,
   userResolvers,
   deviceResolvers,
+  vehicleFilterResolvers,
   {
     ParkingRule: {
       __resolveType() {

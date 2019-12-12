@@ -30,7 +30,19 @@ type VehicleFilter {
   """
   Relationships form a tree. VehicleFilter overrides previous VehicleFilters.
   """
-  inheritsFrom: [VehicleSelector!]!
+  inheritsFrom: VehicleSelector
+}
+
+input VehicleFilterCreateInput {
+  name: String!
+  action: VehicleFilterAction!
+  inheritsFrom: ID
+}
+
+input VehicleFilterUpdateInput {
+  name: String
+  action: VehicleFilterAction
+  inheritsFrom: ID
 }
 
 enum VehicleSelectorEnum {
@@ -84,4 +96,9 @@ type ParkingRulePermitAccess implements ParkingRule {
   name: String!
   vehicles: [VehicleSelector!]!
   permit: Boolean!
+}
+
+extend type Mutation {
+  createVehicleFilter(input: VehicleFilterCreateInput!): VehicleFilter!
+  updateVehicleFilter(id: ID!, input: VehicleFilterUpdateInput!): VehicleFilter!
 }

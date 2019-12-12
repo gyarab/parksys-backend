@@ -1,4 +1,4 @@
-import { User, IUserDocument } from "./user.model";
+import { IUser } from "./user.model";
 import lodash from "lodash";
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { Permission } from "../permissions";
@@ -19,7 +19,7 @@ const users: Resolver = async (_, { filter }, ctx) => {
 };
 
 // User
-const authentications: Resolver = (obj: IUserDocument, _, ctx) => {
+const authentications: Resolver = (obj: IUser, _, ctx) => {
   const uid = lodash.get(ctx, "token.user.id");
   const permissions: Array<String> = lodash.get(
     ctx,

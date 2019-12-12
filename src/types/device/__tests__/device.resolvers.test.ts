@@ -1,5 +1,5 @@
 import resolvers from "../device.resolvers";
-import { Device, IDeviceDocument } from "../device.model";
+import { Device, IDevice } from "../device.model";
 import { Permission } from "../../../types/permissions";
 import { models } from "../../../db/models";
 import { Context } from "../../../db/gql";
@@ -18,7 +18,7 @@ describe("device resolvers", () => {
     },
     models
   };
-  let d1: IDeviceDocument = null;
+  let d1: IDevice = null;
 
   it("Query.device(filter)", async () => {
     const devices = await resolvers.Query.devices(

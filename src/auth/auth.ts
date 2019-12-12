@@ -4,7 +4,7 @@ import { Permission } from "../types/permissions";
 import lodash from "lodash";
 import {
   RefreshToken,
-  IRefreshTokenDocument
+  IRefreshToken
 } from "../types/refreshToken/refreshToken.model";
 import mongoose from "mongoose";
 import { NextFunction, Response } from "express";
@@ -140,7 +140,7 @@ export const createTokenPair = async (
   accessToken: string;
   refreshToken: {
     str: string;
-    obj: IRefreshTokenDocument;
+    obj: IRefreshToken;
   };
 }> => {
   const refreshTokenDb = await new RefreshToken({
