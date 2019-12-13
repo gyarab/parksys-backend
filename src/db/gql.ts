@@ -8,22 +8,25 @@ import deviceResolvers from "../types/device/device.resolvers";
 import vehicleFilterResolvers from "../types/parking/vehicleFilter.resolvers";
 import parkingRuleResolvers from "../types/parking/parkingRule.resolvers";
 import vehicleSelectorResolvers from "../types/parking/vehicleSelector.resolvers";
+import vehicleResolvers from "../types/vehicle/vehicle.resolvers";
 import { Permission } from "../types/permissions";
 import { PRequest } from "../app";
 import { resolvers as scalarResolvers } from "graphql-scalars";
 import { Model } from "mongoose";
+import { models } from "./models";
 import { IUser } from "../types/user/user.model";
 import { IDevice } from "../types/device/device.model";
 import { IRefreshToken } from "../types/refreshToken/refreshToken.model";
 import { IAuthentication } from "../types/authentication/authentication.model";
-import { models } from "./models";
 import gql from "graphql-tag";
 import { IVehicleFilter } from "../types/parking/vehicleFilter.model";
+import { IVehicleSelector } from "../types/parking/vehicleSelector.model";
 import {
   IParkingRule,
   IParkingRuleTimedFee,
   IParkingRulePermitAccess
 } from "../types/parking/parkingRule.model";
+import { IVehicle } from "../types/vehicle/vehicle.model";
 
 export type Context = Pick<PRequest<any>, "token"> & {
   models: {
@@ -35,6 +38,8 @@ export type Context = Pick<PRequest<any>, "token"> & {
     ParkingRule: Model<IParkingRule, {}>;
     ParkingRuleTimedFee: Model<IParkingRuleTimedFee, {}>;
     ParkingRulePermitAccess: Model<IParkingRulePermitAccess, {}>;
+    Vehicle: Model<IVehicle, {}>;
+    VehicleSelector: Model<IVehicleSelector, {}>;
   };
 };
 
@@ -106,20 +111,11 @@ export const resolvers = _.merge(
   scalarResolvers,
   userResolvers,
   deviceResolvers,
+  vehicleResolvers,
   vehicleFilterResolvers,
   vehicleSelectorResolvers,
   parkingRuleResolvers,
   {
-    ParkingRule: {
-      __resolveType() {
-        return "ParkingRuleTimedFee";
-      }
-    },
-    VehicleSelector: {
-      __resolveType() {
-        return "VehicleFilter";
-      }
-    },
     ParkingRuleSelector: {
       __resolveType() {
         return "ParkingRuleTimedFee";

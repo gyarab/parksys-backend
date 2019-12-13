@@ -38,8 +38,7 @@ input VehicleFilterCreateInput {
 input VehicleFilterUpdateInput {
   name: String
   action: VehicleFilterAction
-  addVehicles: [ID!]
-  removeVehicles: [ID!]
+  vehicles: [ID!]
 }
 
 enum VehicleSelectorEnum {
@@ -95,11 +94,38 @@ type ParkingRulePermitAccess implements ParkingRule {
   permit: Boolean!
 }
 
+input VehicleSelectorInput {
+  filter: ID
+  singleton: VehicleSelectorEnum
+}
+
+input ParkingRulePermitAccessCreateInput {
+  name: String!
+  permit: Boolean!
+  vehicles: [VehicleSelectorInput!]
+}
+
+input ParkingRulePermitAccessUpdateInput {
+  name: String
+  permit: Boolean
+  vehicles: [VehicleSelectorInput!]
+  # addVehicles: [VehicleSelector!]
+  # removeVehicles: [VehicleSelector!]
+}
+
 extend type Query {
   rules: [ParkingRule!]
+  vehicleFilters: [VehicleFilter!]
 }
 
 extend type Mutation {
   createVehicleFilter(input: VehicleFilterCreateInput!): VehicleFilter!
   updateVehicleFilter(id: ID!, input: VehicleFilterUpdateInput!): VehicleFilter!
+  createParkingRulePermitAccess(
+    input: ParkingRulePermitAccessCreateInput!
+  ): ParkingRulePermitAccess!
+  updateParkingRulePermitAccess(
+    id: ID!
+    input: ParkingRulePermitAccessUpdateInput!
+  ): ParkingRulePermitAccess!
 }

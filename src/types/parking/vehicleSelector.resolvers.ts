@@ -1,8 +1,8 @@
 export default {
   VehicleSelector: {
     __resolveType(obj) {
-      if (!!obj.filter) return "VehicleFilter";
-      return "VehicleSelectorSingleton";
+      if (!!obj.value) return "VehicleSelectorSingleton";
+      return "VehicleFilter";
     }
   }
 };

@@ -1,6 +1,18 @@
 type Vehicle {
   id: ID!
   licensePlate: String!
-  parkingSessions: [ParkingSession!]!
-  totalPaidCents: NonNegativeInt!
+  parkingSessions: [ParkingSession!]
+  totalPaidCents: NonNegativeInt
+}
+
+input VehicleCreateInput {
+  licensePlate: String!
+}
+
+extend type Query {
+  vehicles: [Vehicle!]
+}
+
+extend type Mutation {
+  createVehicle(input: VehicleCreateInput!): Vehicle!
 }
