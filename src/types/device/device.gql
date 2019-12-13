@@ -24,6 +24,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  addDevice(input: NewDeviceInput!): Device!
-  regenerateActivationPassword(id: ID!): Device
+  createDevice(input: NewDeviceInput!): Device!
+  deviceRegenerateActivationPassword(id: ID!): Device!
+  deleteDevice(id: ID!): Device!
 }

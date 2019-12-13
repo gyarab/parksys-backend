@@ -11,15 +11,19 @@ const devices: Resolver = async (_, args, ctx) => {
 };
 
 // Mutation
-const addDevice: Resolver = async (_, args, ctx) => {
+const createDevice: Resolver = async (_, args, ctx) => {
   return await new ctx.models.Device(args.input).save();
 };
 
-const regenerateActivationPassword: Resolver = async (_, args, ctx) => {
+const deviceRegenerateActivationPassword: Resolver = async (_, args, ctx) => {
   const device = await ctx.models.Device.findById(args.id);
   if (!device) return null;
   device.activationPassword = defaultActivationPasswordGenerator();
   return await device.save();
+};
+
+const deleteDevice: Resolver = async (_, args, ctx) => {
+  return await ctx.models.Device.findByIdAndRemove(args.id);
 };
 
 // Device
@@ -33,14 +37,18 @@ const activationPasswordExpiresAt = (obj: IDevice) => {
 
 export default {
   Query: {
-    devices: checkPermissionsGqlBuilder([Permission.ALL], devices)
+    devices: checkPermissionsGqlBuilder([Permission.DEVICES], devices)
   },
   Mutation: {
-    addDevice: checkPermissionsGqlBuilder([Permission.ALL], addDevice),
-    regenerateActivationPassword: checkPermissionsGqlBuilder(
-      [Permission.ALL],
-      regenerateActivationPassword
-    )
+    createDevice: checkPermissionsGqlBuilder(
+      [Permission.DEVICES],
+      createDevice
+    ),
+    deviceRegenerateActivationPassword: checkPermissionsGqlBuilder(
+      [Permission.DEVICES],
+      deviceRegenerateActivationPassword
+    ),
+    deleteDevice: checkPermissionsGqlBuilder([Permission.DEVICES], deleteDevice)
   },
   Device: {
     activationQrUrl,

@@ -62,8 +62,8 @@ describe("device resolvers", () => {
     console.log(result);
   });
 
-  it("Query.addDevice(input)", async () => {
-    const res = (await resolvers.Mutation.addDevice(
+  it("Query.createDevice(input)", async () => {
+    const res = (await resolvers.Mutation.createDevice(
       null,
       {
         input: {
@@ -81,8 +81,8 @@ describe("device resolvers", () => {
     expect(dbDevice).toMatchObject(res);
   });
 
-  it("Mutation.regenerateActivationPassword", async () => {
-    const resp = (await resolvers.Mutation.regenerateActivationPassword(
+  it("Mutation.deviceRegenerateActivationPassword", async () => {
+    const resp = (await resolvers.Mutation.deviceRegenerateActivationPassword(
       null,
       {
         id: d1.id
@@ -96,6 +96,18 @@ describe("device resolvers", () => {
     const d1Db = await Device.findById(d1.id);
     expect(d1Db.activationPassword).not.toMatchObject(d1.activationPassword);
     expect(d1.activated).toBe(false);
+  });
+
+  it.only("Mutation.deleteDevice(id)", async () => {
+    const device = await new Device({ name: "lg1" }).save();
+    const deletedDevice = await resolvers.Mutation.deleteDevice(
+      null,
+      { id: device.id.toString() },
+      ctx
+    );
+    expect(deletedDevice.toObject()).toMatchObject(device.toObject());
+    // Actualy gone from the db
+    expect(await Device.findById(device.id)).toBeNull();
   });
 
   it("Device.activationQrUrl", () => {
