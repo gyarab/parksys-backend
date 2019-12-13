@@ -1,5 +1,4 @@
 import { VehicleFilter, IVehicleFilter } from "../vehicleFilter.model";
-import { connect, disconnect } from "../../../db";
 
 describe("model VehicleFilter", () => {
   it("has correct required fields", async () => {

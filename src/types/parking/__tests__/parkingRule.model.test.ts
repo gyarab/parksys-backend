@@ -12,38 +12,8 @@ describe("model ParkingRule", () => {
     vehicles: [{ singleton: VehicleSelectorEnum.ALL }]
   };
 
-  // Basic ParkingRule functionality
-  it("required correct fields", async () => {
+  it("requires correct fields and uses VehicleSelector", async () => {
     const rule1 = new ParkingRule({
-      name: "rule1",
-      vehicles: [
-        {
-          filter: "5deeaed22ac8dd0db99c9d8a"
-        }
-      ]
-    });
-    try {
-      await rule1.validate();
-    } catch (err) {
-      fail(err);
-    }
-
-    const rule2 = new ParkingRule({
-      name: "rule2",
-      vehicles: [
-        {
-          singleton: VehicleSelectorEnum.ALL
-        }
-      ]
-    });
-    try {
-      await rule2.validate();
-    } catch (err) {
-      fail(err);
-    }
-
-    // Both fields are not allowed
-    const rule3 = new ParkingRule({
       vehicles: [
         {
           singleton: VehicleSelectorEnum.NONE,
@@ -52,7 +22,7 @@ describe("model ParkingRule", () => {
       ]
     });
     try {
-      await rule3.validate();
+      await rule1.validate();
       fail("expected an error");
     } catch (err) {
       expect(err.errors.name).toBeDefined();
@@ -64,7 +34,7 @@ describe("model ParkingRule", () => {
   // Discriminators
   describe("discriminator ParkingRuleTimedFee", () => {
     it("has discriminator key", () => {
-      expect(new ParkingRuleTimedFee({}).__t).toBeDefined();
+      expect(new ParkingRuleTimedFee({}).__t).toBe("ParkingRuleTimedFee");
     });
 
     it("requires the correct fields", async () => {
@@ -91,7 +61,9 @@ describe("model ParkingRule", () => {
 
   describe("discriminator ParkingRulePermitAccess", () => {
     it("has discriminator key", () => {
-      expect(new ParkingRulePermitAccess({}).__t).toBeDefined();
+      expect(new ParkingRulePermitAccess({}).__t).toBe(
+        "ParkingRulePermitAccess"
+      );
     });
 
     it("requires the correct fields", async () => {
