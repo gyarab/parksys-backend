@@ -9,7 +9,9 @@ export const VehicleLabel = "Vehicle";
 export const VehicleSchema = new mongoose.Schema({
   licensePlate: {
     type: String,
-    required: true
+    required: true,
+    unique: true,
+    dropDups: true
   },
   totalPaidCents: { ...MoneySchema }
 });

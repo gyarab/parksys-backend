@@ -1,26 +1,27 @@
 import { Resolver } from "../../db/gql";
+import { checkPermissionsGqlBuilder } from "../../auth/auth";
+import { Permission } from "../permissions";
 
 const createVehicleFilter: Resolver = async (_, args, ctx) => {
-  const vf = new ctx.models.VehicleFilter(args.input);
-  return await vf.save();
+  return await new ctx.models.VehicleFilter(args.input).save();
 };
 
 const updateVehicleFilter: Resolver = async (_, args, ctx) => {
-  const vehicleFilter = await ctx.models.VehicleFilter.findById(args.id);
-  if (!vehicleFilter) throw new Error("Not found");
-  if (args.input.name) vehicleFilter.name = args.input.name;
-  if (args.input.inheritsFrom) {
-    vehicleFilter.inheritsFrom = args.input.inheritsFrom;
-  }
-  if (args.input.action) vehicleFilter.action = args.input.action;
-  console.log(vehicleFilter);
-
-  return await vehicleFilter.save();
+  return await ctx.models.VehicleFilter.findOneAndUpdate(
+    { _id: args.id },
+    args.input
+  );
 };
 
 export default {
   Mutation: {
-    createVehicleFilter,
-    updateVehicleFilter
+    createVehicleFilter: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      createVehicleFilter
+    ),
+    updateVehicleFilter: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      updateVehicleFilter
+    )
   }
 };

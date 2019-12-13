@@ -9,16 +9,18 @@ import {
 describe("model ParkingRule", () => {
   const correctParkingRuleBase = {
     name: "rule name",
-    vehicles: { singleton: VehicleSelectorEnum.ALL }
+    vehicles: [{ singleton: VehicleSelectorEnum.ALL }]
   };
 
   // Basic ParkingRule functionality
-  it("can contain either vehicles.filter or vehicles.singleton", async () => {
+  it("required correct fields", async () => {
     const rule1 = new ParkingRule({
       name: "rule1",
-      vehicles: {
-        filter: "5deeaed22ac8dd0db99c9d8a"
-      }
+      vehicles: [
+        {
+          filter: "5deeaed22ac8dd0db99c9d8a"
+        }
+      ]
     });
     try {
       await rule1.validate();
@@ -28,9 +30,11 @@ describe("model ParkingRule", () => {
 
     const rule2 = new ParkingRule({
       name: "rule2",
-      vehicles: {
-        singleton: VehicleSelectorEnum.ALL
-      }
+      vehicles: [
+        {
+          singleton: VehicleSelectorEnum.ALL
+        }
+      ]
     });
     try {
       await rule2.validate();
@@ -40,28 +44,20 @@ describe("model ParkingRule", () => {
 
     // Both fields are not allowed
     const rule3 = new ParkingRule({
-      name: "rule3",
-      vehicles: {
-        singleton: VehicleSelectorEnum.NONE,
-        filter: "5deeaed22ac8dd0db99c9d8a"
-      }
+      vehicles: [
+        {
+          singleton: VehicleSelectorEnum.NONE,
+          filter: "5deeaed22ac8dd0db99c9d8a"
+        }
+      ]
     });
     try {
       await rule3.validate();
       fail("expected an error");
     } catch (err) {
-      expect(err.errors["vehicles.singleton"]).toBeDefined();
-      expect(err.errors["vehicles.filter"]).toBeDefined();
-    }
-
-    // None of the fields is not allowed either
-    const rule4 = new ParkingRule({});
-    try {
-      await rule4.validate();
-      fail("expected an error");
-    } catch (err) {
-      expect(err.errors["vehicles.singleton"]).toBeDefined();
-      expect(err.errors["vehicles.filter"]).toBeDefined();
+      expect(err.errors.name).toBeDefined();
+      expect(err.errors["vehicles.0.singleton"]).toBeDefined();
+      expect(err.errors["vehicles.0.filter"]).toBeDefined();
     }
   });
 

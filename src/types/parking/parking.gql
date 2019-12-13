@@ -27,22 +27,19 @@ type VehicleFilter {
   name: String!
   action: VehicleFilterAction!
   vehicles: [Vehicle!]!
-  """
-  Relationships form a tree. VehicleFilter overrides previous VehicleFilters.
-  """
-  inheritsFrom: VehicleSelector
 }
 
 input VehicleFilterCreateInput {
   name: String!
   action: VehicleFilterAction!
-  inheritsFrom: ID
+  vehicles: [ID!]
 }
 
 input VehicleFilterUpdateInput {
   name: String
   action: VehicleFilterAction
-  inheritsFrom: ID
+  addVehicles: [ID!]
+  removeVehicles: [ID!]
 }
 
 enum VehicleSelectorEnum {

@@ -1,4 +1,5 @@
 export enum Permission {
   ALL = "ALL",
-  DEVICES = "DEVICES"
+  DEVICES = "DEVICES",
+  VEHICLES = "VEHICLES"
 }

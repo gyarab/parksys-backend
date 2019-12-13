@@ -5,15 +5,47 @@ import {
   IVehicleFilter
 } from "./vehicleFilter.model";
 import { Money, MoneySchema } from "../money/money.model";
+import { ValidationError } from "apollo-server-core";
 
+interface VehicleFilterPlaceholder {
+  // Either one of these
+  filter?: IVehicleFilter["_id"];
+  singleton?: VehicleSelectorEnum;
+}
 export interface IParkingRule extends mongoose.Document {
   name: string;
-  vehicles: {
-    // Either one of these
-    filter?: IVehicleFilter["_id"];
-    singleton?: VehicleSelectorEnum;
-  };
+  vehicles: VehicleFilterPlaceholder[];
 }
+const VehicleSelectorSchema = new mongoose.Schema(
+  {
+    // Either one of these, both are not allowed
+    filter: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: VehicleFilterLabel,
+      required: function() {
+        return !this.singleton;
+      },
+      validate: {
+        validator: function() {
+          return !this.singleton && !!this.filter;
+        }
+      }
+    },
+    singleton: {
+      type: String,
+      enum: Object.keys(VehicleSelectorEnum),
+      required: function() {
+        return !this.filter;
+      },
+      validate: {
+        validator: function() {
+          return !this.filter && !!this.singleton;
+        }
+      }
+    }
+  },
+  { _id: false, id: false }
+);
 export const ParkingRuleLabel = "ParkingRule";
 export const ParkingRuleSchema = new mongoose.Schema({
   name: {
@@ -22,34 +54,10 @@ export const ParkingRuleSchema = new mongoose.Schema({
     unique: true,
     dropDups: true
   },
-  vehicles: {
-    // Either one of these, both are not allowed
-    filter: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: VehicleFilterLabel,
-      required: function(this: IParkingRule) {
-        return this.vehicles.singleton === undefined;
-      },
-      validate: {
-        validator: function(this: IParkingRule) {
-          return !!this.vehicles.filter && !this.vehicles.singleton;
-        }
-      }
-    },
-    singleton: {
-      type: String,
-      enum: Object.keys(VehicleSelectorEnum),
-      required: function(this: IParkingRule) {
-        return this.vehicles.filter === undefined;
-      },
-      validate: {
-        validator: function(this: IParkingRule) {
-          return !this.vehicles.filter && !!this.vehicles.singleton;
-        }
-      }
-    }
-  }
+  // If empty, no vehicles are selected.
+  vehicles: [VehicleSelectorSchema]
 });
+
 export const ParkingRule = mongoose.model<IParkingRule>(
   ParkingRuleLabel,
   ParkingRuleSchema
