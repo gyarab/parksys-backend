@@ -6,11 +6,13 @@ import {
   RefreshToken,
   IRefreshToken
 } from "../types/refreshToken/refreshToken.model";
-import mongoose from "mongoose";
+import mongoose, { Model } from "mongoose";
 import { NextFunction, Response } from "express";
 import { Resolver, ResolverWithPermissions } from "../db/gql";
 import { PRequest } from "../app";
 import { AuthenticationMethod } from "../types/authentication/authentication.model";
+import { IUser } from "../types/user/user.model";
+import crypto from "crypto";
 
 const cryptSecret = config.get("security:cryptSecret");
 
@@ -135,7 +137,8 @@ export interface IAccessTokenData {
 
 export const createTokenPair = async (
   aTokenData: IAccessTokenData,
-  rTokenData: IRefreshTokenData
+  rTokenData: IRefreshTokenData,
+  _RefreshToken: Model<IRefreshToken, {}>
 ): Promise<{
   accessToken: string;
   refreshToken: {
@@ -143,7 +146,7 @@ export const createTokenPair = async (
     obj: IRefreshToken;
   };
 }> => {
-  const refreshTokenDb = await new RefreshToken({
+  const refreshTokenDb = await new _RefreshToken({
     method: rTokenData.method
   }).save();
   rTokenData.oid = refreshTokenDb.id.toString();
@@ -159,4 +162,76 @@ export const createTokenPair = async (
       obj: refreshTokenDb
     }
   };
+};
+
+export const hashPassword = (
+  password: string,
+  salt: string
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    crypto.scrypt(password, salt, 64, (err, hash) => {
+      if (err) {
+        reject(err);
+      } else {
+        const str = hash.toString("hex");
+        resolve(str);
+      }
+    });
+  });
+};
+
+export const authenticateUser = async (
+  userName: string,
+  password: string,
+  models: { User: Model<IUser, {}>; RefreshToken: Model<IRefreshToken, {}> }
+): Promise<any> => {
+  const user = await models.User.findOne({
+    $or: [{ name: userName }, { email: userName }],
+    authentications: { $elemMatch: { method: AuthenticationMethod.PASSWORD } }
+  });
+  if (!user) throw new Error("Unable to authenticate");
+  for (const auth of user.authentications.filter(
+    auth => auth.method == AuthenticationMethod.PASSWORD
+  )) {
+    if (
+      !auth.payload.hasOwnProperty("h") ||
+      !auth.payload.hasOwnProperty("s")
+    ) {
+      console.error(
+        `PASSWORD authentication for user ${user.name} should have h and s props`
+      );
+      throw new Error("Unable to authenticate");
+    }
+    const { s: salt, h: hash } = auth.payload;
+
+    const hashResult = await hashPassword(password, salt);
+    if (hash === hashResult) {
+      // Authenticated
+      const aTokenData: IAccessTokenData = {
+        expiresAt:
+          new Date().getTime() + config.get("security:userAccessTokenDuration"),
+        user: {
+          id: user.id,
+          permissions: user.permissions
+        }
+      };
+      const {
+        accessToken,
+        refreshToken: { str: refreshToken, obj: refreshTokenObj }
+      } = await createTokenPair(
+        aTokenData,
+        { method: AuthenticationMethod.PASSWORD },
+        models.RefreshToken
+      );
+      user.refreshTokens.push(refreshTokenObj);
+      await user.save();
+
+      return {
+        refreshToken,
+        accessToken,
+        user
+      };
+    }
+  }
+  throw new Error("Unable to authenticate");
 };

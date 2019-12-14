@@ -6,6 +6,7 @@ import routes from "../../routes";
 import { Permission } from "../../../types/permissions";
 import { createTokenPair } from "../../../auth/auth";
 import { AuthenticationMethod } from "../../../types/authentication/authentication.model";
+import { RefreshToken } from "../../../types/refreshToken/refreshToken.model";
 
 const req = request(app);
 const UPDATE_CONFIG_ENDPOINT = () => routes["devices/config"].path;
@@ -72,7 +73,8 @@ describe("updateConfig endpoint", () => {
       },
       {
         method: AuthenticationMethod.TEST
-      }
+      },
+      RefreshToken
     );
     validAccessToken = tokens.accessToken;
     devices[0].refreshToken = tokens.refreshToken.obj;

@@ -1,13 +1,13 @@
 import request from "supertest";
-import { hashPassword } from "../password";
 import { User } from "../../../types/user/user.model";
 import { AuthenticationMethod } from "../../../types/authentication/authentication.model";
 import { app, begin } from "../../../app";
-import { verifyToken } from "../../../auth/jwt";
+import { verifyToken, verifyTokenPair } from "../../../auth/jwt";
 import config from "../../../config";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
 import lodash from "lodash";
+import { hashPassword } from "../../../auth/auth";
 
 const req = request(app);
 const LOGIN_ENDPOINT = routes["login/password"].path;
@@ -20,9 +20,9 @@ describe("password endpoint", () => {
       .send({ user: "user1", password: "1234" });
     expect(resp.status).toBe(200);
 
-    const { refreshToken, accessToken } = resp.body.data;
+    const { refreshToken, accessToken, user } = resp.body.data;
 
-    expect(verifyTokenPair(refreshToken, accessToken)).toBe(true);
+    expect(verifyTokenPair(refreshToken, accessToken, cryptSecret)).toBe(true);
 
     // Check the accessToken body
     const [_, accessTokenBody] = verifyToken(cryptSecret, accessToken);
@@ -36,6 +36,7 @@ describe("password endpoint", () => {
     expect(lodash.get(refreshTokenBody, "method")).toBe(
       AuthenticationMethod.PASSWORD
     );
+    expect(user.name).toBe("user1");
   });
 
   it("does not authenticate invalid users", async () => {
@@ -87,16 +88,5 @@ describe("password endpoint", () => {
     }).save();
   });
 
-  afterAll(async () => {
-    await disconnect();
-  });
+  afterAll(disconnect);
 });
-
-export const verifyTokenPair = (
-  refreshToken: string,
-  accessToken: string
-): boolean => {
-  const [rValid, rBody]: [any, any] = verifyToken(cryptSecret, refreshToken);
-  const [aValid, aBody]: [any, any] = verifyToken(cryptSecret, accessToken);
-  return rValid && aValid && rBody.oid === aBody.roid;
-};

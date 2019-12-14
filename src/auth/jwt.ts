@@ -63,3 +63,13 @@ export function createToken(secret: string, body: object): string {
   const body64 = toBase64Url(body);
   return head64 + "." + body64 + "." + hmac(secret, head64, body64);
 }
+
+export const verifyTokenPair = (
+  refreshToken: string,
+  accessToken: string,
+  secret: string
+): boolean => {
+  const [rValid, rBody]: [any, any] = verifyToken(secret, refreshToken);
+  const [aValid, aBody]: [any, any] = verifyToken(secret, accessToken);
+  return rValid && aValid && rBody.oid === aBody.roid;
+};

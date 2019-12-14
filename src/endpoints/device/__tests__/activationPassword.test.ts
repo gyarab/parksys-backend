@@ -3,11 +3,10 @@ import { app, begin } from "../../../app";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
 import { Device, IDevice } from "../../../types/device/device.model";
-import { verifyTokenPair } from "../../login/__tests__/password.test";
 import { AuthenticationMethod } from "../../../types/authentication/authentication.model";
 import lodash from "lodash";
 import config from "../../../config";
-import { verifyToken } from "../../../auth/jwt";
+import { verifyToken, verifyTokenPair } from "../../../auth/jwt";
 
 const req = request(app);
 const ACTIVATION_ENDPOINT = () => routes["devices/activate"].path;
@@ -23,7 +22,7 @@ describe("password activation endpoint", () => {
     expect(resp.status).toBe(200);
 
     const { refreshToken, accessToken, device: respDevice } = resp.body.data;
-    expect(verifyTokenPair(refreshToken, accessToken)).toBe(true);
+    expect(verifyTokenPair(refreshToken, accessToken, cryptSecret)).toBe(true);
 
     // Check the accessToken body
     const [_, accessTokenBody] = verifyToken(cryptSecret, accessToken);

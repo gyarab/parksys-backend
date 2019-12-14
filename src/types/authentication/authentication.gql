@@ -6,3 +6,13 @@ enum AuthenticationMethod {
 type Authentication {
   method: AuthenticationMethod!
 }
+
+type LoginResult {
+  refreshToken: String!
+  accessToken: String!
+  user: User!
+}
+
+extend type Mutation {
+  passwordLogin(user: String!, password: String!): LoginResult!
+}

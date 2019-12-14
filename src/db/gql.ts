@@ -9,6 +9,7 @@ import vehicleFilterResolvers from "../types/parking/vehicleFilter.resolvers";
 import parkingRuleResolvers from "../types/parking/parkingRule.resolvers";
 import vehicleSelectorResolvers from "../types/parking/vehicleSelector.resolvers";
 import vehicleResolvers from "../types/vehicle/vehicle.resolvers";
+import authenticationResolvers from "../types/authentication/authentication.resolvers";
 import { Permission } from "../types/permissions";
 import { PRequest } from "../app";
 import { resolvers as scalarResolvers } from "graphql-scalars";
@@ -115,6 +116,7 @@ export const resolvers = _.merge(
   vehicleFilterResolvers,
   vehicleSelectorResolvers,
   parkingRuleResolvers,
+  authenticationResolvers,
   {
     ParkingRuleSelector: {
       __resolveType() {

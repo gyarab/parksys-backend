@@ -98,7 +98,7 @@ describe("device resolvers", () => {
     expect(d1.activated).toBe(false);
   });
 
-  it.only("Mutation.deleteDevice(id)", async () => {
+  it("Mutation.deleteDevice(id)", async () => {
     const device = await new Device({ name: "lg1" }).save();
     const deletedDevice = await resolvers.Mutation.deleteDevice(
       null,

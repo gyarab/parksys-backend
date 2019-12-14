@@ -7,6 +7,7 @@ import { Permission } from "../../../types/permissions";
 import { createTokenPair } from "../../../auth/auth";
 import path from "path";
 import { AuthenticationMethod } from "../../../types/authentication/authentication.model";
+import { RefreshToken } from "../../../types/refreshToken/refreshToken.model";
 
 const testImagePath = path.join(
   process.cwd(),
@@ -56,7 +57,8 @@ describe("capture endpoint", () => {
       },
       {
         method: AuthenticationMethod.TEST
-      }
+      },
+      RefreshToken
     );
     validAccessToken = tokens.accessToken;
     devices[0].refreshToken = tokens.refreshToken.obj;

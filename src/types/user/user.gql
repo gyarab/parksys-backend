@@ -1,5 +1,5 @@
 type User {
-  _id: ID!
+  id: ID!
   name: String!
   email: EmailAddress!
   permissions: [String]!
@@ -8,7 +8,7 @@ type User {
 }
 
 input UserFilterInput {
-  _id: ID
+  id: ID
   name: String
   email: EmailAddress
 }

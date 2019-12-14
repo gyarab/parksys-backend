@@ -1,22 +1,8 @@
-import crypto from "crypto";
-import config from "../../config";
 import { User, IUser } from "../../types/user/user.model";
 import { AuthenticationMethod } from "../../types/authentication/authentication.model";
-import { createTokenPair, IAccessTokenData } from "../../auth/auth";
+import { authenticateUser } from "../../auth/auth";
 import { AsyncHandler } from "../../app";
-
-export function hashPassword(password: string, salt: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    crypto.scrypt(password, salt, 64, (err, hash) => {
-      if (err) {
-        reject(err);
-      } else {
-        const str = hash.toString("hex");
-        resolve(str);
-      }
-    });
-  });
-}
+import { RefreshToken } from "../../types/refreshToken/refreshToken.model";
 
 const password: AsyncHandler = async (req, res, next) => {
   const { user: userName, password } = req.body;
@@ -29,7 +15,7 @@ const password: AsyncHandler = async (req, res, next) => {
     res.status(401).end();
     return next();
   }
-  let user: IUser = await User.findOne({
+  const user: IUser = await User.findOne({
     $or: [{ name: userName }, { email: userName }],
     authentications: { $elemMatch: { method: AuthenticationMethod.PASSWORD } }
   });
@@ -39,58 +25,21 @@ const password: AsyncHandler = async (req, res, next) => {
     res.status(401).end();
     return next();
   }
-
-  // Loop over every PASSWORD authentication
-  for (const auth of user.authentications.filter(
-    auth => auth.method == AuthenticationMethod.PASSWORD
-  )) {
-    if (
-      !auth.payload.hasOwnProperty("h") ||
-      !auth.payload.hasOwnProperty("s")
-    ) {
-      const msg = `PASSWORD authentication for user ${user.name} should have h and s props`;
-      console.error(msg);
+  try {
+    const response = await authenticateUser(userName, password, {
+      User,
+      RefreshToken
+    });
+    res.send({ data: { ...response, user: response.user.toJSON() } });
+    return next();
+  } catch (e) {
+    if (e.message === "Unable to authenticate") {
+      res.status(401).end();
+    } else {
       res.status(500).end();
-      return next(new Error(msg));
     }
-    const { s: salt, h: hash } = auth.payload;
-
-    const hashResult = await hashPassword(password, salt);
-    if (hash === hashResult) {
-      // Authenticated
-      const aTokenData: IAccessTokenData = {
-        expiresAt:
-          new Date().getTime() + config.get("security:userAccessTokenDuration"),
-        user: {
-          id: user.id,
-          permissions: user.permissions
-        }
-      };
-      const {
-        accessToken,
-        refreshToken: { str: refreshToken, obj: refreshTokenObj }
-      } = await createTokenPair(aTokenData, {
-        method: AuthenticationMethod.PASSWORD
-      });
-      user.refreshTokens.push(refreshTokenObj);
-      await user.save();
-
-      res.send({
-        data: {
-          refreshToken,
-          accessToken,
-          user: {
-            email: user.name,
-            name: user.name
-          }
-        }
-      });
-      return next();
-    }
+    return next(e);
   }
-  // Was not able to authenticate
-  res.status(401).end();
-  return next();
 };
 
 export default password;

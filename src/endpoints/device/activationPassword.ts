@@ -4,6 +4,7 @@ import { Permission } from "../../types/permissions";
 import { createTokenPair } from "../../auth/auth";
 import config from "../../config";
 import { AsyncHandler } from "../../app";
+import { RefreshToken } from "../../types/refreshToken/refreshToken.model";
 
 const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
   const { activationPassword } = req.body;
@@ -38,7 +39,8 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
     },
     {
       method: AuthenticationMethod.ACTIVATION_PASSWORD
-    }
+    },
+    RefreshToken
   );
 
   // OK -> activate
