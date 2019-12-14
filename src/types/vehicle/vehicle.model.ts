@@ -11,7 +11,8 @@ export const VehicleSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    dropDups: true
+    dropDups: true,
+    index: true // Most lookups are done via licensePlate
   },
   totalPaidCents: { ...MoneySchema }
 });

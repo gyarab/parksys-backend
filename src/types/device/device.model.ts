@@ -36,7 +36,7 @@ export const generateDeviceActivationPassword: (
   return generateDeviceActivationPassword;
 };
 
-interface IDevice extends mongoose.Document {
+export interface IDevice extends mongoose.Document {
   name: string;
   activated: boolean;
   activatedAt: Date;
@@ -47,10 +47,12 @@ interface IDevice extends mongoose.Document {
   defaultActivationPasswordGenerator: string;
 }
 
-const DeviceName = "Device";
+export const DeviceLabel = "Device";
 
-const defaultActivationPasswordGenerator = generateDeviceActivationPassword(64);
-const DeviceSchema = new mongoose.Schema(
+export const defaultActivationPasswordGenerator = generateDeviceActivationPassword(
+  64
+);
+export const DeviceSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -103,12 +105,4 @@ const DeviceSchema = new mongoose.Schema(
 
 DeviceSchema.statics.defaultActivationPasswordGenerator = defaultActivationPasswordGenerator;
 
-const Device = mongoose.model<IDevice>(DeviceName, DeviceSchema);
-
-export {
-  DeviceSchema,
-  Device,
-  DeviceName,
-  IDevice,
-  defaultActivationPasswordGenerator
-};
+export const Device = mongoose.model<IDevice>(DeviceLabel, DeviceSchema);

@@ -31,7 +31,8 @@ export const ParkingSessionSchema = new mongoose.Schema({
   vehicle: {
     type: mongoose.Schema.Types.ObjectId,
     ref: VehicleLabel,
-    required: true
+    required: true,
+    index: true // Most lookups are done via vehicle id
   },
   appliedRules: [
     {
