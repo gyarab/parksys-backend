@@ -40,6 +40,8 @@ describe("password activation endpoint", () => {
 
     // Device should be active now
     expect(respDevice.activated).toBe(true);
+    // Date validity
+    expect(new Date(respDevice.activatedAt).getTime()).not.toBeNaN();
     expect(respDevice.refreshToken).toBeUndefined();
     expect(respDevice.activationPassword).toBeUndefined();
     const dbDevice: IDevice = await Device.findById(respDevice.id);

@@ -49,7 +49,7 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
 
   try {
     const result = await getLprResult(files[Object.keys(files)[0]]);
-    // console.log(result);
+    console.log(result);
   } catch (err) {
     return next(err);
   }

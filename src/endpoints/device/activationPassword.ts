@@ -11,10 +11,11 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
     res.status(401).send({ error: "activation password must be supplied" });
     return next();
   }
+  const now = new Date();
   const device = await Device.findOne({
     "activationPassword.method": AuthenticationMethod.ACTIVATION_PASSWORD,
     "activationPassword.payload.password": activationPassword,
-    "activationPassword.payload.expiresAt": { $gt: new Date() },
+    "activationPassword.payload.expiresAt": { $gt: now },
     activated: false
   });
   if (!device) {
@@ -23,16 +24,13 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
       .send({ error: "device not found or wrong/expired credentials" });
     return next();
   }
-  // OK -> activate
-  device.activated = true;
 
   const {
     accessToken,
     refreshToken: { str: refreshToken, obj: refreshTokenObj }
   } = await createTokenPair(
     {
-      expiresAt:
-        new Date().getTime() + config.get("security:userAccessTokenDuration"),
+      expiresAt: now.getTime() + config.get("security:userAccessTokenDuration"),
       device: {
         id: device.id,
         permissions: [Permission.ALL]
@@ -43,6 +41,9 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
     }
   );
 
+  // OK -> activate
+  device.activated = true;
+  device.activatedAt = now;
   device.refreshToken = refreshTokenObj;
   await device.save();
 
