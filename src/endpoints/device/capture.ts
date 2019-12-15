@@ -46,7 +46,7 @@ const handleResult = async (
   const vehicle =
     (await Vehicle.findOne({ licensePlate: best.plate })) ||
     (await new Vehicle({ licensePlate: best.plate }).save());
-  console.log(vehicle);
+  // console.log(vehicle);
   // Find or create ParkingSession
   const check = new Check({ byDevice: device, time: captureTime });
   let parkingSession: IParkingSession = await ParkingSession.findOne({
@@ -100,7 +100,7 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
     const filename = Object.keys(files)[0];
     const captureTime = filenameToDate(filename);
     const result = await getLprResult(files[filename]);
-    console.log(id, "RSLT", new Date(), result);
+    // console.log(id, "RSLT", new Date(), result);
     handleResult(result, device, captureTime);
     return next();
   } catch (err) {

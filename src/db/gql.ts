@@ -63,7 +63,8 @@ const types = [
   "device",
   "permissions",
   "parking",
-  "vehicle"
+  "vehicle",
+  "time"
 ];
 
 function loadSchemaFile(path: string): Promise<string> {
