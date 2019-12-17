@@ -8,6 +8,35 @@ import { createTokenPair } from "../../../auth/auth";
 import path from "path";
 import { AuthenticationMethod } from "../../../types/authentication/authentication.model";
 import { RefreshToken } from "../../../types/refreshToken/refreshToken.model";
+import { filenameToDate, findAppliedRules } from "../capture";
+import {
+  ParkingRule,
+  ParkingRuleTimedFee,
+  IParkingRule,
+  ParkingRulePermitAccess,
+  ParkingTimeUnit
+} from "../../../types/parking/parkingRule.model";
+import {
+  ParkingRuleAssignment,
+  IParkingRuleAssignment
+} from "../../../types/parking/parkingRuleAssignment.model";
+import {
+  ParkingRuleDayAssignment,
+  IParkingRuleDayAssignment
+} from "../../../types/parking/parkingRuleDayAssignment.model";
+import {
+  ParkingRuleAssignmentGroup,
+  IParkingRuleAssignmentGroup
+} from "../../../types/parking/parkingRuleAssignmentGroup.model";
+import { Vehicle, IVehicle } from "../../../types/vehicle/vehicle.model";
+import {
+  VehicleFilter,
+  VehicleSelectorEnum,
+  IVehicleFilter,
+  VehicleFilterAction
+} from "../../../types/parking/vehicleFilter.model";
+import util from "util";
+import moment from "moment";
 
 const testImagePath = path.join(
   process.cwd(),
@@ -32,7 +61,147 @@ describe("capture endpoint", () => {
         }
       }
     });
-    // TODO: Test that the capture has been recorded
+  });
+
+  describe("findAppliedRules", () => {
+    let vehicles: Array<IVehicle> = null;
+    let vehicleSelectorAll = null;
+    let vehicleSelectorNone = null;
+    let vehicleFilters: Array<IVehicleFilter> = null;
+    let parkingRules: Array<IParkingRule> = null;
+    let parkingRuleAssignments: Array<IParkingRuleAssignment> = null;
+    let parkingAssignmentGroup: IParkingRuleAssignmentGroup = null;
+    let parkingDay1: IParkingRuleDayAssignment = null;
+    let parkingDay2: IParkingRuleDayAssignment = null;
+
+    // Quite an elaborate setup
+    beforeAll(async () => {
+      await Promise.all([
+        Vehicle.remove({}),
+        VehicleFilter.remove({}),
+        ParkingRuleDayAssignment.remove({}),
+        ParkingRuleAssignmentGroup.remove({}),
+        ParkingRuleAssignment.remove({}),
+        ParkingRule.remove({})
+      ]);
+      // Vehicles & VehicleFilters
+      vehicles = await Vehicle.create([
+        // Pays less at some times
+        { licensePlate: "123A4567" },
+        // Pays regularFeeRule
+        { licensePlate: "007X0042" },
+        // Pays regularFeeRule
+        { licensePlate: "101Z0101" }
+      ]);
+
+      vehicleSelectorAll = { singleton: VehicleSelectorEnum.ALL };
+      vehicleSelectorNone = { singleton: VehicleSelectorEnum.NONE };
+      vehicleFilters = await VehicleFilter.create([
+        {
+          name: "filter1",
+          vehicles: [vehicles[0]],
+          action: VehicleFilterAction.EXCLUDE
+        },
+        {
+          name: "filter2",
+          vehicles: [vehicles[0]],
+          action: VehicleFilterAction.INCLUDE
+        }
+      ]);
+
+      // ParkingRules
+      parkingRules = [
+        ...(await ParkingRuleTimedFee.create([
+          {
+            name: "regularFeeRule",
+            unitTime: ParkingTimeUnit.HOUR,
+            centsPerUnitTime: 100
+          },
+          {
+            name: "highFeeRule",
+            // Super high fee
+            unitTime: ParkingTimeUnit.MINUTE,
+            centsPerUnitTime: 1000
+          }
+        ])),
+        ...(await ParkingRulePermitAccess.create([
+          {
+            name: "freePassRule",
+            permit: true
+          }
+        ]))
+      ];
+
+      parkingRuleAssignments = [
+        new ParkingRuleAssignment({
+          rule: parkingRules[0],
+          vehicleSelectors: [vehicleSelectorAll],
+          start: { hours: 0, minutes: 0 },
+          end: { hours: 24, minutes: 0 },
+          priority: 8
+        }),
+        new ParkingRuleAssignment({
+          rule: parkingRules[1],
+          vehicleSelectors: [vehicleSelectorAll],
+          start: { hours: 16, minutes: 0 },
+          end: { hours: 17, minutes: 0 },
+          priority: 11
+        }),
+        new ParkingRuleAssignment({
+          rule: parkingRules[2],
+          vehicleSelectors: [vehicleSelectorAll],
+          start: { hours: 7, minutes: 30 },
+          end: { hours: 17, minutes: 0 },
+          priority: 9
+        }),
+        new ParkingRuleAssignment({
+          rule: parkingRules[0],
+          vehicleSelectors: [vehicleSelectorAll],
+          start: { hours: 15, minutes: 45 },
+          end: { hours: 16, minutes: 15 },
+          priority: 12
+        }),
+        new ParkingRuleAssignment({
+          rule: parkingRules[0],
+          vehicleSelectors: [vehicleSelectorAll],
+          start: { hours: 17, minutes: 15 },
+          end: { hours: 19, minutes: 0 },
+          priority: 10
+        })
+      ];
+
+      parkingAssignmentGroup = await new ParkingRuleAssignmentGroup({
+        ruleAssignments: parkingRuleAssignments,
+        name: "regularGroup"
+      }).save();
+
+      parkingDay1 = await new ParkingRuleDayAssignment({
+        day: new Date("2019-12-01"),
+        groups: [parkingAssignmentGroup]
+      }).save();
+      parkingDay2 = await new ParkingRuleDayAssignment({
+        day: new Date("2019-12-02"),
+        groups: [parkingAssignmentGroup]
+      }).save();
+    });
+
+    it("within one day - full day", async () => {
+      const result = await findAppliedRules(
+        vehicles[0],
+        new Date("2019-12-01 00:00:00"),
+        new Date("2019-12-02 00:00:00")
+      );
+      console.log(util.inspect(result, false, 4, true));
+    });
+
+    it("within one day - part of the day", async () => {});
+
+    it("within two days - overnight", async () => {});
+  });
+
+  it("filenameToDate", () => {
+    const t = new Date().getTime();
+    expect(filenameToDate(`capture_${t}.jpg`).getTime()).toBe(t);
   });
 
   beforeAll(async () => {

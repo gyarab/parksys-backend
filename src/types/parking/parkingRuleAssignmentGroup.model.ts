@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import {
   ParkingRuleAssignmentLabel,
-  IParkingRuleAssignment
+  IParkingRuleAssignment,
+  ParkingRuleAssignmentSchema
 } from "./parkingRuleAssignment.model";
 
 // Interfaces
@@ -14,12 +15,7 @@ export const ParkingRuleAssignmentGroupLabel = "ParkingRuleAssignmentGroup";
 
 // Schema definition
 export const ParkingRuleAssignmentGroupSchema = new mongoose.Schema({
-  ruleAssignments: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: ParkingRuleAssignmentLabel
-    }
-  ],
+  ruleAssignments: [ParkingRuleAssignmentSchema],
   name: {
     type: String,
     required: true,

@@ -1,13 +1,8 @@
 import mongoose from "mongoose";
 import { Money, MoneySchema } from "../money/money.model";
-import {
-  IVehicleSelector,
-  VehicleSelectorSchema
-} from "./vehicleSelector.model";
 
 export interface IParkingRule extends mongoose.Document {
   name: string;
-  vehicles: IVehicleSelector["_id"][];
 }
 
 export const ParkingRuleLabel = "ParkingRule";
@@ -17,9 +12,7 @@ export const ParkingRuleSchema = new mongoose.Schema({
     required: true,
     unique: true,
     dropDups: true
-  },
-  // If empty, no vehicles are selected.
-  vehicles: [VehicleSelectorSchema]
+  }
 });
 
 export const ParkingRule = mongoose.model<IParkingRule>(

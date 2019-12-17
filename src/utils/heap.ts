@@ -1,10 +1,20 @@
-export class LinearHeap<T> {
-  private arr: Array<T>;
+interface Heap<T> {
+  add(elem: T): void;
+  extractTop(): T;
+  size(): number;
+}
+
+export class LinearHeap<T> implements Heap<T> {
+  public arr: Array<T>;
   private comparator;
   private topIndex: number = null;
   constructor(comparator: (o1: T, o2: T) => number) {
     this.arr = [];
     this.comparator = comparator;
+  }
+
+  public size(): number {
+    return this.arr.length;
   }
 
   // O(1)
@@ -13,10 +23,8 @@ export class LinearHeap<T> {
     const i = this.arr.length - 1;
     if (this.topIndex == null) {
       this.topIndex = 0;
-    } else {
-      if (this.comparator(this.arr[i], this.arr[this.topIndex]) > 0) {
-        this.topIndex = i;
-      }
+    } else if (this.comparator(this.arr[i], this.arr[this.topIndex]) > 0) {
+      this.topIndex = i;
     }
   }
 
@@ -42,3 +50,5 @@ export class LinearHeap<T> {
     }
   }
 }
+
+// TODO: Make a binary heap which is faster than the linear heap

@@ -1,4 +1,3 @@
-import { VehicleSelectorEnum } from "../vehicleFilter.model";
 import {
   ParkingRule,
   ParkingRuleTimedFee,
@@ -8,26 +7,16 @@ import {
 
 describe("model ParkingRule", () => {
   const correctParkingRuleBase = {
-    name: "rule name",
-    vehicles: [{ singleton: VehicleSelectorEnum.ALL }]
+    name: "rule name"
   };
 
   it("requires correct fields and uses VehicleSelector", async () => {
-    const rule1 = new ParkingRule({
-      vehicles: [
-        {
-          singleton: VehicleSelectorEnum.NONE,
-          filter: "5deeaed22ac8dd0db99c9d8a"
-        }
-      ]
-    });
+    const rule1 = new ParkingRule({});
     try {
       await rule1.validate();
       fail("expected an error");
     } catch (err) {
       expect(err.errors.name).toBeDefined();
-      expect(err.errors["vehicles.0.singleton"]).toBeDefined();
-      expect(err.errors["vehicles.0.filter"]).toBeDefined();
     }
   });
 

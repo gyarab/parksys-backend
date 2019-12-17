@@ -44,26 +44,6 @@ const updateParkingRulePermitAccess: Resolver = async (_, args, ctx) => {
   );
 };
 
-// ParkingRule - common for all
-const vehicles: Resolver = async (
-  parkingRule: IParkingRule,
-  _,
-  ctx
-): Promise<Array<any>> => {
-  const populatedParkingRule: IParkingRule = await ctx.models.ParkingRule.populate(
-    parkingRule,
-    { path: "vehicles.filter" }
-  );
-  const selectors = populatedParkingRule.vehicles.map(selector => {
-    if (selector.filter) {
-      return selector.filter;
-    } else {
-      return { value: selector.singleton };
-    }
-  });
-  return selectors;
-};
-
 // ParkingRuleTimedFee
 
 // ParkingRulePermitAccess
@@ -71,12 +51,6 @@ const vehicles: Resolver = async (
 export default {
   Query: {
     rules
-  },
-  ParkingRuleTimedFee: {
-    vehicles
-  },
-  ParkingRulePermitAccess: {
-    vehicles
   },
   ParkingRule: {
     __resolveType(
