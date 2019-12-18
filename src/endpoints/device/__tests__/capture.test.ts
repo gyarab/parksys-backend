@@ -35,8 +35,6 @@ import {
   IVehicleFilter,
   VehicleFilterAction
 } from "../../../types/parking/vehicleFilter.model";
-import util from "util";
-import moment from "moment";
 
 const testImagePath = path.join(
   process.cwd(),

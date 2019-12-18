@@ -1,5 +1,8 @@
 import request from "supertest";
-import { Device } from "../../../types/device/device.model";
+import {
+  Device,
+  defaultActivationPasswordGenerator
+} from "../../../types/device/device.model";
 import { app, begin } from "../../../app";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
@@ -13,6 +16,7 @@ const QR_ENDPOINT = id => routes["devices/qr"].path.replace(":id", id);
 
 describe("qr endpoint", () => {
   let d1Id = null;
+  let d2Id = null;
   let validAccessToken = null;
   it("should return an image", async () => {
     const resp = await req
@@ -22,6 +26,15 @@ describe("qr endpoint", () => {
     expect(resp.status).toBe(200);
     // TODO: Better check
     expect(resp.text.length).toBeGreaterThan(0);
+  });
+
+  it("should not return an image - expired", async () => {
+    const resp = await req
+      .get(QR_ENDPOINT(d2Id))
+      .set("Authorization", `Bearer ${validAccessToken}`)
+      .send();
+    expect(resp.status).toBe(400);
+    expect(resp.text.length).toBe(0);
   });
 
   it("should not crash", async () => {
@@ -54,12 +67,22 @@ describe("qr endpoint", () => {
       { method: AuthenticationMethod.TEST },
       RefreshToken
     )).accessToken;
-    const d1 = await Device.create([
+    const devices = await Device.create([
       {
         name: "d1"
+      },
+      {
+        name: "d2",
+        activationPassword: {
+          payload: {
+            password: "1234",
+            expiresAt: new Date(new Date().getTime() - 1000) // already expired
+          },
+          method: AuthenticationMethod.ACTIVATION_PASSWORD
+        }
       }
     ]);
-    d1Id = d1[0]._id.toString();
+    [d1Id, d2Id] = devices.map(d => d.id.toString());
   });
 
   afterAll(async () => {

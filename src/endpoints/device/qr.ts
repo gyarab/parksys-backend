@@ -2,6 +2,7 @@ import { Device } from "../../types/device/device.model";
 import qrcode from "qrcode";
 import mongoose from "mongoose";
 import { AsyncHandler } from "../../app";
+import lodash from "lodash";
 
 const qr: AsyncHandler<{ id: any }> = async (req, res) => {
   const oid = req.params.id;
@@ -10,7 +11,14 @@ const qr: AsyncHandler<{ id: any }> = async (req, res) => {
     return;
   }
   const device = await Device.findById(oid);
-  if (device == null) {
+  if (
+    device == null ||
+    lodash
+      .get(device, "activationPassword.payload.expiresAt", new Date(0))
+      .getTime() -
+      new Date().getTime() <=
+      0
+  ) {
     res.status(400).end();
     return;
   }
