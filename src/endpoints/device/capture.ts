@@ -235,6 +235,7 @@ export const findAppliedRules = async (
   start: Date,
   end: Date
 ) => {
+  // TODO: Solve the Date issues
   // Fetch ParkingRuleDayAssignment
   const ds = moment(start)
     .startOf("day")
@@ -251,7 +252,7 @@ export const findAppliedRules = async (
   });
   // Relative time
   const startTime = timeFromMillis(start.getTime() - ds.getTime());
-  const endTime = timeFromMillis(end.getTime() - ds.getTime());
+  const endTime = timeFromMillis(end.getTime() - start.getTime());
   // Result object
   const appliedRuleAssignmentsAll: { [key: string]: Array<any> } = {};
   for (const day of dayAssignmentsResult) {

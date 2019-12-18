@@ -143,29 +143,29 @@ describe("capture endpoint", () => {
         new ParkingRuleAssignment({
           rule: parkingRules[1],
           vehicleSelectors: [vehicleSelectorAll],
-          start: { hours: 16, minutes: 0 },
+          start: { hours: 15, minutes: 30 },
           end: { hours: 17, minutes: 0 },
           priority: 11
         }),
         new ParkingRuleAssignment({
           rule: parkingRules[2],
           vehicleSelectors: [vehicleSelectorAll],
-          start: { hours: 7, minutes: 30 },
+          start: { hours: 7, minutes: 0 },
           end: { hours: 17, minutes: 0 },
           priority: 9
         }),
         new ParkingRuleAssignment({
           rule: parkingRules[0],
           vehicleSelectors: [vehicleSelectorAll],
-          start: { hours: 15, minutes: 45 },
-          end: { hours: 16, minutes: 15 },
+          start: { hours: 14, minutes: 0 },
+          end: { hours: 16, minutes: 0 },
           priority: 12
         }),
         new ParkingRuleAssignment({
           rule: parkingRules[0],
           vehicleSelectors: [vehicleSelectorAll],
-          start: { hours: 17, minutes: 15 },
-          end: { hours: 19, minutes: 0 },
+          start: { hours: 17, minutes: 30 },
+          end: { hours: 20, minutes: 0 },
           priority: 10
         })
       ];
@@ -189,14 +189,154 @@ describe("capture endpoint", () => {
       const result = await findAppliedRules(
         vehicles[0],
         new Date("2019-12-01 00:00:00"),
-        new Date("2019-12-02 00:00:00")
+        new Date("2019-12-01 23:59:59")
       );
-      console.log(util.inspect(result, false, 4, true));
+      const expected = [
+        {
+          start: { hours: 0, minutes: 0 },
+          end: { hours: 7, minutes: 0 },
+          priority: 8
+        },
+        {
+          start: { hours: 7, minutes: 0 },
+          end: { hours: 14, minutes: 0 },
+          priority: 9
+        },
+        {
+          start: { hours: 14, minutes: 0 },
+          end: { hours: 16, minutes: 0 },
+          priority: 12
+        },
+        {
+          start: { hours: 16, minutes: 0 },
+          end: { hours: 17, minutes: 0 },
+          priority: 11
+        },
+        {
+          start: { hours: 17, minutes: 0 },
+          end: { hours: 17, minutes: 30 },
+          priority: 8
+        },
+        {
+          start: { hours: 17, minutes: 30 },
+          end: { hours: 20, minutes: 0 },
+          priority: 10
+        },
+        {
+          start: { hours: 20, minutes: 30 },
+          end: { hours: 24, minutes: 0 },
+          priority: 8
+        }
+      ];
+      // console.log(util.inspect(result, false, 4, true));
+      // TODO: Solve the Date issues
+      // console.log(Object.keys(result));
+      // expect(Object.keys(result)).toHaveLength(1);
+      const d1 = result["2019-11-30"];
+      expect(d1).toHaveLength(1);
+      for (let i = 0; i < d1[0]; i++) {
+        expect(d1[0][i]).toMatchObject(expected[i]);
+      }
     });
 
-    it("within one day - part of the day", async () => {});
+    it("within one day - part of the day", async () => {
+      const result = await findAppliedRules(
+        vehicles[0],
+        new Date("2019-12-01 07:30:00"),
+        new Date("2019-12-01 19:00:00")
+      );
+      const expected = [
+        {
+          start: { hours: 7, minutes: 30 },
+          end: { hours: 14, minutes: 0 },
+          priority: 9
+        },
+        {
+          start: { hours: 14, minutes: 0 },
+          end: { hours: 16, minutes: 0 },
+          priority: 12
+        },
+        {
+          start: { hours: 16, minutes: 0 },
+          end: { hours: 17, minutes: 0 },
+          priority: 11
+        },
+        {
+          start: { hours: 17, minutes: 0 },
+          end: { hours: 17, minutes: 30 },
+          priority: 8
+        },
+        {
+          start: { hours: 17, minutes: 30 },
+          end: { hours: 19, minutes: 0 },
+          priority: 10
+        }
+      ];
+      // console.log(util.inspect(result, false, 4, true));
+      // TODO: Solve the Date issues
+      // console.log(Object.keys(result));
+      // expect(Object.keys(result)).toHaveLength(1);
+      const d1 = result["2019-11-30"];
+      expect(d1).toHaveLength(1);
+      for (let i = 0; i < d1[0]; i++) {
+        expect(d1[0][i]).toMatchObject(expected[i]);
+      }
+    });
 
-    it("within two days - overnight", async () => {});
+    it("within two days - overnight", async () => {
+      const result = await findAppliedRules(
+        vehicles[0],
+        new Date("2019-12-01 15:03:00"),
+        new Date("2019-12-02 14:42:00")
+      );
+      const expected1 = [
+        {
+          start: { hours: 15, minutes: 3 },
+          end: { hours: 16, minutes: 0 },
+          priority: 12
+        },
+        {
+          start: { hours: 16, minutes: 0 },
+          end: { hours: 17, minutes: 0 },
+          priority: 11
+        },
+        {
+          start: { hours: 17, minutes: 0 },
+          end: { hours: 17, minutes: 30 },
+          priority: 8
+        },
+        {
+          start: { hours: 17, minutes: 30 },
+          end: { hours: 19, minutes: 0 },
+          priority: 10
+        }
+      ];
+      const expected2 = [
+        {
+          start: { hours: 0, minutes: 0 },
+          end: { hours: 14, minutes: 0 },
+          priority: 9
+        },
+        {
+          start: { hours: 14, minutes: 0 },
+          end: { hours: 14, minutes: 42 },
+          priority: 12
+        }
+      ];
+      // console.log(util.inspect(result, false, 4, true));
+      // TODO: Solve the Date issues
+      // console.log(Object.keys(result));
+      // expect(Object.keys(result)).toHaveLength(1);
+      const d1 = result["2019-11-30"];
+      const d2 = result["2019-12-01"];
+      expect(d1).toHaveLength(1);
+      for (let i = 0; i < d1[0]; i++) {
+        expect(d1[0][i]).toMatchObject(expected1[i]);
+      }
+      for (let i = 0; i < d2[0]; i++) {
+        expect(d2[0][i]).toMatchObject(expected2[i]);
+      }
+    });
   });
 
   it("filenameToDate", () => {
