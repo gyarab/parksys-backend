@@ -85,10 +85,7 @@ const transformRuleAssignmentsIntoRuleEvents = (
       if (assignmentStart < startMinutes) assignmentStart = startMinutes;
       if (endMinutes < assignmentEnd) assignmentEnd = endMinutes;
       minutesMemo[i] = [assignmentStart, assignmentEnd];
-      return [
-        [i, RuleEventEnum.START, assignmentStart],
-        [i, RuleEventEnum.END, assignmentEnd]
-      ];
+      return [[i, RuleEventEnum.START], [i, RuleEventEnum.END]];
     })
     // Filter after to preserve indexes from group.ruleAssignments
     .filter(assignment => !!assignment);
