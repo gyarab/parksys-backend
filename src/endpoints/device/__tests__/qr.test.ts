@@ -37,18 +37,23 @@ describe("qr endpoint", () => {
     expect(resp.text.length).toBe(0);
   });
 
-  it("should not crash", async () => {
+  it("invalid ObjectId yields 403", async () => {
+    // Invalid ObjectId
     let resp = await req
       .get(QR_ENDPOINT("5dd00z009b3e507dffba8b33"))
       .set("Authorization", `Bearer ${validAccessToken}`)
       .send();
     expect(resp.status).toBe(400);
+    // No Device with this object id exists
     resp = await req
       .get(QR_ENDPOINT("5dd000009b3e507dffba8b33"))
       .set("Authorization", `Bearer ${validAccessToken}`)
       .send();
     expect(resp.status).toBe(400);
-    resp = await req
+  });
+
+  it("uses authorization middleware", async () => {
+    const resp = await req
       .get(QR_ENDPOINT(d1Id))
       .set("Authorization", `Bearer ASD`)
       .send();
