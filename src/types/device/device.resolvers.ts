@@ -1,8 +1,9 @@
 import { defaultActivationPasswordGenerator, IDevice } from "./device.model";
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
-import { Permission } from "../../types/permissions";
+import { Permission } from "../permissions";
 import routes from "../../endpoints/routes";
 import { Resolver } from "../../db/gql";
+import { RefreshToken } from "../refreshToken/refreshToken.model";
 
 // Query
 const devices: Resolver = async (_, args, ctx) => {
@@ -19,6 +20,10 @@ const deviceRegenerateActivationPassword: Resolver = async (_, args, ctx) => {
   const device = await ctx.models.Device.findById(args.id);
   if (!device) return null;
   device.activationPassword = defaultActivationPasswordGenerator();
+  device.activated = false;
+  device.activatedAt = null;
+  await RefreshToken.findByIdAndRemove(device.refreshToken);
+  device.refreshToken = null;
   return await device.save();
 };
 

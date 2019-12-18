@@ -1,4 +1,8 @@
-import { Device, DeviceSchema } from "../device.model";
+import {
+  Device,
+  DeviceSchema,
+  generateDeviceActivationPassword
+} from "../device.model";
 import { RefreshTokenName } from "../../refreshToken/refreshToken.model";
 import lodash from "lodash";
 
@@ -22,6 +26,15 @@ describe("Device", () => {
   it("refreshToken is a reference", () => {
     expect(lodash.get(DeviceSchema, "obj.refreshToken.ref")).toBe(
       RefreshTokenName
+    );
+  });
+
+  it("generateDeviceActivationPassword returns correct function", () => {
+    const generator = generateDeviceActivationPassword(42);
+    const output = generator();
+    expect(output.payload.password).toHaveLength(42 * 2);
+    expect(output.payload.expiresAt.getTime()).toBeGreaterThan(
+      new Date().getTime()
     );
   });
 });

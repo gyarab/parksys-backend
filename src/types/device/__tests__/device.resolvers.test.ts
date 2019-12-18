@@ -84,9 +84,7 @@ describe("device resolvers", () => {
   it("Mutation.deviceRegenerateActivationPassword", async () => {
     const resp = (await resolvers.Mutation.deviceRegenerateActivationPassword(
       null,
-      {
-        id: d1.id
-      },
+      { id: d1.id },
       ctx,
       null
     )).toJSON();
@@ -95,7 +93,9 @@ describe("device resolvers", () => {
     // Verify DB
     const d1Db = await Device.findById(d1.id);
     expect(d1Db.activationPassword).not.toMatchObject(d1.activationPassword);
-    expect(d1.activated).toBe(false);
+    expect(d1Db.activated).toBe(false);
+    expect(d1Db.refreshToken).toBeNull();
+    expect(d1Db.activatedAt).toBeNull();
   });
 
   it("Mutation.deleteDevice(id)", async () => {

@@ -1,8 +1,5 @@
 import request from "supertest";
-import {
-  Device,
-  defaultActivationPasswordGenerator
-} from "../../../types/device/device.model";
+import { Device } from "../../../types/device/device.model";
 import { app, begin } from "../../../app";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
@@ -12,7 +9,8 @@ import { AuthenticationMethod } from "../../../types/authentication/authenticati
 import { RefreshToken } from "../../../types/refreshToken/refreshToken.model";
 
 const req = request(app);
-const QR_ENDPOINT = id => routes["devices/qr"].path.replace(":id", id);
+const QR_ENDPOINT = (id: string) =>
+  routes["devices/qr"].path.replace(":id", id);
 
 describe("qr endpoint", () => {
   let d1Id = null;
