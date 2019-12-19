@@ -132,35 +132,35 @@ describe("capture endpoint", () => {
 
       parkingRuleAssignments = [
         new ParkingRuleAssignment({
-          rule: parkingRules[0],
+          rules: [parkingRules[0]],
           vehicleSelectors: [vehicleSelectorAll],
           start: { hours: 0, minutes: 0 },
           end: { hours: 24, minutes: 0 },
           priority: 8
         }),
         new ParkingRuleAssignment({
-          rule: parkingRules[1],
+          rules: [parkingRules[1]],
           vehicleSelectors: [vehicleSelectorAll],
           start: { hours: 15, minutes: 30 },
           end: { hours: 17, minutes: 0 },
           priority: 11
         }),
         new ParkingRuleAssignment({
-          rule: parkingRules[2],
+          rules: [parkingRules[2]],
           vehicleSelectors: [vehicleSelectorAll],
           start: { hours: 7, minutes: 0 },
           end: { hours: 17, minutes: 0 },
           priority: 9
         }),
         new ParkingRuleAssignment({
-          rule: parkingRules[0],
+          rules: [parkingRules[0]],
           vehicleSelectors: [vehicleSelectorAll],
           start: { hours: 14, minutes: 0 },
           end: { hours: 16, minutes: 0 },
           priority: 12
         }),
         new ParkingRuleAssignment({
-          rule: parkingRules[0],
+          rules: [parkingRules[0]],
           vehicleSelectors: [vehicleSelectorAll],
           start: { hours: 17, minutes: 30 },
           end: { hours: 20, minutes: 0 },
@@ -327,7 +327,6 @@ describe("capture endpoint", () => {
       // expect(Object.keys(result)).toHaveLength(1);
       const d1 = result["2019-11-30"];
       const d2 = result["2019-12-01"];
-      expect(d1).toHaveLength(1);
       for (let i = 0; i < d1[0]; i++) {
         expect(d1[0][i]).toMatchObject(expected1[i]);
       }

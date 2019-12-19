@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
-import { IParkingRule, ParkingRuleLabel } from "./parkingRule.model";
+import {
+  IParkingRule,
+  ParkingRuleSchema,
+  ParkingRuleLabel
+} from "./parkingRule.model";
 import { TimeSchema, Time } from "../../types/time/time.model";
 import {
   VehicleSelectorSchema,
@@ -7,23 +11,24 @@ import {
 } from "./vehicleSelector.model";
 
 export interface IParkingRuleAssignment extends mongoose.Document {
-  rule: IParkingRule["_id"];
+  rules: Array<IParkingRule["_id"] | IParkingRule>;
   // Always local
   start: Time;
   end: Time;
   priority: number;
-  vehicleSelectors: IVehicleSelector["_id"][] | IVehicleSelector[];
+  vehicleSelectors: Array<IVehicleSelector["_id"] | IVehicleSelector>;
 }
 export const ParkingRuleAssignmentLabel = "ParkingRuleAssignment";
 
 // Schema definition
 export const ParkingRuleAssignmentSchema = new mongoose.Schema(
   {
-    rule: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: ParkingRuleLabel,
-      required: true
-    },
+    rules: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: ParkingRuleLabel
+      }
+    ],
     start: TimeSchema(true, true, "start"),
     end: TimeSchema(true, true, "end"),
     priority: {

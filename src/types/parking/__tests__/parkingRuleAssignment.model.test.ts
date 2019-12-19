@@ -4,7 +4,7 @@ import { VehicleSelectorEnum } from "../vehicleFilter.model";
 describe("model ParkingRuleAssignment", () => {
   it("requires correct fields", async () => {
     const assignment1 = new ParkingRuleAssignment({
-      rule: "5df3c05a28516f4419b44333",
+      rules: ["5df3c05a28516f4419b44333"],
       start: {
         hours: 9,
         minutes: 0
@@ -29,7 +29,6 @@ describe("model ParkingRuleAssignment", () => {
       await assignment2.validate();
       fail("expected an error");
     } catch (err) {
-      expect(err.errors.rule).toBeDefined();
       expect(err.errors.priority).toBeDefined();
       expect(err.errors["vehicleSelectors.0.singleton"]).toBeDefined();
       expect(err.errors["vehicleSelectors.0.filter"]).toBeDefined();
