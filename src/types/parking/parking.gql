@@ -101,21 +101,10 @@ input ParkingRulePermitAccessUpdateInput {
 
 type ParkingRuleAssignment {
   rule: ParkingRule!
-  start: Time!
-  end: Time!
+  start: DateTime!
+  end: DateTime!
   vehicleSelectors: [VehicleSelector!]
   priority: NonNegativeInt!
-}
-
-type ParkingRuleAssignmentGroup {
-  name: String!
-  ruleAssignments: [ParkingRuleAssignment!]
-}
-
-type ParkingRuleDayAssignment {
-  # Unique. Time is set to 0:00.
-  day: DateTime!
-  groups: [ParkingRuleAssignmentGroup!]
 }
 
 ## QUERIES & MUTATIONS

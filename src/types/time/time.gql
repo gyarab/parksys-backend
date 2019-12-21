@@ -1,4 +1,0 @@
-type Time {
-  hours: NonNegativeInt!
-  minutes: NonNegativeInt!
-}

@@ -5,14 +5,8 @@ describe("model ParkingRuleAssignment", () => {
   it("requires correct fields", async () => {
     const assignment1 = new ParkingRuleAssignment({
       rules: ["5df3c05a28516f4419b44333"],
-      start: {
-        hours: 9,
-        minutes: 0
-      },
-      end: {
-        hours: 24,
-        minutes: 0
-      },
+      start: new Date(),
+      end: new Date(),
       priority: 0,
       vehicleSelectors: [{ singleton: VehicleSelectorEnum.ALL }] // not requried
     });
@@ -32,10 +26,8 @@ describe("model ParkingRuleAssignment", () => {
       expect(err.errors.priority).toBeDefined();
       expect(err.errors["vehicleSelectors.0.singleton"]).toBeDefined();
       expect(err.errors["vehicleSelectors.0.filter"]).toBeDefined();
-      expect(err.errors["start.hours"]).toBeDefined();
-      expect(err.errors["start.minutes"]).toBeDefined();
-      expect(err.errors["end.hours"]).toBeDefined();
-      expect(err.errors["end.minutes"]).toBeDefined();
+      expect(err.errors.start).toBeDefined();
+      expect(err.errors.end).toBeDefined();
     }
   });
 });

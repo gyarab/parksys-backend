@@ -20,14 +20,6 @@ import {
   ParkingRuleAssignment,
   IParkingRuleAssignment
 } from "../../../types/parking/parkingRuleAssignment.model";
-import {
-  ParkingRuleDayAssignment,
-  IParkingRuleDayAssignment
-} from "../../../types/parking/parkingRuleDayAssignment.model";
-import {
-  ParkingRuleAssignmentGroup,
-  IParkingRuleAssignmentGroup
-} from "../../../types/parking/parkingRuleAssignmentGroup.model";
 import { Vehicle, IVehicle } from "../../../types/vehicle/vehicle.model";
 import {
   VehicleFilter,
@@ -68,17 +60,12 @@ describe("capture endpoint", () => {
     let vehicleFilters: Array<IVehicleFilter> = null;
     let parkingRules: Array<IParkingRule> = null;
     let parkingRuleAssignments: Array<IParkingRuleAssignment> = null;
-    let parkingAssignmentGroup: IParkingRuleAssignmentGroup = null;
-    let parkingDay1: IParkingRuleDayAssignment = null;
-    let parkingDay2: IParkingRuleDayAssignment = null;
 
     // Quite an elaborate setup
     beforeAll(async () => {
       await Promise.all([
         Vehicle.remove({}),
         VehicleFilter.remove({}),
-        ParkingRuleDayAssignment.remove({}),
-        ParkingRuleAssignmentGroup.remove({}),
         ParkingRuleAssignment.remove({}),
         ParkingRule.remove({})
       ]);
@@ -130,209 +117,215 @@ describe("capture endpoint", () => {
         ]))
       ];
 
-      parkingRuleAssignments = [
-        new ParkingRuleAssignment({
+      parkingRuleAssignments = await ParkingRuleAssignment.create([
+        {
           rules: [parkingRules[0]],
           vehicleSelectors: [vehicleSelectorAll],
-          start: { hours: 0, minutes: 0 },
-          end: { hours: 24, minutes: 0 },
+          start: new Date("2019-10-01T00:00:00.000Z"),
+          end: new Date("2019-12-02T16:00:00.000Z"),
           priority: 8
-        }),
-        new ParkingRuleAssignment({
+        },
+        {
           rules: [parkingRules[1]],
           vehicleSelectors: [vehicleSelectorAll],
-          start: { hours: 15, minutes: 30 },
-          end: { hours: 17, minutes: 0 },
+          start: new Date("2019-12-01T15:30:00.000Z"),
+          end: new Date("2019-12-01T17:00:00.000Z"),
           priority: 11
-        }),
-        new ParkingRuleAssignment({
+        },
+        {
           rules: [parkingRules[2]],
           vehicleSelectors: [vehicleSelectorAll],
-          start: { hours: 7, minutes: 0 },
-          end: { hours: 17, minutes: 0 },
+          start: new Date("2019-12-01T07:00:00.000Z"),
+          end: new Date("2019-12-01T17:00:00.000Z"),
           priority: 9
-        }),
-        new ParkingRuleAssignment({
+        },
+        {
           rules: [parkingRules[0]],
           vehicleSelectors: [vehicleSelectorAll],
-          start: { hours: 14, minutes: 0 },
-          end: { hours: 16, minutes: 0 },
+          start: new Date("2019-12-01T14:00:00.000Z"),
+          end: new Date("2019-12-01T16:00:00.000Z"),
           priority: 12
-        }),
-        new ParkingRuleAssignment({
+        },
+        {
           rules: [parkingRules[0]],
           vehicleSelectors: [vehicleSelectorAll],
-          start: { hours: 17, minutes: 30 },
-          end: { hours: 20, minutes: 0 },
+          start: new Date("2019-12-01T20:00:00.000Z"),
+          end: new Date("2019-12-02T16:00:00.000Z"),
           priority: 10
-        })
-      ];
-
-      parkingAssignmentGroup = await new ParkingRuleAssignmentGroup({
-        ruleAssignments: parkingRuleAssignments,
-        name: "regularGroup"
-      }).save();
-
-      parkingDay1 = await new ParkingRuleDayAssignment({
-        day: new Date("2019-12-01"),
-        groups: [parkingAssignmentGroup]
-      }).save();
-      parkingDay2 = await new ParkingRuleDayAssignment({
-        day: new Date("2019-12-02"),
-        groups: [parkingAssignmentGroup]
-      }).save();
+        },
+        {
+          rules: [parkingRules[0]],
+          vehicleSelectors: [vehicleSelectorAll],
+          start: new Date("2019-12-02T02:00:00.000Z"),
+          end: new Date("2019-12-02T16:00:00.000Z"),
+          priority: 12
+        },
+        {
+          rules: [parkingRules[2]],
+          vehicleSelectors: [vehicleSelectorAll],
+          start: new Date("2019-12-02T16:30:00.000Z"),
+          end: new Date("2019-12-02T18:00:00.000Z"),
+          priority: 9
+        }
+      ]);
     });
 
-    it("within one day - full day", async () => {
+    it("full day", async () => {
       const result = await findAppliedRules(
         vehicles[0],
-        new Date("2019-12-01 00:00:00"),
-        new Date("2019-12-01 23:59:59")
+        new Date("2019-12-01T00:00:00.000Z"),
+        new Date(new Date("2019-12-02T00:00:00.000Z").getTime() - 1)
       );
       const expected = [
         {
-          start: { hours: 0, minutes: 0 },
-          end: { hours: 7, minutes: 0 },
-          priority: 8
+          start: new Date("2019-12-01T00:00:00.000Z"),
+          end: new Date("2019-12-01T07:00:00.000Z"),
+          assignment: { priority: 8 }
         },
         {
-          start: { hours: 7, minutes: 0 },
-          end: { hours: 14, minutes: 0 },
-          priority: 9
+          start: new Date("2019-12-01T07:00:00.000Z"),
+          end: new Date("2019-12-01T14:00:00.000Z"),
+          assignment: { priority: 9 }
         },
         {
-          start: { hours: 14, minutes: 0 },
-          end: { hours: 16, minutes: 0 },
-          priority: 12
+          start: new Date("2019-12-01T14:00:00.000Z"),
+          end: new Date("2019-12-01T16:00:00.000Z"),
+          assignment: { priority: 12 }
         },
         {
-          start: { hours: 16, minutes: 0 },
-          end: { hours: 17, minutes: 0 },
-          priority: 11
+          start: new Date("2019-12-01T16:00:00.000Z"),
+          end: new Date("2019-12-01T17:00:00.000Z"),
+          assignment: { priority: 11 }
         },
         {
-          start: { hours: 17, minutes: 0 },
-          end: { hours: 17, minutes: 30 },
-          priority: 8
+          start: new Date("2019-12-01T17:00:00.000Z"),
+          end: new Date("2019-12-01T20:00:00.000Z"),
+          assignment: { priority: 8 }
         },
         {
-          start: { hours: 17, minutes: 30 },
-          end: { hours: 20, minutes: 0 },
-          priority: 10
-        },
-        {
-          start: { hours: 20, minutes: 30 },
-          end: { hours: 24, minutes: 0 },
-          priority: 8
+          start: new Date("2019-12-01T20:00:00.000Z"),
+          end: new Date(new Date("2019-12-02T00:00:00.000Z").getTime() - 1),
+          assignment: { priority: 10 }
         }
       ];
-      // console.log(util.inspect(result, false, 4, true));
-      // TODO: Solve the Date issues
-      // console.log(Object.keys(result));
-      // expect(Object.keys(result)).toHaveLength(1);
-      const d1 = result["2019-11-30"];
-      expect(d1).toHaveLength(1);
-      for (let i = 0; i < d1[0]; i++) {
-        expect(d1[0][i]).toMatchObject(expected[i]);
+      for (let i = 0; i < Math.min(result.length, expected.length); i++) {
+        expect(result[i]).toMatchObject(expected[i]);
       }
+      expect(result.length).toBe(expected.length);
     });
 
-    it("within one day - part of the day", async () => {
+    it("part of a day", async () => {
       const result = await findAppliedRules(
         vehicles[0],
-        new Date("2019-12-01 07:30:00"),
-        new Date("2019-12-01 19:00:00")
+        new Date("2019-12-01T06:00:00.000Z"),
+        new Date("2019-12-01T20:01:00.000Z")
       );
       const expected = [
         {
-          start: { hours: 7, minutes: 30 },
-          end: { hours: 14, minutes: 0 },
-          priority: 9
+          start: new Date("2019-12-01T06:00:00.000Z"),
+          end: new Date("2019-12-01T07:00:00.000Z"),
+          assignment: { priority: 8 }
         },
         {
-          start: { hours: 14, minutes: 0 },
-          end: { hours: 16, minutes: 0 },
-          priority: 12
+          start: new Date("2019-12-01T07:00:00.000Z"),
+          end: new Date("2019-12-01T14:00:00.000Z"),
+          assignment: { priority: 9 }
         },
         {
-          start: { hours: 16, minutes: 0 },
-          end: { hours: 17, minutes: 0 },
-          priority: 11
+          start: new Date("2019-12-01T14:00:00.000Z"),
+          end: new Date("2019-12-01T16:00:00.000Z"),
+          assignment: { priority: 12 }
         },
         {
-          start: { hours: 17, minutes: 0 },
-          end: { hours: 17, minutes: 30 },
-          priority: 8
+          start: new Date("2019-12-01T16:00:00.000Z"),
+          end: new Date("2019-12-01T17:00:00.000Z"),
+          assignment: { priority: 11 }
         },
         {
-          start: { hours: 17, minutes: 30 },
-          end: { hours: 19, minutes: 0 },
-          priority: 10
+          start: new Date("2019-12-01T17:00:00.000Z"),
+          end: new Date("2019-12-01T20:00:00.000Z"),
+          assignment: { priority: 8 }
+        },
+        {
+          start: new Date("2019-12-01T20:00:00.000Z"),
+          end: new Date("2019-12-01T20:01:00.000Z"),
+          assignment: { priority: 10 }
         }
       ];
-      // console.log(util.inspect(result, false, 4, true));
-      // TODO: Solve the Date issues
-      // console.log(Object.keys(result));
-      // expect(Object.keys(result)).toHaveLength(1);
-      const d1 = result["2019-11-30"];
-      expect(d1).toHaveLength(1);
-      for (let i = 0; i < d1[0]; i++) {
-        expect(d1[0][i]).toMatchObject(expected[i]);
+      for (let i = 0; i < Math.min(result.length, expected.length); i++) {
+        expect(result[i]).toMatchObject(expected[i]);
       }
+      expect(result.length).toBe(expected.length);
     });
 
     it("within two days - overnight", async () => {
       const result = await findAppliedRules(
         vehicles[0],
-        new Date("2019-12-01 15:03:00"),
-        new Date("2019-12-02 14:42:00")
+        new Date("2019-12-01T16:30:00.000Z"),
+        new Date("2019-12-02T17:00:00.000Z")
       );
-      const expected1 = [
+      const expected = [
         {
-          start: { hours: 15, minutes: 3 },
-          end: { hours: 16, minutes: 0 },
-          priority: 12
+          start: new Date("2019-12-01T16:30:00.000Z"),
+          end: new Date("2019-12-01T17:00:00.000Z"),
+          assignment: { priority: 11 }
         },
         {
-          start: { hours: 16, minutes: 0 },
-          end: { hours: 17, minutes: 0 },
-          priority: 11
+          start: new Date("2019-12-01T17:00:00.000Z"),
+          end: new Date("2019-12-01T20:00:00.000Z"),
+          assignment: { priority: 8 }
         },
         {
-          start: { hours: 17, minutes: 0 },
-          end: { hours: 17, minutes: 30 },
-          priority: 8
+          start: new Date("2019-12-01T20:00:00.000Z"),
+          end: new Date("2019-12-02T02:00:00.000Z"),
+          assignment: { priority: 10 }
         },
         {
-          start: { hours: 17, minutes: 30 },
-          end: { hours: 19, minutes: 0 },
-          priority: 10
+          start: new Date("2019-12-02T02:00:00.000Z"),
+          end: new Date("2019-12-02T16:00:00.000Z"),
+          assignment: { priority: 12 }
+        },
+        {
+          start: new Date("2019-12-02T16:30:00.000Z"),
+          end: new Date("2019-12-02T17:00:00.000Z"),
+          assignment: { priority: 9 }
         }
       ];
-      const expected2 = [
-        {
-          start: { hours: 0, minutes: 0 },
-          end: { hours: 14, minutes: 0 },
-          priority: 9
-        },
-        {
-          start: { hours: 14, minutes: 0 },
-          end: { hours: 14, minutes: 42 },
-          priority: 12
-        }
-      ];
-      // console.log(util.inspect(result, false, 4, true));
-      // TODO: Solve the Date issues
-      // console.log(Object.keys(result));
-      // expect(Object.keys(result)).toHaveLength(1);
-      const d1 = result["2019-11-30"];
-      const d2 = result["2019-12-01"];
-      for (let i = 0; i < d1[0]; i++) {
-        expect(d1[0][i]).toMatchObject(expected1[i]);
+      for (let i = 0; i < Math.min(result.length, expected.length); i++) {
+        expect(result[i]).toMatchObject(expected[i]);
       }
-      for (let i = 0; i < d2[0]; i++) {
-        expect(d2[0][i]).toMatchObject(expected2[i]);
-      }
+      expect(result.length).toBe(expected.length);
+    });
+
+    it("nothing should be returned", async () => {
+      const result1 = await findAppliedRules(
+        vehicles[0],
+        // Delta = 0
+        new Date("2019-12-01T16:30:00.000Z"),
+        new Date("2019-12-01T16:30:00.000Z")
+      );
+      expect(result1).toHaveLength(0);
+      const result2 = await findAppliedRules(
+        vehicles[0],
+        // No rules
+        new Date("2030-12-01T16:30:00.000Z"),
+        new Date("2030-12-02T17:00:00.000Z")
+      );
+      expect(result2).toHaveLength(0);
+      const result3 = await findAppliedRules(
+        vehicles[0],
+        // No rules
+        new Date("2019-12-02T16:15:00.000Z"),
+        new Date("2019-12-02T16:20:00.000Z")
+      );
+      expect(result3).toHaveLength(0);
+      const result4 = await findAppliedRules(
+        vehicles[0],
+        // End < Start
+        new Date("2019-12-02T17:00:00.000Z"),
+        new Date("2019-12-01T16:30:00.000Z")
+      );
+      expect(result4).toHaveLength(0);
     });
   });
 
