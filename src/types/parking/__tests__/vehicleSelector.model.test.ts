@@ -1,7 +1,4 @@
-import {
-  VehicleSelector,
-  VehicleSelectorSchema
-} from "../vehicleSelector.model";
+import { VehicleSelector } from "../vehicleSelector.model";
 import { VehicleSelectorEnum } from "../vehicleFilter.model";
 
 describe("model ParkingRule", () => {

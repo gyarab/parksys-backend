@@ -17,6 +17,10 @@ import {
   ParkingRuleAssignment
 } from "../../types/parking/parkingRuleAssignment.model";
 import { IVehicleSelector } from "../../types/parking/vehicleSelector.model";
+import {
+  VehicleFilterAction,
+  VehicleSelectorEnum
+} from "../../types/parking/vehicleFilter.model";
 
 const getLprResult = (file: any): Promise<LicensePlateRecognitionResult> => {
   return new Promise<LicensePlateRecognitionResult>((resolve, reject) => {
@@ -40,11 +44,48 @@ const getLprResult = (file: any): Promise<LicensePlateRecognitionResult> => {
   });
 };
 
-const ruleAppliesToVehicle = (
-  selectors: IVehicleSelector[],
-  vehicleId: IVehicle["_id"]
-): boolean => {
-  return true;
+export const createFilterApplier = (vehicle: IVehicle) => {
+  const vId = vehicle._id.toString();
+  // Cache answers
+  const cache: { [id: string]: boolean } = {};
+  return (ruleAssignment: IParkingRuleAssignment): boolean => {
+    const rId = ruleAssignment._id.toString();
+    if (cache[rId] !== undefined) {
+      // Return already calculated answers
+      return cache[rId];
+    }
+    const all =
+      ruleAssignment.vehicleSelectors[0].singleton === VehicleSelectorEnum.ALL;
+    const none = !all;
+    // Assumes ruleAssignment is populated
+    const idSet = ruleAssignment.vehicleSelectors
+      .slice(1) // Ignore the first one
+      .reduce<Set<string>>((idSet, selector: IVehicleSelector) => {
+        const include = selector.filter.action === VehicleFilterAction.INCLUDE;
+        const exclude = !include;
+        if ((all && exclude) || (none && include)) {
+          // Add to set
+          for (const id of selector.filter.vehicles) {
+            idSet.add(id.toString());
+          }
+        } else {
+          // Remove from set
+          for (const id of selector.filter.vehicles) {
+            idSet.delete(id.toString());
+          }
+        }
+        return idSet;
+      }, new Set());
+    // This could be substituted with an XOR operation but that would be unreadable
+    if (all) {
+      // Exclusion mode
+      cache[rId] = !idSet.has(vId);
+    } else {
+      // Inclusion mode
+      cache[rId] = idSet.has(vId);
+    }
+    return cache[rId];
+  };
 };
 
 enum RuleEventEnum {
@@ -131,6 +172,7 @@ const getAppliedRuleAssignments = (
       appliedRuleAssignments.push(ara);
     }
   };
+  const ruleAppliesToVehicle = createFilterApplier(vehicle);
   for (let i = 0; i < events.length; i++) {
     // index - into group.ruleAssignments, se - START/END
     const [index, se] = events[i];
@@ -143,7 +185,7 @@ const getAppliedRuleAssignments = (
       // No current rule assignment AND next one applies
       if (
         currentRuleAssignmentI === -1 &&
-        ruleAppliesToVehicle(ruleAssignment.vehicleSelectors, vehicle._id)
+        ruleAppliesToVehicle(ruleAssignment)
       ) {
         // Use next rule
         currentRuleAssignmentI = index;
@@ -153,7 +195,7 @@ const getAppliedRuleAssignments = (
       else if (
         currentRuleAssignmentI !== -1 &&
         currentRuleAssignment.priority < ruleAssignment.priority &&
-        ruleAppliesToVehicle(ruleAssignment.vehicleSelectors, vehicle)
+        ruleAppliesToVehicle(ruleAssignment)
       ) {
         // Apply
         addAppliedRuleAssignment({
@@ -197,7 +239,7 @@ const getAppliedRuleAssignments = (
         let nextRuleAssignmentI = heap.extractTop();
         const canBeUsed = (j: number) =>
           millisMemo[j][RuleEventEnum.END] > eventMillis &&
-          ruleAppliesToVehicle(ruleAssignments[j].vehicleSelectors, vehicle);
+          ruleAppliesToVehicle(ruleAssignments[j]);
         while (heap.size() && !canBeUsed(nextRuleAssignmentI)) {
           nextRuleAssignmentI = heap.extractTop();
         }
@@ -227,8 +269,11 @@ export const findAppliedRules = async (
   // Fetch ParkingRuleDayAssignment
   const ruleAssignments = await ParkingRuleAssignment.find({
     $or: [
+      // Either start or end are withing our interval
       { start: { $gte: start, $lte: end } },
       { end: { $gte: start, $lte: end } },
+      // Or neither of them are in the interval but the assignment
+      // still applies
       { start: { $lte: start }, end: { $gte: end } }
     ]
   }).populate({
