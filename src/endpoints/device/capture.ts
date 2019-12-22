@@ -298,6 +298,8 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
     res.send({
       data: { config: device.config }
     });
+    device.shouldSendConfig = false;
+    await device.save();
   } else {
     res.status(200).end();
   }
@@ -311,7 +313,7 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
     const captureTime = filenameToDate(filename);
     const result = await getLprResult(files[filename]);
     // console.log(id, "RSLT", new Date(), result);
-    handleResult(result, device, captureTime);
+    await handleResult(result, device, captureTime);
     return next();
   } catch (err) {
     return next(err);

@@ -37,8 +37,8 @@ const CAPTURE_ENDPOINT = () => routes["devices/capture"].path;
 
 describe("capture endpoint", () => {
   let validAccessToken = null;
-  it("should return config", async () => {
-    const resp = await req
+  it("should return config once", async () => {
+    let resp = await req
       .post(CAPTURE_ENDPOINT())
       .attach("capture_" + new Date().getTime(), testImagePath)
       .set("Authorization", `Bearer ${validAccessToken}`);
@@ -51,6 +51,13 @@ describe("capture endpoint", () => {
         }
       }
     });
+
+    resp = await req
+      .post(CAPTURE_ENDPOINT())
+      .attach("capture_" + new Date().getTime(), testImagePath)
+      .set("Authorization", `Bearer ${validAccessToken}`);
+    expect(resp.status).toBe(200);
+    expect(resp.body).toStrictEqual({});
   });
 
   describe("findAppliedRules", () => {
