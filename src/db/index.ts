@@ -4,7 +4,8 @@ import config from "../config";
 
 const options = {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  useFindAndModify: false
 };
 
 const clear = async () => {

@@ -106,6 +106,8 @@ extend type Query {
 extend type Mutation {
   createVehicleFilter(input: VehicleFilterCreateInput!): VehicleFilter!
   updateVehicleFilter(id: ID!, input: VehicleFilterUpdateInput!): VehicleFilter!
+  deleteVehicleFilter(id: ID!): VehicleFilter!
+
   createParkingRulePermitAccess(
     input: ParkingRulePermitAccessCreateInput!
   ): ParkingRulePermitAccess!

@@ -10,11 +10,23 @@ const createVehicle: Resolver = async (_, args, ctx) => {
   return await new ctx.models.Vehicle(args.input).save();
 };
 
+const deleteVehicle: Resolver = async (_, args, ctx) => {
+  return await ctx.models.Vehicle.findByIdAndRemove(args.id);
+};
+
+const deleteVehicleByLicensePlate: Resolver = async (_, args, ctx) => {
+  return await ctx.models.Vehicle.findOneAndDelete({
+    licensePlate: args.licensePlate
+  });
+};
+
 export default {
   Query: {
     vehicles
   },
   Mutation: {
-    createVehicle
+    createVehicle,
+    deleteVehicle,
+    deleteVehicleByLicensePlate
   }
 };

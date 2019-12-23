@@ -15,4 +15,6 @@ extend type Query {
 
 extend type Mutation {
   createVehicle(input: VehicleCreateInput!): Vehicle!
+  deleteVehicle(id: ID!): Vehicle!
+  deleteVehicleByLicensePlate(licensePlate: String!): Vehicle!
 }

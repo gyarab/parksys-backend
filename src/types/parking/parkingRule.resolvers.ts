@@ -3,24 +3,28 @@ import {
   IParkingRulePermitAccess,
   IParkingRuleTimedFee
 } from "./parkingRule.model";
+import {
+  gqlFindByIdUpdate,
+  ModelGetter,
+  gqlFindUsingFilter,
+  gqlCreate
+} from "../../db/genericResolvers";
+
+const ruleModelGetter: ModelGetter = ctx => ctx.models.ParkingRule;
+const permitAccessModelGetter: ModelGetter = ctx =>
+  ctx.models.ParkingRulePermitAccess;
 
 // Query
-const rules: Resolver = async (_, __, ctx) => {
-  return await ctx.models.ParkingRule.find({});
-};
+const rules: Resolver = gqlFindUsingFilter(ruleModelGetter);
 
 // Mutation
-const createParkingRulePermitAccess: Resolver = async (_, args, ctx) => {
-  return await new ctx.models.ParkingRulePermitAccess(args.input).save();
-};
+const createParkingRulePermitAccess: Resolver = gqlCreate(
+  permitAccessModelGetter
+);
 
-const updateParkingRulePermitAccess: Resolver = async (_, args, ctx) => {
-  return await ctx.models.ParkingRulePermitAccess.findByIdAndUpdate(
-    args.id,
-    args.input,
-    { new: true }
-  );
-};
+const updateParkingRulePermitAccess: Resolver = gqlFindByIdUpdate(
+  permitAccessModelGetter
+);
 
 // ParkingRuleTimedFee
 

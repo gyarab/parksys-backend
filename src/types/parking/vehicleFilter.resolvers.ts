@@ -1,7 +1,15 @@
 import { Resolver } from "../../db/gql";
+import {
+  ModelGetter,
+  gqlCreate,
+  gqlFindByIdUpdate,
+  gqlFindByIdDelete
+} from "../../db/genericResolvers";
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { Permission } from "../permissions";
 import { IVehicleFilter } from "./vehicleFilter.model";
+
+const vfGetter: ModelGetter = ctx => ctx.models.VehicleFilter;
 
 // Query
 const vehicleFilters: Resolver = async (_, args, ctx) => {
@@ -9,15 +17,9 @@ const vehicleFilters: Resolver = async (_, args, ctx) => {
 };
 
 // Mutation
-const createVehicleFilter: Resolver = async (_, args, ctx) => {
-  return await new ctx.models.VehicleFilter(args.input).save();
-};
-
-const updateVehicleFilter: Resolver = async (_, args, ctx) => {
-  return await ctx.models.VehicleFilter.findByIdAndUpdate(args.id, args.input, {
-    new: true
-  });
-};
+const createVehicleFilter: Resolver = gqlCreate(vfGetter);
+const updateVehicleFilter: Resolver = gqlFindByIdUpdate(vfGetter);
+const deleteVehicleFilter: Resolver = gqlFindByIdDelete(vfGetter);
 
 // VehicleFilter
 const vehicles: Resolver = async (filter: IVehicleFilter, _, ctx) => {
@@ -39,6 +41,10 @@ export default {
     updateVehicleFilter: checkPermissionsGqlBuilder(
       [Permission.VEHICLES],
       updateVehicleFilter
+    ),
+    deleteVehicleFilter: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      deleteVehicleFilter
     )
   },
   VehicleFilter: {
