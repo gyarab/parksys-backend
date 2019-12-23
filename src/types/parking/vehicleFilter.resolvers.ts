@@ -8,23 +8,23 @@ const vehicleFilters: Resolver = async (_, args, ctx) => {
   return await ctx.models.VehicleFilter.find({});
 };
 
-const vehicles: Resolver = async (filter: IVehicleFilter, _, ctx) => {
-  const vehs: IVehicleFilter = await ctx.models.VehicleFilter.populate(filter, {
-    path: "vehicles"
-  });
-  return vehs.vehicles;
-};
-
 // Mutation
 const createVehicleFilter: Resolver = async (_, args, ctx) => {
   return await new ctx.models.VehicleFilter(args.input).save();
 };
 
 const updateVehicleFilter: Resolver = async (_, args, ctx) => {
-  return await ctx.models.VehicleFilter.findOneAndUpdate(
-    { _id: args.id },
-    args.input
-  );
+  return await ctx.models.VehicleFilter.findByIdAndUpdate(args.id, args.input, {
+    new: true
+  });
+};
+
+// VehicleFilter
+const vehicles: Resolver = async (filter: IVehicleFilter, _, ctx) => {
+  const { vehicles } = await ctx.models.VehicleFilter.populate(filter, {
+    path: "vehicles"
+  });
+  return vehicles;
 };
 
 export default {

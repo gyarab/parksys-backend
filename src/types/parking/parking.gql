@@ -45,22 +45,10 @@ input VehicleFilterUpdateInput {
   vehicles: [ID!]
 }
 
-input VehicleSelectorInput {
-  filter: ID
-  singleton: VehicleSelectorEnum
-}
-
-enum VehicleSelectorEnum {
+enum VehicleSelectorMode {
   ALL
   NONE
 }
-
-# Wrapper around VehicleSelectorEnum.
-type VehicleSelectorSingleton {
-  value: VehicleSelectorEnum!
-}
-
-union VehicleSelector = VehicleFilter | VehicleSelectorSingleton
 
 interface ParkingRule {
   id: ID!
@@ -103,7 +91,8 @@ type ParkingRuleAssignment {
   rule: ParkingRule!
   start: DateTime!
   end: DateTime!
-  vehicleSelectors: [VehicleSelector!]
+  vehicleSelectorMode: VehicleSelectorMode!
+  vehicleFilters: [VehicleFilter!]
   priority: NonNegativeInt!
 }
 

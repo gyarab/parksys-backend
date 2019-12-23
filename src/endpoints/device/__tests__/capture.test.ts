@@ -22,12 +22,12 @@ import {
 } from "../../../types/parking/parkingRule.model";
 import {
   ParkingRuleAssignment,
-  IParkingRuleAssignment
+  IParkingRuleAssignment,
+  VehicleSelectorMode
 } from "../../../types/parking/parkingRuleAssignment.model";
 import { Vehicle, IVehicle } from "../../../types/vehicle/vehicle.model";
 import {
   VehicleFilter,
-  VehicleSelectorEnum,
   IVehicleFilter,
   VehicleFilterAction
 } from "../../../types/parking/vehicleFilter.model";
@@ -71,8 +71,6 @@ describe("capture endpoint", () => {
 
     describe("select all with filters", () => {
       let vehicles: Array<IVehicle> = null;
-      let vehicleSelectorAll = null;
-      let vehicleSelectorNone = null;
       let vehicleFilters: Array<IVehicleFilter> = null;
       let parkingRules: Array<IParkingRule> = null;
       let parkingRuleAssignments: Array<IParkingRuleAssignment> = null;
@@ -95,8 +93,6 @@ describe("capture endpoint", () => {
           { licensePlate: "101Z0101" }
         ]);
 
-        vehicleSelectorAll = { singleton: VehicleSelectorEnum.ALL };
-        vehicleSelectorNone = { singleton: VehicleSelectorEnum.NONE };
         vehicleFilters = await VehicleFilter.create([
           {
             name: "filter1",
@@ -136,49 +132,56 @@ describe("capture endpoint", () => {
         parkingRuleAssignments = await ParkingRuleAssignment.create([
           {
             rules: [parkingRules[0]],
-            vehicleSelectors: [vehicleSelectorAll],
+            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilters: [],
             start: new Date("2019-10-01T00:00:00.000Z"),
             end: new Date("2019-12-02T16:00:00.000Z"),
             priority: 8
           },
           {
             rules: [parkingRules[1]],
-            vehicleSelectors: [vehicleSelectorAll],
+            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilters: [],
             start: new Date("2019-12-01T15:30:00.000Z"),
             end: new Date("2019-12-01T17:00:00.000Z"),
             priority: 11
           },
           {
             rules: [parkingRules[2]],
-            vehicleSelectors: [vehicleSelectorAll],
+            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilters: [],
             start: new Date("2019-12-01T07:00:00.000Z"),
             end: new Date("2019-12-01T17:00:00.000Z"),
             priority: 9
           },
           {
             rules: [parkingRules[0]],
-            vehicleSelectors: [vehicleSelectorAll],
+            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilters: [],
             start: new Date("2019-12-01T14:00:00.000Z"),
             end: new Date("2019-12-01T16:00:00.000Z"),
             priority: 12
           },
           {
             rules: [parkingRules[0]],
-            vehicleSelectors: [vehicleSelectorAll],
+            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilters: [],
             start: new Date("2019-12-01T20:00:00.000Z"),
             end: new Date("2019-12-02T16:00:00.000Z"),
             priority: 10
           },
           {
             rules: [parkingRules[0]],
-            vehicleSelectors: [vehicleSelectorAll],
+            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilters: [],
             start: new Date("2019-12-02T02:00:00.000Z"),
             end: new Date("2019-12-02T16:00:00.000Z"),
             priority: 12
           },
           {
             rules: [parkingRules[2]],
-            vehicleSelectors: [vehicleSelectorAll],
+            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilters: [],
             start: new Date("2019-12-02T16:30:00.000Z"),
             end: new Date("2019-12-02T18:00:00.000Z"),
             priority: 9
@@ -399,30 +402,24 @@ describe("capture endpoint", () => {
         {
           ...rACommons,
           // None
-          vehicleSelectors: [{ singleton: VehicleSelectorEnum.NONE }]
+          vehicleSelectorMode: VehicleSelectorMode.NONE
         },
         {
           ...rACommons,
           // ALL
-          vehicleSelectors: [{ singleton: VehicleSelectorEnum.ALL }]
+          vehicleSelectorMode: VehicleSelectorMode.ALL
         },
         {
           ...rACommons,
           // 123 only
-          vehicleSelectors: [
-            { singleton: VehicleSelectorEnum.NONE },
-            { filter: include456 },
-            { filter: include123 },
-            { filter: exclude456 }
-          ]
+          vehicleSelectorMode: VehicleSelectorMode.NONE,
+          vehicleFilters: [include456, include123, exclude456]
         },
         {
           ...rACommons,
           // 456 only
-          vehicleSelectors: [
-            { singleton: VehicleSelectorEnum.ALL },
-            { filter: exclude123 }
-          ]
+          vehicleSelectorMode: VehicleSelectorMode.ALL,
+          vehicleFilters: [exclude123]
         }
       ]);
     });

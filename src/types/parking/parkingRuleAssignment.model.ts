@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
 import { IParkingRule, ParkingRuleLabel } from "./parkingRule.model";
-import {
-  VehicleSelectorSchema,
-  IVehicleSelector
-} from "./vehicleSelector.model";
+import { IVehicleFilter, VehicleFilterLabel } from "./vehicleFilter.model";
+
+export enum VehicleSelectorMode {
+  ALL = "ALL",
+  NONE = "NONE"
+}
 
 export interface IParkingRuleAssignment extends mongoose.Document {
   rules: Array<IParkingRule["_id"] | IParkingRule>;
@@ -11,7 +13,8 @@ export interface IParkingRuleAssignment extends mongoose.Document {
   start: Date;
   end: Date;
   priority: number;
-  vehicleSelectors: Array<IVehicleSelector["_id"] | IVehicleSelector>;
+  vehicleSelectorMode: VehicleSelectorMode;
+  vehicleFilters: Array<IVehicleFilter["_id"]> | Array<IVehicleFilter>;
 }
 export const ParkingRuleAssignmentLabel = "ParkingRuleAssignment";
 
@@ -35,7 +38,17 @@ export const ParkingRuleAssignmentSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  vehicleSelectors: [VehicleSelectorSchema]
+  vehicleSelectorMode: {
+    type: String,
+    enum: Object.keys(VehicleSelectorMode),
+    required: true
+  },
+  vehicleFilters: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: VehicleFilterLabel
+    }
+  ]
 });
 
 // Schema Creation

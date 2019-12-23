@@ -1,5 +1,7 @@
-import { ParkingRuleAssignment } from "../parkingRuleAssignment.model";
-import { VehicleSelectorEnum } from "../vehicleFilter.model";
+import {
+  ParkingRuleAssignment,
+  VehicleSelectorMode
+} from "../parkingRuleAssignment.model";
 
 describe("model ParkingRuleAssignment", () => {
   it("requires correct fields", async () => {
@@ -8,7 +10,7 @@ describe("model ParkingRuleAssignment", () => {
       start: new Date(),
       end: new Date(),
       priority: 0,
-      vehicleSelectors: [{ singleton: VehicleSelectorEnum.ALL }] // not requried
+      vehicleSelectorMode: VehicleSelectorMode.ALL
     });
     try {
       await assignment1.validate();
@@ -24,8 +26,7 @@ describe("model ParkingRuleAssignment", () => {
       fail("expected an error");
     } catch (err) {
       expect(err.errors.priority).toBeDefined();
-      expect(err.errors["vehicleSelectors.0.singleton"]).toBeDefined();
-      expect(err.errors["vehicleSelectors.0.filter"]).toBeDefined();
+      expect(err.errors.vehicleSelectorMode).toBeDefined();
       expect(err.errors.start).toBeDefined();
       expect(err.errors.end).toBeDefined();
     }

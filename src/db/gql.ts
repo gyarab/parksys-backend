@@ -7,7 +7,6 @@ import userResolvers from "../types/user/user.resolvers";
 import deviceResolvers from "../types/device/device.resolvers";
 import vehicleFilterResolvers from "../types/parking/vehicleFilter.resolvers";
 import parkingRuleResolvers from "../types/parking/parkingRule.resolvers";
-import vehicleSelectorResolvers from "../types/parking/vehicleSelector.resolvers";
 import vehicleResolvers from "../types/vehicle/vehicle.resolvers";
 import authenticationResolvers from "../types/authentication/authentication.resolvers";
 import { Permission } from "../types/permissions";
@@ -21,7 +20,6 @@ import { IRefreshToken } from "../types/refreshToken/refreshToken.model";
 import { IAuthentication } from "../types/authentication/authentication.model";
 import gql from "graphql-tag";
 import { IVehicleFilter } from "../types/parking/vehicleFilter.model";
-import { IVehicleSelector } from "../types/parking/vehicleSelector.model";
 import {
   IParkingRule,
   IParkingRuleTimedFee,
@@ -40,7 +38,6 @@ export type Context = Pick<PRequest<any>, "token"> & {
     ParkingRuleTimedFee: Model<IParkingRuleTimedFee, {}>;
     ParkingRulePermitAccess: Model<IParkingRulePermitAccess, {}>;
     Vehicle: Model<IVehicle, {}>;
-    VehicleSelector: Model<IVehicleSelector, {}>;
   };
 };
 
@@ -114,7 +111,6 @@ export const resolvers = _.merge(
   deviceResolvers,
   vehicleResolvers,
   vehicleFilterResolvers,
-  vehicleSelectorResolvers,
   parkingRuleResolvers,
   authenticationResolvers,
   {

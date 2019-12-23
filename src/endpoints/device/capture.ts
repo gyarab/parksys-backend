@@ -14,13 +14,10 @@ import {
 import { LinearHeap } from "../../utils/heap";
 import {
   IParkingRuleAssignment,
-  ParkingRuleAssignment
+  ParkingRuleAssignment,
+  VehicleSelectorMode
 } from "../../types/parking/parkingRuleAssignment.model";
-import { IVehicleSelector } from "../../types/parking/vehicleSelector.model";
-import {
-  VehicleFilterAction,
-  VehicleSelectorEnum
-} from "../../types/parking/vehicleFilter.model";
+import { VehicleFilterAction } from "../../types/parking/vehicleFilter.model";
 
 const getLprResult = (file: any): Promise<LicensePlateRecognitionResult> => {
   return new Promise<LicensePlateRecognitionResult>((resolve, reject) => {
@@ -54,23 +51,21 @@ export const createFilterApplier = (vehicle: IVehicle) => {
       // Return already calculated answers
       return cache[rId];
     }
-    const all =
-      ruleAssignment.vehicleSelectors[0].singleton === VehicleSelectorEnum.ALL;
+    const all = ruleAssignment.vehicleSelectorMode === VehicleSelectorMode.ALL;
     const none = !all;
     // Assumes ruleAssignment is populated
     const idSet = new Set<string>();
-    for (let i = 1; i < ruleAssignment.vehicleSelectors.length; i++) {
-      const selector: IVehicleSelector = ruleAssignment.vehicleSelectors[i];
-      const include = selector.filter.action === VehicleFilterAction.INCLUDE;
+    for (const filter of ruleAssignment.vehicleFilters) {
+      const include = filter.action === VehicleFilterAction.INCLUDE;
       const exclude = !include;
       if ((all && exclude) || (none && include)) {
         // Add to set
-        for (const id of selector.filter.vehicles) {
+        for (const id of filter.vehicles) {
           idSet.add(id.toString());
         }
       } else {
         // Remove from set
-        for (const id of selector.filter.vehicles) {
+        for (const id of filter.vehicles) {
           idSet.delete(id.toString());
         }
       }
@@ -276,7 +271,7 @@ export const findAppliedRules = async (
       { start: { $lte: start }, end: { $gte: end } }
     ]
   }).populate({
-    path: "vehicleSelectors.filter"
+    path: "vehicleFilters"
   });
   // Result object
   const appliedRuleAssignments = getAppliedRuleAssignments(

@@ -1,11 +1,6 @@
 import mongoose from "mongoose";
 import { VehicleLabel, IVehicle } from "../vehicle/vehicle.model";
 
-export enum VehicleSelectorEnum {
-  ALL = "ALL",
-  NONE = "NONE"
-}
-
 export enum VehicleFilterAction {
   EXCLUDE = "EXCLUDE",
   INCLUDE = "INCLUDE"
