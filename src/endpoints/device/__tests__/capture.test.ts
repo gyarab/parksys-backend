@@ -346,7 +346,7 @@ describe("capture endpoint", () => {
     });
   });
 
-  describe.only("createFilterApplier", () => {
+  describe("createFilterApplier", () => {
     let vehicle1: IVehicle = null;
     let vehicle2: IVehicle = null;
     let ruleAssignment1: IParkingRuleAssignment = null;

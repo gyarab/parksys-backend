@@ -58,24 +58,23 @@ export const createFilterApplier = (vehicle: IVehicle) => {
       ruleAssignment.vehicleSelectors[0].singleton === VehicleSelectorEnum.ALL;
     const none = !all;
     // Assumes ruleAssignment is populated
-    const idSet = ruleAssignment.vehicleSelectors
-      .slice(1) // Ignore the first one
-      .reduce<Set<string>>((idSet, selector: IVehicleSelector) => {
-        const include = selector.filter.action === VehicleFilterAction.INCLUDE;
-        const exclude = !include;
-        if ((all && exclude) || (none && include)) {
-          // Add to set
-          for (const id of selector.filter.vehicles) {
-            idSet.add(id.toString());
-          }
-        } else {
-          // Remove from set
-          for (const id of selector.filter.vehicles) {
-            idSet.delete(id.toString());
-          }
+    const idSet = new Set<string>();
+    for (let i = 1; i < ruleAssignment.vehicleSelectors.length; i++) {
+      const selector: IVehicleSelector = ruleAssignment.vehicleSelectors[i];
+      const include = selector.filter.action === VehicleFilterAction.INCLUDE;
+      const exclude = !include;
+      if ((all && exclude) || (none && include)) {
+        // Add to set
+        for (const id of selector.filter.vehicles) {
+          idSet.add(id.toString());
         }
-        return idSet;
-      }, new Set());
+      } else {
+        // Remove from set
+        for (const id of selector.filter.vehicles) {
+          idSet.delete(id.toString());
+        }
+      }
+    }
     // This could be substituted with an XOR operation but that would be unreadable
     if (all) {
       // Exclusion mode
