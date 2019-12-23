@@ -4,29 +4,26 @@ import {
   gqlCreate,
   gqlFindByIdUpdate,
   gqlFindByIdDelete,
-  gqlFindUsingFilter
+  gqlFindUsingFilter,
+  gqlPopulate
 } from "../../db/genericResolvers";
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { Permission } from "../permissions";
 import { IVehicleFilter } from "./vehicleFilter.model";
 
-const vfGetter: ModelGetter = ctx => ctx.models.VehicleFilter;
+const modelGetter: ModelGetter<IVehicleFilter> = ctx =>
+  ctx.models.VehicleFilter;
 
 // Query
-const vehicleFilters: Resolver = gqlFindUsingFilter(vfGetter);
+const vehicleFilters: Resolver = gqlFindUsingFilter(modelGetter);
 
 // Mutation
-const createVehicleFilter: Resolver = gqlCreate(vfGetter);
-const updateVehicleFilter: Resolver = gqlFindByIdUpdate(vfGetter);
-const deleteVehicleFilter: Resolver = gqlFindByIdDelete(vfGetter);
+const createVehicleFilter: Resolver = gqlCreate(modelGetter);
+const updateVehicleFilter: Resolver = gqlFindByIdUpdate(modelGetter);
+const deleteVehicleFilter: Resolver = gqlFindByIdDelete(modelGetter);
 
 // VehicleFilter
-const vehicles: Resolver = async (filter: IVehicleFilter, _, ctx) => {
-  const { vehicles } = await ctx.models.VehicleFilter.populate(filter, {
-    path: "vehicles"
-  });
-  return vehicles;
-};
+const vehicles: Resolver = gqlPopulate(modelGetter, "vehicles");
 
 export default {
   Query: {

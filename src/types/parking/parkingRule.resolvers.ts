@@ -1,7 +1,8 @@
 import { Resolver } from "../../db/gql";
 import {
   IParkingRulePermitAccess,
-  IParkingRuleTimedFee
+  IParkingRuleTimedFee,
+  IParkingRule
 } from "./parkingRule.model";
 import {
   gqlFindByIdUpdate,
@@ -10,8 +11,9 @@ import {
   gqlCreate
 } from "../../db/genericResolvers";
 
-const ruleModelGetter: ModelGetter = ctx => ctx.models.ParkingRule;
-const permitAccessModelGetter: ModelGetter = ctx =>
+const ruleModelGetter: ModelGetter<IParkingRule> = ctx =>
+  ctx.models.ParkingRule;
+const permitAccessModelGetter: ModelGetter<IParkingRulePermitAccess> = ctx =>
   ctx.models.ParkingRulePermitAccess;
 
 // Query

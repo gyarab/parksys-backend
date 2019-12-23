@@ -4,12 +4,14 @@ import {
   gqlCreate,
   gqlFindByIdUpdate,
   gqlFindByIdDelete,
-  gqlFindUsingFilter
+  gqlFindUsingFilter,
+  gqlPopulate
 } from "../../db/genericResolvers";
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { IParkingRuleAssignment } from "./parkingRuleAssignment.model";
 
-const modelGetter: ModelGetter = ctx => ctx.models.ParkingRuleAssignment;
+const modelGetter: ModelGetter<IParkingRuleAssignment> = ctx =>
+  ctx.models.ParkingRuleAssignment;
 
 // Query
 const parkingRuleAssignments: Resolver = gqlFindUsingFilter(modelGetter);
@@ -20,29 +22,9 @@ const updateParkingRuleAssignment: Resolver = gqlFindByIdUpdate(modelGetter);
 const deleteParkingRuleAssignment: Resolver = gqlFindByIdDelete(modelGetter);
 
 // ParkingRuleAssignment
-const rules: Resolver = async (
-  ruleAssignment: IParkingRuleAssignment,
-  _,
-  ctx
-) => {
-  const { rules } = await ctx.models.ParkingRuleAssignment.populate(
-    ruleAssignment,
-    { path: "rules" }
-  );
-  return rules;
-};
+const rules: Resolver = gqlPopulate(modelGetter, "rules");
 
-const vehicleFilters: Resolver = async (
-  ruleAssignment: IParkingRuleAssignment,
-  _,
-  ctx
-) => {
-  const { vehicleFilters } = await ctx.models.ParkingRuleAssignment.populate(
-    ruleAssignment,
-    { path: "vehicleFilters" }
-  );
-  return vehicleFilters;
-};
+const vehicleFilters: Resolver = gqlPopulate(modelGetter, "vehicleFilters");
 
 export default {
   Query: {

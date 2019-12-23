@@ -3,12 +3,19 @@ import {
   ModelGetter,
   gqlFindByIdUpdate,
   gqlFindByIdDelete,
-  gqlFindUsingFilter
+  gqlFindUsingFilter,
+  gqlPopulate
 } from "../genericResolvers";
 import { Resolver } from "../gql";
 import { connect, disconnect } from "../index";
-import { User } from "../../types/user/user.model";
+import { User, IUser } from "../../types/user/user.model";
 import { models } from "../models";
+import { createTokenPair } from "../../auth/auth";
+import { AuthenticationMethod } from "../../types/authentication/authentication.model";
+import {
+  RefreshToken,
+  IRefreshToken
+} from "../../types/refreshToken/refreshToken.model";
 
 const user1 = {
   name: "user1",
@@ -21,11 +28,15 @@ const user2 = {
 };
 
 describe("generic resolvers", () => {
-  const userModelGetter: ModelGetter = ctx => ctx.models.User;
+  const userModelGetter: ModelGetter<IUser> = ctx => ctx.models.User;
   const userCreate: Resolver = gqlCreate(userModelGetter);
   const userUpdate: Resolver = gqlFindByIdUpdate(userModelGetter);
   const userDelete: Resolver = gqlFindByIdDelete(userModelGetter);
   const userFind: Resolver = gqlFindUsingFilter(userModelGetter);
+  const userPopulateRefreshTokens: Resolver = gqlPopulate(
+    userModelGetter,
+    "refreshTokens"
+  );
 
   it("gqlCreate", async () => {
     const user = await userCreate(null, { input: user1 }, { models }, null);
@@ -79,7 +90,7 @@ describe("generic resolvers", () => {
     expect(users[0].toObject()).toMatchObject(dbUser.toObject());
   });
 
-  it("gqlFindUsingFilter - implicit all", async () => {
+  it("gqlFindUsingFilter - implicitly all", async () => {
     await new User(user1).save();
     await new User(user2).save();
     const users = await userFind(null, {}, { models }, null);
@@ -88,7 +99,67 @@ describe("generic resolvers", () => {
     expect(users).toHaveLength(2);
   });
 
-  afterEach(async () => Promise.all([User.remove({})]));
+  it("gqlPopulate - not populated", async () => {
+    const {
+      refreshToken: { obj: refreshTokenObj }
+    } = await createTokenPair(
+      {},
+      { method: AuthenticationMethod.TEST },
+      RefreshToken
+    );
+    const user = await new User({
+      ...user1,
+      refreshTokens: [refreshTokenObj]
+    }).save();
+    const dbPopulatedUser: IUser = await User.populate(user, {
+      path: "refreshTokens"
+    });
+
+    const refreshTokens: Array<IRefreshToken> = await userPopulateRefreshTokens(
+      user,
+      {},
+      { models },
+      null
+    );
+    expect(dbPopulatedUser.toObject()).toMatchObject({
+      ...user1,
+      refreshTokens: refreshTokens.map(r => r.toObject())
+    });
+  });
+
+  it("gqlPopulate - already populated", async () => {
+    const {
+      refreshToken: { obj: refreshTokenObj }
+    } = await createTokenPair(
+      {},
+      { method: AuthenticationMethod.TEST },
+      RefreshToken
+    );
+    const user = await new User({
+      ...user1,
+      refreshTokens: [refreshTokenObj]
+    }).save();
+    const dbPopulatedUser: IUser = await User.populate(user, {
+      path: "refreshTokens"
+    });
+
+    await disconnect();
+    const refreshTokens: Array<IRefreshToken> = await userPopulateRefreshTokens(
+      dbPopulatedUser,
+      {},
+      { models },
+      null
+    );
+    expect(dbPopulatedUser.toObject()).toMatchObject({
+      ...user1,
+      refreshTokens: refreshTokens.map(r => r.toObject())
+    });
+    await connect();
+  });
+
+  afterEach(async () =>
+    Promise.all([User.remove({}), RefreshToken.remove({})])
+  );
   afterAll(disconnect);
   beforeAll(connect);
 });

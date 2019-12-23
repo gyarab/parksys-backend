@@ -11,7 +11,7 @@ import {
   gqlFindUsingFilter
 } from "../../db/genericResolvers";
 
-const modelGetter: ModelGetter = ctx => ctx.models.Device;
+const modelGetter: ModelGetter<IDevice> = ctx => ctx.models.Device;
 
 // Query
 const devices: Resolver = gqlFindUsingFilter(modelGetter);
