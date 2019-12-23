@@ -15,13 +15,12 @@ const permitAccessModelGetter: ModelGetter = ctx =>
   ctx.models.ParkingRulePermitAccess;
 
 // Query
-const rules: Resolver = gqlFindUsingFilter(ruleModelGetter);
+const parkingRules: Resolver = gqlFindUsingFilter(ruleModelGetter);
 
 // Mutation
 const createParkingRulePermitAccess: Resolver = gqlCreate(
   permitAccessModelGetter
 );
-
 const updateParkingRulePermitAccess: Resolver = gqlFindByIdUpdate(
   permitAccessModelGetter
 );
@@ -32,7 +31,7 @@ const updateParkingRulePermitAccess: Resolver = gqlFindByIdUpdate(
 
 export default {
   Query: {
-    rules
+    parkingRules
   },
   ParkingRule: {
     __resolveType(

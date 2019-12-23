@@ -3,6 +3,7 @@ import { Device } from "../types/device/device.model";
 import { RefreshToken } from "../types/refreshToken/refreshToken.model";
 import { Authentication } from "../types/authentication/authentication.model";
 import { VehicleFilter } from "../types/parking/vehicleFilter.model";
+import { ParkingRuleAssignment } from "../types/parking/parkingRuleAssignment.model";
 import { Vehicle } from "../types/vehicle/vehicle.model";
 import {
   ParkingRule,
@@ -19,5 +20,6 @@ export const models = {
   VehicleFilter,
   ParkingRule,
   ParkingRuleTimedFee,
-  ParkingRulePermitAccess
+  ParkingRulePermitAccess,
+  ParkingRuleAssignment
 };

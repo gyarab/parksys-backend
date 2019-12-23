@@ -26,8 +26,9 @@ describe("VehicleFilter resolvers", () => {
     ]);
     const resolverFilters = await resolvers.Query.vehicleFilters(
       null,
-      null,
-      ctx
+      {},
+      ctx,
+      null
     );
     expect(resolverFilters[0].toObject()).toMatchObject(
       dbFilters[0].toObject()

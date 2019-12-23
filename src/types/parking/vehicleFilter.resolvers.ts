@@ -3,7 +3,8 @@ import {
   ModelGetter,
   gqlCreate,
   gqlFindByIdUpdate,
-  gqlFindByIdDelete
+  gqlFindByIdDelete,
+  gqlFindUsingFilter
 } from "../../db/genericResolvers";
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { Permission } from "../permissions";
@@ -12,9 +13,7 @@ import { IVehicleFilter } from "./vehicleFilter.model";
 const vfGetter: ModelGetter = ctx => ctx.models.VehicleFilter;
 
 // Query
-const vehicleFilters: Resolver = async (_, args, ctx) => {
-  return await ctx.models.VehicleFilter.find({});
-};
+const vehicleFilters: Resolver = gqlFindUsingFilter(vfGetter);
 
 // Mutation
 const createVehicleFilter: Resolver = gqlCreate(vfGetter);

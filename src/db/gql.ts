@@ -9,10 +9,11 @@ import vehicleFilterResolvers from "../types/parking/vehicleFilter.resolvers";
 import parkingRuleResolvers from "../types/parking/parkingRule.resolvers";
 import vehicleResolvers from "../types/vehicle/vehicle.resolvers";
 import authenticationResolvers from "../types/authentication/authentication.resolvers";
+import parkingRuleAssignmentResolvers from "../types/parking/parkingRuleAssignment.resolvers";
 import { Permission } from "../types/permissions";
 import { PRequest } from "../app";
 import { resolvers as scalarResolvers } from "graphql-scalars";
-import { Model } from "mongoose";
+import { Model, Document } from "mongoose";
 import { models } from "./models";
 import { IUser } from "../types/user/user.model";
 import { IDevice } from "../types/device/device.model";
@@ -26,6 +27,7 @@ import {
   IParkingRulePermitAccess
 } from "../types/parking/parkingRule.model";
 import { IVehicle } from "../types/vehicle/vehicle.model";
+import { IParkingRuleAssignment } from "../types/parking/parkingRuleAssignment.model";
 
 export type Context = Pick<PRequest<any>, "token"> & {
   models: {
@@ -38,6 +40,7 @@ export type Context = Pick<PRequest<any>, "token"> & {
     ParkingRuleTimedFee: Model<IParkingRuleTimedFee, {}>;
     ParkingRulePermitAccess: Model<IParkingRulePermitAccess, {}>;
     Vehicle: Model<IVehicle, {}>;
+    ParkingRuleAssignment: Model<IParkingRuleAssignment, {}>;
   };
 };
 
@@ -113,10 +116,11 @@ export const resolvers = _.merge(
   vehicleFilterResolvers,
   parkingRuleResolvers,
   authenticationResolvers,
+  parkingRuleAssignmentResolvers,
   {
     ParkingRuleSelector: {
-      __resolveType() {
-        return "ParkingRuleTimedFee";
+      __resolveType(obj) {
+        return obj.__t;
       }
     }
   }

@@ -88,7 +88,8 @@ input ParkingRulePermitAccessUpdateInput {
 ## PARKING RULE ASSIGNMENT TYPES
 
 type ParkingRuleAssignment {
-  rule: ParkingRule!
+  id: ID!
+  rules: [ParkingRule]!
   start: DateTime!
   end: DateTime!
   vehicleSelectorMode: VehicleSelectorMode!
@@ -96,11 +97,38 @@ type ParkingRuleAssignment {
   priority: NonNegativeInt!
 }
 
+input ParkingRuleAssignmentFilter {
+  vehicleSelectorMode: VehicleSelectorMode
+  # TODO: Solve gt, lt, gte, lte with dates
+  # TODO: Solve array matching
+}
+
+input ParkingRuleAssignmentCreateInput {
+  rules: [ID!]!
+  start: DateTime!
+  end: DateTime!
+  vehicleSelectorMode: VehicleSelectorMode!
+  vehicleFilters: [ID!]
+  priority: NonNegativeInt!
+}
+
+input ParkingRuleAssignmentUpdateInput {
+  rules: [ID!]
+  start: DateTime
+  end: DateTime
+  vehicleSelectorMode: VehicleSelectorMode
+  vehicleFilters: [ID!]
+  priority: NonNegativeInt
+}
+
 ## QUERIES & MUTATIONS
 
 extend type Query {
-  rules: [ParkingRule!]
+  parkingRules: [ParkingRule!]
   vehicleFilters: [VehicleFilter!]
+  parkingRuleAssignments(
+    filter: ParkingRuleAssignmentFilter
+  ): [ParkingRuleAssignment!]
 }
 
 extend type Mutation {
@@ -115,4 +143,13 @@ extend type Mutation {
     id: ID!
     input: ParkingRulePermitAccessUpdateInput!
   ): ParkingRulePermitAccess!
+
+  createParkingRuleAssignment(
+    input: ParkingRuleAssignmentCreateInput!
+  ): ParkingRuleAssignment!
+  updateParkingRuleAssignment(
+    id: ID!
+    input: ParkingRuleAssignmentUpdateInput!
+  ): ParkingRuleAssignment!
+  deleteParkingRuleAssignment(id: ID!): ParkingRuleAssignment!
 }
