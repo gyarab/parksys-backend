@@ -262,17 +262,10 @@ export const findAppliedRules = async (
   }
   // Fetch ParkingRuleDayAssignment
   const ruleAssignments = await ParkingRuleAssignment.find({
-    $or: [
-      // Either start or end are withing our interval
-      { start: { $gte: start, $lte: end } },
-      { end: { $gte: start, $lte: end } },
-      // Or neither of them are in the interval but the assignment
-      // still applies
-      { start: { $lte: start }, end: { $gte: end } }
-    ]
-  }).populate({
-    path: "vehicleFilters"
-  });
+    start: { $lte: end },
+    end: { $gte: start }
+  }).populate({ path: "vehicleFilters" });
+  console.log(ruleAssignments);
   // Result object
   const appliedRuleAssignments = getAppliedRuleAssignments(
     start,

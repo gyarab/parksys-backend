@@ -5,11 +5,11 @@ import { AuthenticationMethod } from "./types/authentication/authentication.mode
 import { Permission } from "./types/permissions";
 import { hashPassword } from "./auth/auth";
 
-const port = config.get("server:port");
+const { port, host } = config.get("server");
 
 begin().then(() => {
-  app.listen(port, () =>
-    console.log(`Parking System Backend listening on port ${port}!`)
+  app.listen(port, host, () =>
+    console.log(`Parking System Backend listening on ${host}:${port}!`)
   );
 });
 

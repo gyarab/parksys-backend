@@ -97,10 +97,20 @@ type ParkingRuleAssignment {
   priority: NonNegativeInt!
 }
 
+input DateFilter {
+  lte: DateTime
+  lt: DateTime
+  gte: DateTime
+  gt: DateTime
+}
+
 input ParkingRuleAssignmentFilter {
+  id: ID
   vehicleSelectorMode: VehicleSelectorMode
-  # TODO: Solve gt, lt, gte, lte with dates
+  startFilter: DateFilter
+  endFilter: DateFilter
   # TODO: Solve array matching
+  # TODO: Solve gt, lt, gte, lte with dates
 }
 
 input ParkingRuleAssignmentCreateInput {
@@ -123,12 +133,23 @@ input ParkingRuleAssignmentUpdateInput {
 
 ## QUERIES & MUTATIONS
 
+type ParkingRuleAssignmentApplication {
+  start: DateTime!
+  end: DateTime!
+  assignment: ParkingRuleAssignment!
+}
+
 extend type Query {
   parkingRules: [ParkingRule!]
   vehicleFilters: [VehicleFilter!]
   parkingRuleAssignments(
     filter: ParkingRuleAssignmentFilter
   ): [ParkingRuleAssignment!]
+  simulateRuleAssignmentApplication(
+    vehicle: ID!
+    start: DateTime!
+    end: DateTime!
+  ): [ParkingRuleAssignmentApplication!]
 }
 
 extend type Mutation {
