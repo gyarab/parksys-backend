@@ -65,13 +65,156 @@ describe("capture endpoint", () => {
   });
 
   describe("findAppliedRules", () => {
-    describe.skip("select some with fiters", () => {
-      // TODO: Write the tests
+    describe("select some with fiters", () => {
+      let vehicles: Array<IVehicle> = null;
+      let vehicleFilters: Array<IVehicleFilter> = null;
+      let parkingRules: Array<IParkingRule> = null;
+      let parkingRuleAssignments: Array<IParkingRuleAssignment> = null;
+
+      beforeAll(async () => {
+        await Promise.all([
+          Vehicle.remove({}),
+          VehicleFilter.remove({}),
+          ParkingRuleAssignment.remove({}),
+          ParkingRule.remove({})
+        ]);
+        // Vehicles & VehicleFilters
+        vehicles = await Vehicle.create([
+          { licensePlate: "123" },
+          { licensePlate: "456" }
+        ]);
+
+        // ParkingRules
+        parkingRules = [
+          ...(await ParkingRuleTimedFee.create([
+            {
+              name: "regularFeeRule",
+              unitTime: ParkingTimeUnit.HOUR,
+              centsPerUnitTime: 100
+            },
+            {
+              name: "highFeeRule",
+              // Super high fee
+              unitTime: ParkingTimeUnit.MINUTE,
+              centsPerUnitTime: 1000
+            }
+          ])),
+          ...(await ParkingRulePermitAccess.create([
+            {
+              name: "freePassRule",
+              permit: true
+            }
+          ]))
+        ];
+
+        vehicleFilters = await VehicleFilter.create([
+          {
+            name: "filter1",
+            vehicles: [vehicles[0]],
+            action: VehicleFilterAction.EXCLUDE
+          },
+          {
+            name: "filter2",
+            vehicles: [vehicles[1]],
+            action: VehicleFilterAction.INCLUDE
+          },
+          {
+            name: "filter3",
+            vehicles: [vehicles[0]],
+            action: VehicleFilterAction.INCLUDE
+          }
+        ]);
+
+        parkingRuleAssignments = await ParkingRuleAssignment.create([
+          {
+            rules: [parkingRules[0]],
+            // Applies to all
+            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilters: [],
+            start: new Date("2019-12-01T00:00:00.000Z"),
+            end: new Date("2019-12-01T20:00:00.000Z"),
+            priority: 1
+          },
+          {
+            rules: [parkingRules[1]],
+            // Only applies to 456
+            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilters: [vehicleFilters[1], vehicleFilters[0]],
+            start: new Date("2019-12-01T12:00:00.000Z"),
+            end: new Date("2019-12-01T15:00:00.000Z"),
+            priority: 2
+          },
+          {
+            rules: [parkingRules[2]],
+            // Applies to all
+            vehicleSelectorMode: VehicleSelectorMode.NONE,
+            vehicleFilters: [vehicleFilters[2], vehicleFilters[1]],
+            start: new Date("2019-12-01T14:00:00.000Z"),
+            end: new Date("2019-12-01T18:00:00.000Z"),
+            priority: 3
+          }
+        ]);
+      });
+
+      it("works", async () => {
+        const start = new Date("2019-12-01T09:00:00.000Z");
+        const end = new Date("2019-12-01T21:00:00.000Z");
+        const result1 = await findAppliedRules(vehicles[0], start, end);
+        const expected1 = [
+          {
+            start: new Date("2019-12-01T09:00:00.000Z"),
+            end: new Date("2019-12-01T14:00:00.000Z"),
+            assignment: { priority: 1 }
+          },
+          {
+            start: new Date("2019-12-01T14:00:00.000Z"),
+            end: new Date("2019-12-01T18:00:00.000Z"),
+            assignment: { priority: 3 }
+          },
+          {
+            start: new Date("2019-12-01T18:00:00.000Z"),
+            end: new Date("2019-12-01T20:00:00.000Z"),
+            assignment: { priority: 1 }
+          }
+        ];
+
+        const result2 = await findAppliedRules(vehicles[1], start, end);
+        const expected2 = [
+          {
+            start: new Date("2019-12-01T09:00:00.000Z"),
+            end: new Date("2019-12-01T12:00:00.000Z"),
+            assignment: { priority: 1 }
+          },
+          {
+            start: new Date("2019-12-01T12:00:00.000Z"),
+            end: new Date("2019-12-01T14:00:00.000Z"),
+            assignment: { priority: 2 }
+          },
+          {
+            start: new Date("2019-12-01T14:00:00.000Z"),
+            end: new Date("2019-12-01T18:00:00.000Z"),
+            assignment: { priority: 3 }
+          },
+          {
+            start: new Date("2019-12-01T18:00:00.000Z"),
+            end: new Date("2019-12-01T20:00:00.000Z"),
+            assignment: { priority: 1 }
+          }
+        ];
+
+        function verifyResult(result, expected) {
+          for (let i = 0; i < Math.min(result.length, expected.length); i++) {
+            expect(expected[i]).toMatchObject(result[i]);
+          }
+          expect(result.length).toBe(expected.length);
+        }
+        verifyResult(expected1, result1);
+        verifyResult(expected2, result2);
+      });
     });
 
     describe("select all with filters", () => {
       let vehicles: Array<IVehicle> = null;
-      let vehicleFilters: Array<IVehicleFilter> = null;
       let parkingRules: Array<IParkingRule> = null;
       let parkingRuleAssignments: Array<IParkingRuleAssignment> = null;
 
@@ -91,19 +234,6 @@ describe("capture endpoint", () => {
           { licensePlate: "007X0042" },
           // Pays regularFeeRule
           { licensePlate: "101Z0101" }
-        ]);
-
-        vehicleFilters = await VehicleFilter.create([
-          {
-            name: "filter1",
-            vehicles: [vehicles[0]],
-            action: VehicleFilterAction.EXCLUDE
-          },
-          {
-            name: "filter2",
-            vehicles: [vehicles[0]],
-            action: VehicleFilterAction.INCLUDE
-          }
         ]);
 
         // ParkingRules

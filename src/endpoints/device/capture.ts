@@ -265,7 +265,6 @@ export const findAppliedRules = async (
     start: { $lte: end },
     end: { $gte: start }
   }).populate({ path: "vehicleFilters" });
-  console.log(ruleAssignments);
   // Result object
   const appliedRuleAssignments = getAppliedRuleAssignments(
     start,
