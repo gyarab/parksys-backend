@@ -601,9 +601,7 @@ describe("capture endpoint", () => {
           permissions: [Permission.ALL]
         }
       },
-      {
-        method: AuthenticationMethod.TEST
-      },
+      { method: AuthenticationMethod.TEST },
       RefreshToken
     );
     validAccessToken = tokens.accessToken;

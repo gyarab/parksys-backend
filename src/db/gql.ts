@@ -44,12 +44,13 @@ export type Context = Pick<PRequest<any>, "token"> & {
   };
 };
 
-export type Resolver = (
-  obj?: any,
-  args?: any,
-  ctx?: Context,
-  info?: any
-) => any;
+export type ResolverArgs = [Document | null, any, Context, any];
+export type Resolver<T = any> = (
+  obj?: ResolverArgs[0],
+  args?: ResolverArgs[1],
+  ctx?: ResolverArgs[2],
+  info?: ResolverArgs[3]
+) => T;
 
 export interface ResolverWithPermissions extends Resolver {
   requiredPermissions: Permission[];

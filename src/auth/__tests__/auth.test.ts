@@ -155,7 +155,7 @@ describe("checkPermissionGqlBuilder", () => {
         models
       };
       const func = () =>
-        checkPermissionsGqlBuilder(required, resolver)("1", "2", ctx, "3");
+        checkPermissionsGqlBuilder(required, resolver)(null, "2", ctx, "3");
       if (expectedResult === false) {
         // Should fail
         expect(func).toThrowError();
@@ -163,7 +163,7 @@ describe("checkPermissionGqlBuilder", () => {
         // Should be ok
         func();
         expect(resolver).toHaveBeenCalledTimes(1);
-        expect(resolver.mock.calls[0]).toMatchObject(["1", "2", ctx, "3"]);
+        expect(resolver.mock.calls[0]).toMatchObject([null, "2", ctx, "3"]);
       }
     });
   }

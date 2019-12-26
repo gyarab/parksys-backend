@@ -33,7 +33,7 @@ const dateFilter = (query, key, originalKey) => {
 
 // Query
 const parkingRuleAssignments: Resolver = async (_, args, ctx) => {
-  let query = args.filter;
+  let query = args.filter || {};
   if (!!query.startFilter) dateFilter(query, "start", "startFilter");
   if (!!query.endFilter) dateFilter(query, "end", "endFilter");
   return await ctx.models.ParkingRuleAssignment.find(query);
@@ -53,7 +53,31 @@ const simulateRuleAssignmentApplication: Resolver = async (
 
 // Mutation
 const createParkingRuleAssignment: Resolver = gqlCreate(modelGetter);
-const updateParkingRuleAssignment: Resolver = gqlFindByIdUpdate(modelGetter);
+
+const _updateParkingRuleAssignment = gqlFindByIdUpdate(modelGetter);
+const updateParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
+  const current = await ctx.models.ParkingRuleAssignment.findById(args.id);
+
+  // Check that no ParkingRuleAssignment has the same priority nor
+  // shares the same time interval.
+  if (
+    ["priority", "start", "end"].some(
+      field => field in args.input && args.input[field] !== current[field]
+    )
+  ) {
+    const newObj = { ...current.toObject(), ...args.input };
+    const collisions = await ctx.models.ParkingRuleAssignment.count({
+      _id: { $ne: args.id },
+      priority: newObj.priority,
+      start: { $lte: newObj.end },
+      end: { $gte: newObj.start }
+    });
+    if (collisions !== 0) {
+      throw new Error("Time or priority collision");
+    }
+  }
+  return await _updateParkingRuleAssignment(obj, args, ctx, info);
+};
 const deleteParkingRuleAssignment: Resolver = gqlFindByIdDelete(modelGetter);
 
 // ParkingRuleAssignment
