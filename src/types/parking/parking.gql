@@ -139,6 +139,14 @@ type ParkingRuleAssignmentApplication {
   assignment: ParkingRuleAssignment!
 }
 
+type ParkingRuleAssignmentResultUpdateError {
+  collisions: [ParkingRuleAssignment!]!
+}
+
+union ParkingRuleAssignmentUpdateResult =
+    ParkingRuleAssignment
+  | ParkingRuleAssignmentResultUpdateError
+
 extend type Query {
   parkingRules: [ParkingRule!]
   vehicleFilters: [VehicleFilter!]
@@ -171,6 +179,6 @@ extend type Mutation {
   updateParkingRuleAssignment(
     id: ID!
     input: ParkingRuleAssignmentUpdateInput!
-  ): ParkingRuleAssignment!
+  ): ParkingRuleAssignmentUpdateResult!
   deleteParkingRuleAssignment(id: ID!): ParkingRuleAssignment!
 }

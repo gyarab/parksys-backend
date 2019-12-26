@@ -9,6 +9,7 @@ import {
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { IParkingRuleAssignment } from "./parkingRuleAssignment.model";
 import { findAppliedRules } from "../../endpoints/device/capture";
+import { model } from "mongoose";
 
 const modelGetter: ModelGetter<IParkingRuleAssignment> = ctx =>
   ctx.models.ParkingRuleAssignment;
@@ -66,14 +67,14 @@ const updateParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
     )
   ) {
     const newObj = { ...current.toObject(), ...args.input };
-    const collisions = await ctx.models.ParkingRuleAssignment.count({
+    const collisions = await ctx.models.ParkingRuleAssignment.find({
       _id: { $ne: args.id },
       priority: newObj.priority,
-      start: { $lte: newObj.end },
-      end: { $gte: newObj.start }
-    });
-    if (collisions !== 0) {
-      throw new Error("Time or priority collision");
+      start: { $lt: newObj.end }, // not equal because assignments can start when one ends
+      end: { $gt: newObj.start }
+    }).select("_id");
+    if (collisions.length > 0) {
+      return { collisions: collisions.map(a => a._id) };
     }
   }
   return await _updateParkingRuleAssignment(obj, args, ctx, info);
@@ -82,7 +83,6 @@ const deleteParkingRuleAssignment: Resolver = gqlFindByIdDelete(modelGetter);
 
 // ParkingRuleAssignment
 const rules: Resolver = gqlPopulate(modelGetter, "rules");
-
 const vehicleFilters: Resolver = gqlPopulate(modelGetter, "vehicleFilters");
 
 export default {
@@ -107,5 +107,21 @@ export default {
   ParkingRuleAssignment: {
     rules,
     vehicleFilters
+  },
+  ParkingRuleAssignmentUpdateResult: {
+    __resolveType(obj) {
+      if (obj.collisions) {
+        return "ParkingRuleAssignmentResultUpdateError";
+      } else {
+        return "ParkingRuleAssignment";
+      }
+    }
+  },
+  ParkingRuleAssignmentResultUpdateError: {
+    collisions: async (obj, _, ctx, __) => {
+      return await ctx.models.ParkingRuleAssignment.find({
+        _id: { $in: obj.collisions }
+      });
+    }
   }
 };
