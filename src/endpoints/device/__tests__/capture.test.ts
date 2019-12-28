@@ -23,7 +23,7 @@ import {
 import {
   ParkingRuleAssignment,
   IParkingRuleAssignment,
-  VehicleSelectorMode
+  VehicleFilterMode
 } from "../../../types/parking/parkingRuleAssignment.model";
 import { Vehicle, IVehicle } from "../../../types/vehicle/vehicle.model";
 import {
@@ -129,7 +129,7 @@ describe("capture endpoint", () => {
           {
             rules: [parkingRules[0]],
             // Applies to all
-            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilterMode: VehicleFilterMode.ALL,
             vehicleFilters: [],
             start: new Date("2019-12-01T00:00:00.000Z"),
             end: new Date("2019-12-01T20:00:00.000Z"),
@@ -138,7 +138,7 @@ describe("capture endpoint", () => {
           {
             rules: [parkingRules[1]],
             // Only applies to 456
-            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilterMode: VehicleFilterMode.ALL,
             vehicleFilters: [vehicleFilters[1], vehicleFilters[0]],
             start: new Date("2019-12-01T12:00:00.000Z"),
             end: new Date("2019-12-01T15:00:00.000Z"),
@@ -147,7 +147,7 @@ describe("capture endpoint", () => {
           {
             rules: [parkingRules[2]],
             // Applies to all
-            vehicleSelectorMode: VehicleSelectorMode.NONE,
+            vehicleFilterMode: VehicleFilterMode.NONE,
             vehicleFilters: [vehicleFilters[2], vehicleFilters[1]],
             start: new Date("2019-12-01T14:00:00.000Z"),
             end: new Date("2019-12-01T18:00:00.000Z"),
@@ -262,7 +262,7 @@ describe("capture endpoint", () => {
         parkingRuleAssignments = await ParkingRuleAssignment.create([
           {
             rules: [parkingRules[0]],
-            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilterMode: VehicleFilterMode.ALL,
             vehicleFilters: [],
             start: new Date("2019-10-01T00:00:00.000Z"),
             end: new Date("2019-12-02T16:00:00.000Z"),
@@ -270,7 +270,7 @@ describe("capture endpoint", () => {
           },
           {
             rules: [parkingRules[1]],
-            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilterMode: VehicleFilterMode.ALL,
             vehicleFilters: [],
             start: new Date("2019-12-01T15:30:00.000Z"),
             end: new Date("2019-12-01T17:00:00.000Z"),
@@ -278,7 +278,7 @@ describe("capture endpoint", () => {
           },
           {
             rules: [parkingRules[2]],
-            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilterMode: VehicleFilterMode.ALL,
             vehicleFilters: [],
             start: new Date("2019-12-01T07:00:00.000Z"),
             end: new Date("2019-12-01T17:00:00.000Z"),
@@ -286,7 +286,7 @@ describe("capture endpoint", () => {
           },
           {
             rules: [parkingRules[0]],
-            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilterMode: VehicleFilterMode.ALL,
             vehicleFilters: [],
             start: new Date("2019-12-01T14:00:00.000Z"),
             end: new Date("2019-12-01T16:00:00.000Z"),
@@ -294,7 +294,7 @@ describe("capture endpoint", () => {
           },
           {
             rules: [parkingRules[0]],
-            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilterMode: VehicleFilterMode.ALL,
             vehicleFilters: [],
             start: new Date("2019-12-01T20:00:00.000Z"),
             end: new Date("2019-12-02T16:00:00.000Z"),
@@ -302,7 +302,7 @@ describe("capture endpoint", () => {
           },
           {
             rules: [parkingRules[0]],
-            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilterMode: VehicleFilterMode.ALL,
             vehicleFilters: [],
             start: new Date("2019-12-02T02:00:00.000Z"),
             end: new Date("2019-12-02T16:00:00.000Z"),
@@ -310,7 +310,7 @@ describe("capture endpoint", () => {
           },
           {
             rules: [parkingRules[2]],
-            vehicleSelectorMode: VehicleSelectorMode.ALL,
+            vehicleFilterMode: VehicleFilterMode.ALL,
             vehicleFilters: [],
             start: new Date("2019-12-02T16:30:00.000Z"),
             end: new Date("2019-12-02T18:00:00.000Z"),
@@ -532,23 +532,23 @@ describe("capture endpoint", () => {
         {
           ...rACommons,
           // None
-          vehicleSelectorMode: VehicleSelectorMode.NONE
+          vehicleFilterMode: VehicleFilterMode.NONE
         },
         {
           ...rACommons,
           // ALL
-          vehicleSelectorMode: VehicleSelectorMode.ALL
+          vehicleFilterMode: VehicleFilterMode.ALL
         },
         {
           ...rACommons,
           // 123 only
-          vehicleSelectorMode: VehicleSelectorMode.NONE,
+          vehicleFilterMode: VehicleFilterMode.NONE,
           vehicleFilters: [include456, include123, exclude456]
         },
         {
           ...rACommons,
           // 456 only
-          vehicleSelectorMode: VehicleSelectorMode.ALL,
+          vehicleFilterMode: VehicleFilterMode.ALL,
           vehicleFilters: [exclude123]
         }
       ]);

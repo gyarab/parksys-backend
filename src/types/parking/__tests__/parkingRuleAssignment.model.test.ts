@@ -1,6 +1,6 @@
 import {
   ParkingRuleAssignment,
-  VehicleSelectorMode
+  VehicleFilterMode
 } from "../parkingRuleAssignment.model";
 
 describe("model ParkingRuleAssignment", () => {
@@ -10,7 +10,7 @@ describe("model ParkingRuleAssignment", () => {
       start: new Date(),
       end: new Date(),
       priority: 0,
-      vehicleSelectorMode: VehicleSelectorMode.ALL
+      vehicleFilterMode: VehicleFilterMode.ALL
     });
     try {
       await assignment1.validate();
@@ -26,7 +26,7 @@ describe("model ParkingRuleAssignment", () => {
       fail("expected an error");
     } catch (err) {
       expect(err.errors.priority).toBeDefined();
-      expect(err.errors.vehicleSelectorMode).toBeDefined();
+      expect(err.errors.vehicleFilterMode).toBeDefined();
       expect(err.errors.start).toBeDefined();
       expect(err.errors.end).toBeDefined();
     }

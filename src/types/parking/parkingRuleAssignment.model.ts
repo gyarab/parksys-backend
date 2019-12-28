@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { IParkingRule, ParkingRuleLabel } from "./parkingRule.model";
 import { IVehicleFilter, VehicleFilterLabel } from "./vehicleFilter.model";
 
-export enum VehicleSelectorMode {
+export enum VehicleFilterMode {
   ALL = "ALL",
   NONE = "NONE"
 }
@@ -13,7 +13,7 @@ export interface IParkingRuleAssignment extends mongoose.Document {
   start: Date;
   end: Date;
   priority: number;
-  vehicleSelectorMode: VehicleSelectorMode;
+  vehicleFilterMode: VehicleFilterMode;
   vehicleFilters: Array<IVehicleFilter["_id"]> | Array<IVehicleFilter>;
 }
 export const ParkingRuleAssignmentLabel = "ParkingRuleAssignment";
@@ -38,9 +38,9 @@ export const ParkingRuleAssignmentSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  vehicleSelectorMode: {
+  vehicleFilterMode: {
     type: String,
-    enum: Object.keys(VehicleSelectorMode),
+    enum: Object.keys(VehicleFilterMode),
     required: true
   },
   vehicleFilters: [

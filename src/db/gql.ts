@@ -49,7 +49,7 @@ export type Resolver<T = any> = (
   obj?: ResolverArgs[0],
   args?: ResolverArgs[1],
   ctx?: ResolverArgs[2],
-  info?: ResolverArgs[3]
+  infotrue?: ResolverArgs[3]
 ) => T;
 
 export interface ResolverWithPermissions extends Resolver {

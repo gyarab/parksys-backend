@@ -45,7 +45,7 @@ input VehicleFilterUpdateInput {
   vehicles: [ID!]
 }
 
-enum VehicleSelectorMode {
+enum VehicleFilterMode {
   ALL
   NONE
 }
@@ -92,7 +92,7 @@ type ParkingRuleAssignment {
   rules: [ParkingRule]!
   start: DateTime!
   end: DateTime!
-  vehicleSelectorMode: VehicleSelectorMode!
+  vehicleFilterMode: VehicleFilterMode!
   vehicleFilters: [VehicleFilter!]
   priority: NonNegativeInt!
 }
@@ -106,7 +106,7 @@ input DateFilter {
 
 input ParkingRuleAssignmentFilter {
   id: ID
-  vehicleSelectorMode: VehicleSelectorMode
+  vehicleFilterMode: VehicleFilterMode
   startFilter: DateFilter
   endFilter: DateFilter
   # TODO: Solve array matching
@@ -117,7 +117,7 @@ input ParkingRuleAssignmentCreateInput {
   rules: [ID!]!
   start: DateTime!
   end: DateTime!
-  vehicleSelectorMode: VehicleSelectorMode!
+  vehicleFilterMode: VehicleFilterMode!
   vehicleFilters: [ID!]
   priority: NonNegativeInt!
 }
@@ -126,7 +126,7 @@ input ParkingRuleAssignmentUpdateInput {
   rules: [ID!]
   start: DateTime
   end: DateTime
-  vehicleSelectorMode: VehicleSelectorMode
+  vehicleFilterMode: VehicleFilterMode
   vehicleFilters: [ID!]
   priority: NonNegativeInt
 }

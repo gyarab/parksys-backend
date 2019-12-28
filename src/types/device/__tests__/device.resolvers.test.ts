@@ -103,7 +103,8 @@ describe("device resolvers", () => {
     const deletedDevice = await resolvers.Mutation.deleteDevice(
       null,
       { id: device.id.toString() },
-      ctx
+      ctx,
+      null
     );
     expect(deletedDevice.toObject()).toMatchObject(device.toObject());
     // Actualy gone from the db

@@ -1,0 +1,6 @@
+input DateFilter {
+  lte: DateTime
+  lt: DateTime
+  gte: DateTime
+  gt: DateTime
+}

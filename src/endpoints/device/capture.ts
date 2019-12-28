@@ -15,7 +15,7 @@ import { LinearHeap } from "../../utils/heap";
 import {
   IParkingRuleAssignment,
   ParkingRuleAssignment,
-  VehicleSelectorMode
+  VehicleFilterMode
 } from "../../types/parking/parkingRuleAssignment.model";
 import { VehicleFilterAction } from "../../types/parking/vehicleFilter.model";
 
@@ -51,7 +51,7 @@ export const createFilterApplier = (vehicle: IVehicle) => {
       // Return already calculated answers
       return cache[rId];
     }
-    const all = ruleAssignment.vehicleSelectorMode === VehicleSelectorMode.ALL;
+    const all = ruleAssignment.vehicleFilterMode === VehicleFilterMode.ALL;
     const none = !all;
     // Assumes ruleAssignment is populated
     const idSet = new Set<string>();

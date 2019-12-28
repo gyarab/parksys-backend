@@ -72,9 +72,9 @@ const updateParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
       priority: newObj.priority,
       start: { $lt: newObj.end }, // not equal because assignments can start when one ends
       end: { $gt: newObj.start }
-    }).select("_id");
+    });
     if (collisions.length > 0) {
-      return { collisions: collisions.map(a => a._id) };
+      return { collisions };
     }
   }
   return await _updateParkingRuleAssignment(obj, args, ctx, info);
@@ -118,10 +118,9 @@ export default {
     }
   },
   ParkingRuleAssignmentResultUpdateError: {
-    collisions: async (obj, _, ctx, __) => {
-      return await ctx.models.ParkingRuleAssignment.find({
-        _id: { $in: obj.collisions }
-      });
+    collisions: (obj, _, __, ___) => {
+      // It should already be populated
+      return obj.collisions;
     }
   }
 };

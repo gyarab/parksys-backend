@@ -4,7 +4,7 @@ import { models } from "../../../db/models";
 import {
   ParkingRuleAssignment,
   IParkingRuleAssignment,
-  VehicleSelectorMode
+  VehicleFilterMode
 } from "../parkingRuleAssignment.model";
 import { Context } from "../../../db/gql";
 
@@ -35,7 +35,7 @@ describe("ParkingRuleAssignment resolvers", () => {
         {
           id: pRA1._id.toString(),
           input: {
-            vehicleSelectorMode: VehicleSelectorMode.NONE
+            vehicleFilterMode: VehicleFilterMode.NONE
           }
         },
         ctx,
@@ -72,7 +72,7 @@ describe("ParkingRuleAssignment resolvers", () => {
         ctx,
         null
       );
-      expect(result1.collisions[0].toString()).toBe(pRA2._id.toString());
+      expect(result1.collisions[0]._id.toString()).toBe(pRA2._id.toString());
       expect(result1.collisions).toHaveLength(1);
       const result2 = await resolvers.Mutation.updateParkingRuleAssignment(
         null,
@@ -87,7 +87,7 @@ describe("ParkingRuleAssignment resolvers", () => {
         ctx,
         null
       );
-      expect(result2.collisions[0].toString()).toBe(pRA2._id.toString());
+      expect(result2.collisions[0]._id.toString()).toBe(pRA2._id.toString());
       expect(result2.collisions).toHaveLength(1);
     });
 
@@ -104,7 +104,7 @@ describe("ParkingRuleAssignment resolvers", () => {
 
     it("ParkingRuleAssignmentResultUpdateError.collsions", async () => {
       const result = await resolvers.ParkingRuleAssignmentResultUpdateError.collisions(
-        { collisions: [pRA1._id, pRA2._id] },
+        { collisions: [pRA1, pRA2] },
         null,
         ctx,
         null
@@ -119,13 +119,13 @@ describe("ParkingRuleAssignment resolvers", () => {
           priority: 1,
           start: new Date(1550000000000),
           end: new Date(1551000000000),
-          vehicleSelectorMode: VehicleSelectorMode.ALL
+          vehicleFilterMode: VehicleFilterMode.ALL
         },
         {
           priority: 2,
           start: new Date(1550000000000),
           end: new Date(1551000000000),
-          vehicleSelectorMode: VehicleSelectorMode.ALL
+          vehicleFilterMode: VehicleFilterMode.ALL
         }
       ]);
     });
