@@ -147,6 +147,30 @@ union ParkingRuleAssignmentUpdateResult =
     ParkingRuleAssignment
   | ParkingRuleAssignmentResultUpdateError
 
+input VehicleFilterSearchInput {
+  name: String!
+  limit: PositiveInt
+  page: PositiveInt
+}
+
+type VehicleFilterSearchResult {
+  data: [VehicleFilter!]
+  page: PositiveInt!
+  limit: PositiveInt!
+}
+
+input ParkingRuleSearchInput {
+  name: String!
+  limit: PositiveInt
+  page: PositiveInt
+}
+
+type ParkingRuleSearchResult {
+  data: [ParkingRule!]
+  page: PositiveInt!
+  limit: PositiveInt!
+}
+
 extend type Query {
   parkingRules: [ParkingRule!]
   vehicleFilters: [VehicleFilter!]
@@ -158,6 +182,11 @@ extend type Query {
     start: DateTime!
     end: DateTime!
   ): [ParkingRuleAssignmentApplication!]
+
+  vehicleFilterSearch(
+    search: VehicleFilterSearchInput!
+  ): VehicleFilterSearchResult!
+  parkingRuleSearch(search: ParkingRuleSearchInput!): ParkingRuleSearchResult!
 }
 
 extend type Mutation {

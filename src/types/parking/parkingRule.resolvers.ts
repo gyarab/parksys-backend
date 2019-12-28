@@ -8,7 +8,8 @@ import {
   gqlFindByIdUpdate,
   ModelGetter,
   gqlFindUsingFilter,
-  gqlCreate
+  gqlCreate,
+  gqlRegexSearch
 } from "../../db/genericResolvers";
 
 const ruleModelGetter: ModelGetter<IParkingRule> = ctx =>
@@ -18,6 +19,10 @@ const permitAccessModelGetter: ModelGetter<IParkingRulePermitAccess> = ctx =>
 
 // Query
 const parkingRules: Resolver = gqlFindUsingFilter(ruleModelGetter);
+const parkingRuleSearch: Resolver = gqlRegexSearch(ruleModelGetter, "name", {
+  max: 100,
+  default: 50
+});
 
 // Mutation
 const createParkingRulePermitAccess: Resolver = gqlCreate(
@@ -33,7 +38,8 @@ const updateParkingRulePermitAccess: Resolver = gqlFindByIdUpdate(
 
 export default {
   Query: {
-    parkingRules
+    parkingRules,
+    parkingRuleSearch
   },
   ParkingRule: {
     __resolveType(

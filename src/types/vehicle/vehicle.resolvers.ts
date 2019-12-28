@@ -1,19 +1,25 @@
 import { Resolver } from "../../db/gql";
+import {
+  gqlCreate,
+  ModelGetter,
+  gqlFindByIdDelete,
+  gqlFindUsingFilter,
+  gqlRegexSearch
+} from "../../db/genericResolvers";
+import { IVehicle } from "./vehicle.model";
+
+const modelGetter: ModelGetter<IVehicle> = ctx => ctx.models.Vehicle;
 
 // Query
-const vehicles: Resolver = async (_, args, ctx) => {
-  return await ctx.models.Vehicle.find(args || {});
-};
+const vehicles: Resolver = gqlFindUsingFilter(modelGetter);
+const vehicleSearch: Resolver = gqlRegexSearch(modelGetter, "licensePlate", {
+  max: 100,
+  default: 50
+});
 
 // Mutation
-const createVehicle: Resolver = async (_, args, ctx) => {
-  return await new ctx.models.Vehicle(args.input).save();
-};
-
-const deleteVehicle: Resolver = async (_, args, ctx) => {
-  return await ctx.models.Vehicle.findByIdAndRemove(args.id);
-};
-
+const createVehicle: Resolver = gqlCreate(modelGetter);
+const deleteVehicle: Resolver = gqlFindByIdDelete(modelGetter);
 const deleteVehicleByLicensePlate: Resolver = async (_, args, ctx) => {
   return await ctx.models.Vehicle.findOneAndDelete({
     licensePlate: args.licensePlate
@@ -22,7 +28,8 @@ const deleteVehicleByLicensePlate: Resolver = async (_, args, ctx) => {
 
 export default {
   Query: {
-    vehicles
+    vehicles,
+    vehicleSearch
   },
   Mutation: {
     createVehicle,

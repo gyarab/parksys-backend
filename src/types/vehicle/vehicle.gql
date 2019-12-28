@@ -9,8 +9,23 @@ input VehicleCreateInput {
   licensePlate: String!
 }
 
+input VehicleSearchInput {
+  licensePlate: String!
+  # Default is 50, max is 100.
+  limit: PositiveInt
+  # Default is 1
+  page: PositiveInt
+}
+
+type VehicleSearchResult {
+  data: [Vehicle!]
+  page: PositiveInt!
+  limit: PositiveInt!
+}
+
 extend type Query {
   vehicles: [Vehicle!]
+  vehicleSearch(search: VehicleSearchInput!): VehicleSearchResult!
 }
 
 extend type Mutation {

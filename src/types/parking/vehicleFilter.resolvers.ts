@@ -5,7 +5,8 @@ import {
   gqlFindByIdUpdate,
   gqlFindByIdDelete,
   gqlFindUsingFilter,
-  gqlPopulate
+  gqlPopulate,
+  gqlRegexSearch
 } from "../../db/genericResolvers";
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { Permission } from "../permissions";
@@ -16,6 +17,10 @@ const modelGetter: ModelGetter<IVehicleFilter> = ctx =>
 
 // Query
 const vehicleFilters: Resolver = gqlFindUsingFilter(modelGetter);
+const vehicleFilterSearch: Resolver = gqlRegexSearch(modelGetter, "name", {
+  max: 100,
+  default: 50
+});
 
 // Mutation
 const createVehicleFilter: Resolver = gqlCreate(modelGetter);
@@ -27,7 +32,8 @@ const vehicles: Resolver = gqlPopulate(modelGetter, "vehicles");
 
 export default {
   Query: {
-    vehicleFilters
+    vehicleFilters,
+    vehicleFilterSearch
   },
   Mutation: {
     createVehicleFilter: checkPermissionsGqlBuilder(

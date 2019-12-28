@@ -44,3 +44,40 @@ export const gqlPopulate = <D extends mongoose.Document, K extends keyof D>(
     return populated[key];
   }
 };
+
+export const gqlRegexSearch = <D extends mongoose.Document, K extends keyof D>(
+  modelGetter: ModelGetter<D>,
+  fieldKey: K,
+  limitArg: { max: number; default: number },
+  sorting: object = { [fieldKey]: -1 }
+): Resolver | never => {
+  if (limitArg.max < limitArg.default) {
+    throw new Error(
+      "limit.max < limit.default! This would produce errors every time the resolver is called!"
+    );
+  }
+  return async (_, args, ctx) => {
+    const model = modelGetter(ctx);
+    const limit = args.search.limit || limitArg.default;
+    const page = args.search.page || 1;
+    if (limit > limitArg.max)
+      throw new Error(`Limit must be <= ${limitArg.max}!`);
+    const fieldValueEscaped = args.search[fieldKey].replace(
+      /[-[\]{}()*+?.,\\/^$|#\s]/g,
+      "\\$&"
+    );
+    const matchedObjects = await model
+      .find({
+        [fieldKey]: { $regex: `.*${fieldValueEscaped}.*` }
+      })
+      .sort(sorting)
+      // Skip not scale well: https://stackoverflow.com/questions/5539955/how-to-paginate-with-mongoose-in-node-js
+      .skip((page - 1) * limit)
+      .limit(limit);
+    return {
+      data: matchedObjects,
+      page,
+      limit
+    };
+  };
+};
