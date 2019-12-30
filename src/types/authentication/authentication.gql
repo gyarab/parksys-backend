@@ -13,6 +13,16 @@ type LoginResult {
   user: User!
 }
 
+input PasswordChangeInput {
+  newPassword: String!
+  # Admin can change someone else's password. Normal users have to provide their current password.
+  currentPassword: String
+  # Admin can change someone else's password.
+  user: ID!
+}
+
 extend type Mutation {
   passwordLogin(user: String!, password: String!): LoginResult!
+  # Requires a valid access token
+  passwordChange(input: PasswordChangeInput!): String!
 }

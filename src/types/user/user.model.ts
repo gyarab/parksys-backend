@@ -13,7 +13,7 @@ interface IUser extends mongoose.Document {
   name: string;
   email: string;
   permissions?: string[];
-  authentications?: IAuthentication<any>["_id"][];
+  authentications?: IAuthentication<any>[];
   refreshTokens?: IRefreshToken["_id"][];
 }
 

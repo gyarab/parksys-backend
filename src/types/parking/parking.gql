@@ -92,6 +92,7 @@ type ParkingRuleAssignment {
   rules: [ParkingRule]!
   start: DateTime!
   end: DateTime!
+  active: Boolean!
   vehicleFilterMode: VehicleFilterMode!
   vehicleFilters: [VehicleFilter!]
   priority: NonNegativeInt!
@@ -120,6 +121,8 @@ input ParkingRuleAssignmentCreateInput {
   vehicleFilterMode: VehicleFilterMode!
   vehicleFilters: [ID!]
   priority: NonNegativeInt!
+  # Default false
+  active: Boolean
 }
 
 input ParkingRuleAssignmentUpdateInput {
@@ -129,6 +132,7 @@ input ParkingRuleAssignmentUpdateInput {
   vehicleFilterMode: VehicleFilterMode
   vehicleFilters: [ID!]
   priority: NonNegativeInt
+  active: Boolean
 }
 
 ## QUERIES & MUTATIONS

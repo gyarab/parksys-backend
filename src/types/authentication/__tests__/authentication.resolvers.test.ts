@@ -74,15 +74,21 @@ describe("authentication resolvers", () => {
 
     it("fails", async () => {
       try {
-        await resolvers.Mutation.passwordLogin(
+        const a = await resolvers.Mutation.passwordLogin(
           null,
           { user: "user2", password: "abcd" },
           ctx
         );
+        console.log(a); // this should not print out
         fail("expected an error");
       } catch (err) {
         expect(err).not.toBeNull();
       }
     });
+  });
+
+  it("Mutation.passwordChange(currentPassword, newPassword)", async () => {
+    // Create token pair, change password, relogin
+    return;
   });
 });

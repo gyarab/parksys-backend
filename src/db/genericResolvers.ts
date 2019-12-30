@@ -1,4 +1,4 @@
-import { Context, Resolver, ResolverArgs } from "./gql";
+import { Context, Resolver } from "./gql";
 import mongoose from "mongoose";
 
 export type ModelGetter<D extends mongoose.Document> = (

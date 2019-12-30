@@ -1,6 +1,5 @@
-import { User, IUser } from "../../types/user/user.model";
-import { AuthenticationMethod } from "../../types/authentication/authentication.model";
-import { authenticateUser } from "../../auth/auth";
+import { User } from "../../types/user/user.model";
+import { authenticateUserWithPassword } from "../../auth/auth";
 import { AsyncHandler } from "../../app";
 import { RefreshToken } from "../../types/refreshToken/refreshToken.model";
 
@@ -15,18 +14,9 @@ const password: AsyncHandler = async (req, res, next) => {
     res.status(401).end();
     return next();
   }
-  const user: IUser = await User.findOne({
-    $or: [{ name: userName }, { email: userName }],
-    authentications: { $elemMatch: { method: AuthenticationMethod.PASSWORD } }
-  });
 
-  if (!user) {
-    // User with password auth not found
-    res.status(401).end();
-    return next();
-  }
   try {
-    const response = await authenticateUser(userName, password, {
+    const response = await authenticateUserWithPassword(userName, password, {
       User,
       RefreshToken
     });
@@ -37,6 +27,7 @@ const password: AsyncHandler = async (req, res, next) => {
       res.status(401).end();
     } else {
       res.status(500).end();
+      console.error(e);
     }
     return next(e);
   }

@@ -6,6 +6,7 @@ interface IRoute {
 type RoutableEndpoints =
   | "ping"
   | "login/password"
+  | "login/passwordChange"
   | "devices/qr"
   | "devices/activate"
   | "devices/capture"
@@ -16,6 +17,7 @@ type RouteConfig = Record<RoutableEndpoints, Omit<IRoute, "name">>;
 const config: RouteConfig = {
   ping: { path: "/ping" },
   "login/password": { path: "/login/password" },
+  "login/passwordChange": { path: "/login/password" },
   "devices/capture": { path: "/capture" },
   "devices/qr": { path: "/devices/qr/:id" },
   "devices/config": { path: "/devices/config" },
