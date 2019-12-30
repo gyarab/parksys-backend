@@ -22,7 +22,9 @@ export const gqlFindByIdUpdate: ResolverFactory = modelGetter => async (
   args,
   ctx
 ) =>
-  await modelGetter(ctx).findByIdAndUpdate(args.id, args.input, { new: true });
+  await modelGetter(ctx).findByIdAndUpdate(args.id, args.input, {
+    new: true
+  });
 
 export const gqlFindByIdDelete: ResolverFactory = modelGetter => async (
   _,

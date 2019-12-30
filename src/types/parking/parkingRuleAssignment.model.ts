@@ -15,6 +15,7 @@ export interface IParkingRuleAssignment extends mongoose.Document {
   priority: number;
   vehicleFilterMode: VehicleFilterMode;
   vehicleFilters: Array<IVehicleFilter["_id"]> | Array<IVehicleFilter>;
+  active: boolean;
 }
 export const ParkingRuleAssignmentLabel = "ParkingRuleAssignment";
 
@@ -32,7 +33,12 @@ export const ParkingRuleAssignmentSchema = new mongoose.Schema({
   },
   end: {
     type: Date,
-    required: true
+    required: true,
+    validate: {
+      validator(this: IParkingRuleAssignment) {
+        return this.start.getTime() <= this.end.getTime();
+      }
+    }
   },
   priority: {
     type: Number,
@@ -48,7 +54,12 @@ export const ParkingRuleAssignmentSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: VehicleFilterLabel
     }
-  ]
+  ],
+  active: {
+    type: Boolean,
+    required: true,
+    default: false
+  }
 });
 
 // Schema Creation

@@ -67,6 +67,10 @@ const updateParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
     )
   ) {
     const newObj = { ...current.toObject(), ...args.input };
+    // Start <= End
+    if (newObj.start.getTime() > newObj.end.getTime()) {
+      throw new Error("start > end!");
+    }
     const collisions = await ctx.models.ParkingRuleAssignment.find({
       _id: { $ne: args.id },
       priority: newObj.priority,
