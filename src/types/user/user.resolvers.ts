@@ -3,20 +3,22 @@ import lodash from "lodash";
 import { checkPermissionsGqlBuilder } from "../../auth/auth";
 import { Permission } from "../permissions";
 import { Resolver } from "../../db/gql";
+import { gqlFindUsingFilter, ModelGetter } from "../../db/genericResolvers";
+
+const modelGetter: ModelGetter<IUser> = ctx => ctx.models.User;
 
 // Query
 const currentUser: Resolver = async (_, __, ctx) => {
   const uid = lodash.get(ctx, "token.user.id");
   if (!!uid) {
     const user = await ctx.models.User.findById(uid);
-    return user == null ? null : user;
+    if (!user) throw new Error("User no longer exists");
+    return user;
   }
   throw new Error("No current user");
 };
 
-const users: Resolver = async (_, { filter }, ctx) => {
-  return await ctx.models.User.find(!!filter ? filter : {});
-};
+const users: Resolver = gqlFindUsingFilter(modelGetter);
 
 // User
 const authentications: Resolver = (obj: IUser, _, ctx) => {
@@ -33,12 +35,17 @@ const authentications: Resolver = (obj: IUser, _, ctx) => {
   }
 };
 
+const isAdmin: Resolver = (obj: IUser) => {
+  return obj.permissions.indexOf(Permission.ALL) >= 0;
+};
+
 export default {
   Query: {
     currentUser,
     users: checkPermissionsGqlBuilder([Permission.ALL], users)
   },
   User: {
-    authentications
+    authentications,
+    isAdmin
   }
 };

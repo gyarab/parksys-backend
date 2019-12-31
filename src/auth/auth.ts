@@ -350,7 +350,6 @@ export const changeUsersPassword = async (
   let nChanged = 0;
   // Change every matching auth - currently only one is supported though
   for (const [auth, i] of onlyPasswordAuths(user)) {
-    console.log(user.name, i, isAdmin);
     if (isAdmin || (await isPasswordCorrect(auth, currentPassword))) {
       const { hash, salt } = await hashSalt(); // computed only once
       const authPayload: IAuthenticationPayloadPassword = {

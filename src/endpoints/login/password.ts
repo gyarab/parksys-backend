@@ -4,11 +4,11 @@ import { AsyncHandler } from "../../app";
 import { RefreshToken } from "../../types/refreshToken/refreshToken.model";
 
 const password: AsyncHandler = async (req, res, next) => {
-  const { user: userName, password } = req.body;
+  const { user: username, password } = req.body;
   if (
-    !userName ||
+    !username ||
     !password ||
-    !(typeof userName == "string") ||
+    !(typeof username == "string") ||
     !(typeof password == "string")
   ) {
     res.status(401).end();
@@ -16,7 +16,7 @@ const password: AsyncHandler = async (req, res, next) => {
   }
 
   try {
-    const response = await authenticateUserWithPassword(userName, password, {
+    const response = await authenticateUserWithPassword(username, password, {
       User,
       RefreshToken
     });

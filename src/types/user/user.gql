@@ -5,6 +5,7 @@ type User {
   permissions: [String]!
   authentications: [Authentication]
   refreshTokens: [RefreshToken]
+  isAdmin: Boolean!
 }
 
 input UserFilterInput {
