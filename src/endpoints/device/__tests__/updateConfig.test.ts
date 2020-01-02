@@ -77,7 +77,7 @@ describe("updateConfig endpoint", () => {
       RefreshToken
     );
     validAccessToken = tokens.accessToken.str;
-    devices[0].refreshToken = tokens.refreshToken.obj;
+    devices[0].refreshToken = tokens.refreshToken.db;
     await devices[0].save();
   });
 

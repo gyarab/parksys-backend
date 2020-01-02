@@ -100,16 +100,14 @@ describe("generic resolvers", () => {
   });
 
   it("gqlPopulate - not populated", async () => {
-    const {
-      refreshToken: { obj: refreshTokenObj }
-    } = await createTokenPair(
+    const { refreshToken } = await createTokenPair(
       {},
       { method: AuthenticationMethod.TEST },
       RefreshToken
     );
     const user = await new User({
       ...user1,
-      refreshTokens: [refreshTokenObj]
+      refreshTokens: [refreshToken.db]
     }).save();
     const dbPopulatedUser: IUser = await User.populate(user, {
       path: "refreshTokens"
@@ -128,16 +126,14 @@ describe("generic resolvers", () => {
   });
 
   it("gqlPopulate - already populated", async () => {
-    const {
-      refreshToken: { obj: refreshTokenObj }
-    } = await createTokenPair(
+    const { refreshToken } = await createTokenPair(
       {},
       { method: AuthenticationMethod.TEST },
       RefreshToken
     );
     const user = await new User({
       ...user1,
-      refreshTokens: [refreshTokenObj]
+      refreshTokens: [refreshToken.db]
     }).save();
     const dbPopulatedUser: IUser = await User.populate(user, {
       path: "refreshTokens"

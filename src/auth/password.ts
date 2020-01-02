@@ -11,7 +11,11 @@ import {
 } from "../types/authentication/authentication.model";
 import { IUser } from "../types/user/user.model";
 import { hashPassword, createSalt } from "./passwordUtils";
-import { IAccessTokenData, createTokenPair } from "./tokenUtils";
+import {
+  AccessTokenData,
+  createTokenPair,
+  userAccessTokenData
+} from "./tokenUtils";
 
 const usersFaultMessage = "Unable to authenticate";
 type UserModel = Model<IUser, {}>;
@@ -80,23 +84,23 @@ export const authenticateUserWithPassword = async (
   for (const [auth, _] of onlyPasswordAuths(user)) {
     if (await isPasswordCorrect(auth, suppliedPassword)) {
       // Authenticated
-      const aTokenData: IAccessTokenData = {
-        expiresAt:
-          new Date().getTime() + config.get("security:userAccessTokenDuration"),
-        user: {
-          id: user.id,
-          permissions: user.permissions
-        }
-      };
+      const aTokenData: AccessTokenData = userAccessTokenData({
+        id: user.id,
+        permissions: user.permissions
+      });
       const {
         accessToken: { str: accessToken },
-        refreshToken: { str: refreshToken, obj: refreshTokenObj }
+        refreshToken: {
+          str: refreshToken,
+          obj: refreshTokenObj,
+          db: refreshTokenDb
+        }
       } = await createTokenPair(
         aTokenData,
         { method: AuthenticationMethod.PASSWORD },
         models.RefreshToken
       );
-      user.refreshTokens.push(refreshTokenObj);
+      user.refreshTokens.push(refreshTokenDb);
       await user.save();
 
       return {

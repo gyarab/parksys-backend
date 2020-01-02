@@ -1,5 +1,5 @@
 import { User } from "../../types/user/user.model";
-import { authenticateUserWithPassword } from "../../auth/auth";
+import { authenticateUserWithPassword } from "../../auth/password";
 import { AsyncHandler } from "../../app";
 import { RefreshToken } from "../../types/refreshToken/refreshToken.model";
 

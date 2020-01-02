@@ -3,7 +3,7 @@ import config from "./config";
 import { User } from "./types/user/user.model";
 import { AuthenticationMethod } from "./types/authentication/authentication.model";
 import { Permission } from "./types/permissions";
-import { hashPassword } from "./auth/auth";
+import { hashPassword } from "./auth/passwordUtils";
 
 const { port, host } = config.get("server");
 

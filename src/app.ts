@@ -7,13 +7,13 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import { constructGraphQLServer } from "./db/gql";
 import { checkAuthorizationHeader } from "./auth/requestHofs";
-import { IAccessTokenData } from "./auth/tokenUtils";
+import { AccessTokenData } from "./auth/tokenUtils";
 import fileUpload from "express-fileupload";
 import { Params } from "express-serve-static-core";
 import compression from "compression";
 
 export interface PRequest<T extends Params> extends Request<T> {
-  token?: IAccessTokenData | null;
+  token?: AccessTokenData | null;
 }
 
 export type THandler<T, P extends Params> = (

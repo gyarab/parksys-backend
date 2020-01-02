@@ -1,5 +1,8 @@
 import { AsyncHandler } from "../../app";
-import { changeUsersPassword, verifyPasswordChangeArgs } from "../../auth/auth";
+import {
+  changeUsersPassword,
+  verifyPasswordChangeArgs
+} from "../../auth/password";
 import { User } from "../../types/user/user.model";
 
 const passwordChange: AsyncHandler = async (req, res, next) => {

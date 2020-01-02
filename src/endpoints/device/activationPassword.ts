@@ -1,8 +1,7 @@
 import { Device } from "../../types/device/device.model";
 import { AuthenticationMethod } from "../../types/authentication/authentication.model";
 import { Permission } from "../../types/permissions";
-import { createTokenPair } from "../../auth/tokenUtils";
-import config from "../../config";
+import { createTokenPair, deviceAccessTokenData } from "../../auth/tokenUtils";
 import { AsyncHandler } from "../../app";
 import { RefreshToken } from "../../types/refreshToken/refreshToken.model";
 
@@ -28,15 +27,15 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
 
   const {
     accessToken: { str: accessToken },
-    refreshToken: { str: refreshToken, obj: refreshTokenObj }
+    refreshToken: { str: refreshToken, db: refreshTokenDb }
   } = await createTokenPair(
-    {
-      expiresAt: now.getTime() + config.get("security:userAccessTokenDuration"),
-      device: {
+    deviceAccessTokenData(
+      {
         id: device.id,
         permissions: [Permission.ALL]
-      }
-    },
+      },
+      now
+    ),
     {
       method: AuthenticationMethod.ACTIVATION_PASSWORD
     },
@@ -46,7 +45,7 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
   // OK -> activate
   device.activated = true;
   device.activatedAt = now;
-  device.refreshToken = refreshTokenObj;
+  device.refreshToken = refreshTokenDb;
   await device.save();
 
   res.send({

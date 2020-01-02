@@ -7,7 +7,7 @@ import config from "../config";
 import mongoose from "mongoose";
 import { Permission } from "../types/permissions";
 import lodash from "lodash";
-import { IAccessTokenData } from "./tokenUtils";
+import { AccessTokenData } from "./tokenUtils";
 
 const cryptSecret = config.get("security:cryptSecret");
 
@@ -32,7 +32,7 @@ const verifyRefreshTokenBody = (body: any): boolean => {
 
 export const checkAuthorizationHeader = async (
   req: any
-): Promise<IAccessTokenData | null> => {
+): Promise<AccessTokenData | null> => {
   if (req == null || req.headers == null || req.headers.authorization == null) {
     return null;
   }
@@ -44,7 +44,7 @@ export const checkAuthorizationHeader = async (
   }
   const token = split[1];
   try {
-    const [valid, body]: [boolean, IAccessTokenData] = verifyToken(
+    const [valid, body]: [boolean, AccessTokenData] = verifyToken(
       cryptSecret,
       token
     );

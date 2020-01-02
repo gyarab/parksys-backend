@@ -3,7 +3,7 @@ import {
   authenticateUserWithPassword,
   verifyPasswordChangeArgs,
   changeUsersPassword
-} from "../../auth/auth";
+} from "../../auth/password";
 
 // Mutation
 const passwordLogin: Resolver = async (_, { user, password }, ctx) => {
