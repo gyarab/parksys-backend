@@ -4,7 +4,7 @@ import loginPasswordEndpoint from "./login/password";
 import changePasswordEndpoint from "./login/passwordChange";
 import qrEndpoint from "./device/qr";
 import deviceAactivationEndpoint from "./device/activationPassword";
-import { checkPermissionReqBuilder } from "../auth/auth";
+import { checkPermissionReqBuilder } from "../auth/requestHofs";
 import { Permission } from "../types/permissions";
 import captureEndpoint from "./device/capture";
 import { Handler } from "../app";

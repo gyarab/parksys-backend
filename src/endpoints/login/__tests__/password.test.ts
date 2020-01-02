@@ -7,7 +7,7 @@ import config from "../../../config";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
 import lodash from "lodash";
-import { hashPassword } from "../../../auth/auth";
+import { hashPassword } from "../../../auth/passwordUtils";
 
 const req = request(app);
 const LOGIN_ENDPOINT = routes["login/password"].path;

@@ -4,7 +4,7 @@ import { app, begin } from "../../../app";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
 import { Permission } from "../../../types/permissions";
-import { createTokenPair } from "../../../auth/auth";
+import { createTokenPair } from "../../../auth/tokenUtils";
 import { AuthenticationMethod } from "../../../types/authentication/authentication.model";
 import { RefreshToken } from "../../../types/refreshToken/refreshToken.model";
 

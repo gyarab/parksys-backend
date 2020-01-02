@@ -1,6 +1,6 @@
 import { IUser } from "./user.model";
 import lodash from "lodash";
-import { checkPermissionsGqlBuilder } from "../../auth/auth";
+import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { Permission } from "../permissions";
 import { Resolver } from "../../db/gql";
 import { gqlFindUsingFilter, ModelGetter } from "../../db/genericResolvers";

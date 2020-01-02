@@ -8,7 +8,7 @@ import {
   gqlPopulate,
   gqlRegexSearch
 } from "../../db/genericResolvers";
-import { checkPermissionsGqlBuilder } from "../../auth/auth";
+import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { Permission } from "../permissions";
 import { IVehicleFilter } from "./vehicleFilter.model";
 

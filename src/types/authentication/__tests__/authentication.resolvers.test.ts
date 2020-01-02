@@ -6,7 +6,7 @@ import config from "../../../config";
 import lodash from "lodash";
 import { AuthenticationMethod } from "../authentication.model";
 import { User } from "../../../types/user/user.model";
-import { hashPassword } from "../../../auth/auth";
+import { hashPassword } from "../../../auth/passwordUtils";
 
 const ctx = { models };
 const cryptSecret = config.get("security:cryptSecret");

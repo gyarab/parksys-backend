@@ -6,10 +6,9 @@ import {
   gqlFindByIdDelete,
   gqlPopulate
 } from "../../db/genericResolvers";
-import { checkPermissionsGqlBuilder } from "../../auth/auth";
+import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { IParkingRuleAssignment } from "./parkingRuleAssignment.model";
 import { findAppliedRules } from "../../endpoints/device/capture";
-import { model } from "mongoose";
 
 const modelGetter: ModelGetter<IParkingRuleAssignment> = ctx =>
   ctx.models.ParkingRuleAssignment;

@@ -1,7 +1,7 @@
 import { Device } from "../../types/device/device.model";
 import { AuthenticationMethod } from "../../types/authentication/authentication.model";
 import { Permission } from "../../types/permissions";
-import { createTokenPair } from "../../auth/auth";
+import { createTokenPair } from "../../auth/tokenUtils";
 import config from "../../config";
 import { AsyncHandler } from "../../app";
 import { RefreshToken } from "../../types/refreshToken/refreshToken.model";

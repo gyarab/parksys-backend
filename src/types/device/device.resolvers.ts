@@ -1,5 +1,5 @@
 import { defaultActivationPasswordGenerator, IDevice } from "./device.model";
-import { checkPermissionsGqlBuilder } from "../../auth/auth";
+import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { Permission } from "../permissions";
 import routes from "../../endpoints/routes";
 import { RefreshToken } from "../refreshToken/refreshToken.model";

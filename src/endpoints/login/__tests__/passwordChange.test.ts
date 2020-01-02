@@ -4,9 +4,10 @@ import { AuthenticationMethod } from "../../../types/authentication/authenticati
 import { app, begin } from "../../../app";
 import { disconnect } from "../../../db";
 import routes from "../../routes";
-import { hashPassword, createTokenPair } from "../../../auth/auth";
+import { createTokenPair } from "../../../auth/tokenUtils";
 import { Permission } from "../../../types/permissions";
 import { RefreshToken } from "../../../types/refreshToken/refreshToken.model";
+import { hashPassword } from "../../../auth/passwordUtils";
 
 const req = request(app);
 const PASSOWORD_CHANGE_ENDPOINT = routes["login/password"].path;

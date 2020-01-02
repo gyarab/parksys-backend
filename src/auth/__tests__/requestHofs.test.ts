@@ -3,7 +3,7 @@ import {
   checkAuthorizationHeader,
   checkPermissionReqBuilder,
   checkPermissionsGqlBuilder
-} from "../auth";
+} from "../requestHofs";
 import { Permission } from "../../types/permissions";
 import { createToken } from "../jwt";
 import config from "../../config";

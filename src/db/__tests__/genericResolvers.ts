@@ -10,7 +10,7 @@ import { Resolver } from "../gql";
 import { connect, disconnect } from "../index";
 import { User, IUser } from "../../types/user/user.model";
 import { models } from "../models";
-import { createTokenPair } from "../../auth/auth";
+import { createTokenPair } from "../../auth/tokenUtils";
 import { AuthenticationMethod } from "../../types/authentication/authentication.model";
 import {
   RefreshToken,
