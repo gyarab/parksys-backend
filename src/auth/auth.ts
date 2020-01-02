@@ -89,7 +89,7 @@ export const authenticateUserWithPassword = async (
         }
       };
       const {
-        accessToken,
+        accessToken: { str: accessToken },
         refreshToken: { str: refreshToken, obj: refreshTokenObj }
       } = await createTokenPair(
         aTokenData,

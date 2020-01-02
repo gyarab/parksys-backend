@@ -180,7 +180,7 @@ describe("password change endpoint", () => {
       },
       { method: AuthenticationMethod.TEST },
       RefreshToken
-    )).accessToken;
+    )).accessToken.str;
     validAccessTokenRegUser = (await createTokenPair(
       {
         user: {
@@ -190,7 +190,7 @@ describe("password change endpoint", () => {
       },
       { method: AuthenticationMethod.TEST },
       RefreshToken
-    )).accessToken;
+    )).accessToken.str;
   });
 
   afterAll(disconnect);

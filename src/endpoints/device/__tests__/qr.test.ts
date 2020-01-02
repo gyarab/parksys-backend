@@ -69,7 +69,7 @@ describe("qr endpoint", () => {
       },
       { method: AuthenticationMethod.TEST },
       RefreshToken
-    )).accessToken;
+    )).accessToken.str;
     const devices = await Device.create([
       {
         name: "d1"

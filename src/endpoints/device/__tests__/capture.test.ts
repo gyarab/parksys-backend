@@ -604,7 +604,7 @@ describe("capture endpoint", () => {
       { method: AuthenticationMethod.TEST },
       RefreshToken
     );
-    validAccessToken = tokens.accessToken;
+    validAccessToken = tokens.accessToken.str;
     devices[0].refreshToken = tokens.refreshToken.obj;
     await devices[0].save();
   });

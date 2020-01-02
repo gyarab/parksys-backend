@@ -30,7 +30,10 @@ export const createTokenPair = async (
   rTokenData: IRefreshTokenData,
   RefreshToken: Model<IRefreshToken, {}>
 ): Promise<{
-  accessToken: string;
+  accessToken: {
+    str: string;
+    obj: IAccessTokenData;
+  };
   refreshToken: {
     str: string;
     obj: IRefreshToken;
@@ -46,7 +49,10 @@ export const createTokenPair = async (
   const accessTokenStr = createToken(cryptSecret, aTokenData);
 
   return {
-    accessToken: accessTokenStr,
+    accessToken: {
+      str: accessTokenStr,
+      obj: aTokenData
+    },
     refreshToken: {
       str: refreshTokenStr,
       obj: refreshTokenDb

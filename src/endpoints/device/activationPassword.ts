@@ -27,7 +27,7 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
   }
 
   const {
-    accessToken,
+    accessToken: { str: accessToken },
     refreshToken: { str: refreshToken, obj: refreshTokenObj }
   } = await createTokenPair(
     {
