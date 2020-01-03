@@ -91,19 +91,17 @@ describe("ParkingRuleAssignment resolvers", () => {
       expect(result2.collisions).toHaveLength(1);
     });
 
-    it("ParkingRuleAssignmentUpdateResult.__resolveType", async () => {
-      const result1 = resolvers.ParkingRuleAssignmentUpdateResult.__resolveType(
-        { collisions: [pRA2._id] }
-      );
-      expect(result1).toBe("ParkingRuleAssignmentResultUpdateError");
-      const result2 = resolvers.ParkingRuleAssignmentUpdateResult.__resolveType(
-        pRA1
-      );
+    it("ParkingRuleAssignmentResult.__resolveType", async () => {
+      const result1 = resolvers.ParkingRuleAssignmentResult.__resolveType({
+        collisions: [pRA2._id]
+      });
+      expect(result1).toBe("ParkingRuleAssignmentResultError");
+      const result2 = resolvers.ParkingRuleAssignmentResult.__resolveType(pRA1);
       expect(result2).toBe("ParkingRuleAssignment");
     });
 
-    it("ParkingRuleAssignmentResultUpdateError.collsions", async () => {
-      const result = await resolvers.ParkingRuleAssignmentResultUpdateError.collisions(
+    it("ParkingRuleAssignmentResultError.collsions", async () => {
+      const result = await resolvers.ParkingRuleAssignmentResultError.collisions(
         { collisions: [pRA1, pRA2] },
         null,
         ctx,

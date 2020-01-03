@@ -143,13 +143,13 @@ type ParkingRuleAssignmentApplication {
   assignment: ParkingRuleAssignment!
 }
 
-type ParkingRuleAssignmentResultUpdateError {
+type ParkingRuleAssignmentResultError {
   collisions: [ParkingRuleAssignment!]!
 }
 
-union ParkingRuleAssignmentUpdateResult =
+union ParkingRuleAssignmentResult =
     ParkingRuleAssignment
-  | ParkingRuleAssignmentResultUpdateError
+  | ParkingRuleAssignmentResultError
 
 input VehicleFilterSearchInput {
   name: String!
@@ -208,10 +208,10 @@ extend type Mutation {
 
   createParkingRuleAssignment(
     input: ParkingRuleAssignmentCreateInput!
-  ): ParkingRuleAssignment!
+  ): ParkingRuleAssignmentResult!
   updateParkingRuleAssignment(
     id: ID!
     input: ParkingRuleAssignmentUpdateInput!
-  ): ParkingRuleAssignmentUpdateResult!
+  ): ParkingRuleAssignmentResult!
   deleteParkingRuleAssignment(id: ID!): ParkingRuleAssignment!
 }

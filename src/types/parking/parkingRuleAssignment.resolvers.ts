@@ -9,6 +9,7 @@ import {
 import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { IParkingRuleAssignment } from "./parkingRuleAssignment.model";
 import { findAppliedRules } from "../../endpoints/device/capture";
+import { Model } from "mongoose";
 
 const modelGetter: ModelGetter<IParkingRuleAssignment> = ctx =>
   ctx.models.ParkingRuleAssignment;
@@ -52,26 +53,24 @@ const simulateRuleAssignmentApplication: Resolver = async (
 };
 
 // Mutation
-const createParkingRuleAssignment: Resolver = gqlCreate(modelGetter);
-
-const _updateParkingRuleAssignment = gqlFindByIdUpdate(modelGetter);
-const updateParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
-  const current = await ctx.models.ParkingRuleAssignment.findById(args.id);
-
-  // Check that no ParkingRuleAssignment has the same priority nor
-  // shares the same time interval.
+const __verifyNoCollisions = async (
+  args: any,
+  current: any,
+  ParkingRuleAssignment: Model<IParkingRuleAssignment, {}>
+) => {
   if (
     ["priority", "start", "end"].some(
       field => field in args.input && args.input[field] !== current[field]
     )
   ) {
-    const newObj = { ...current.toObject(), ...args.input };
+    const newObj = { ...current, ...args.input };
     // Start <= End
     if (newObj.start.getTime() > newObj.end.getTime()) {
       throw new Error("start > end!");
     }
-    const collisions = await ctx.models.ParkingRuleAssignment.find({
-      _id: { $ne: args.id },
+    const idSearch = !!args.id ? { _id: { $ne: args.id } } : {};
+    const collisions = await ParkingRuleAssignment.find({
+      ...idSearch,
       priority: newObj.priority,
       start: { $lt: newObj.end }, // not equal because assignments can start when one ends
       end: { $gt: newObj.start }
@@ -80,7 +79,36 @@ const updateParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
       return { collisions };
     }
   }
-  return await _updateParkingRuleAssignment(obj, args, ctx, info);
+  return { collisions: -1 };
+};
+
+const _createParkingRuleAssignment: Resolver = gqlCreate(modelGetter);
+const createParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
+  const { collisions } = await __verifyNoCollisions(
+    args,
+    {},
+    ctx.models.ParkingRuleAssignment
+  );
+  if (collisions === -1) {
+    return await _createParkingRuleAssignment(obj, args, ctx, info);
+  } else {
+    return { collisions };
+  }
+};
+
+const _updateParkingRuleAssignment: Resolver = gqlFindByIdUpdate(modelGetter);
+const updateParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
+  const current = await ctx.models.ParkingRuleAssignment.findById(args.id);
+  const { collisions } = await __verifyNoCollisions(
+    args,
+    current.toObject(),
+    ctx.models.ParkingRuleAssignment
+  );
+  if (collisions === -1) {
+    return await _updateParkingRuleAssignment(obj, args, ctx, info);
+  } else {
+    return { collisions };
+  }
 };
 const deleteParkingRuleAssignment: Resolver = gqlFindByIdDelete(modelGetter);
 
@@ -111,16 +139,16 @@ export default {
     rules,
     vehicleFilters
   },
-  ParkingRuleAssignmentUpdateResult: {
+  ParkingRuleAssignmentResult: {
     __resolveType(obj) {
       if (obj.collisions) {
-        return "ParkingRuleAssignmentResultUpdateError";
+        return "ParkingRuleAssignmentResultError";
       } else {
         return "ParkingRuleAssignment";
       }
     }
   },
-  ParkingRuleAssignmentResultUpdateError: {
+  ParkingRuleAssignmentResultError: {
     collisions: (obj, _, __, ___) => {
       // It should already be populated
       return obj.collisions;
