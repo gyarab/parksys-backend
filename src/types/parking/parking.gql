@@ -197,7 +197,9 @@ extend type Mutation {
   createVehicleFilter(input: VehicleFilterCreateInput!): VehicleFilter!
   updateVehicleFilter(id: ID!, input: VehicleFilterUpdateInput!): VehicleFilter!
   deleteVehicleFilter(id: ID!): VehicleFilter!
+}
 
+extend type Mutation {
   createParkingRulePermitAccess(
     input: ParkingRulePermitAccessCreateInput!
   ): ParkingRulePermitAccess!
@@ -205,7 +207,9 @@ extend type Mutation {
     id: ID!
     input: ParkingRulePermitAccessUpdateInput!
   ): ParkingRulePermitAccess!
+}
 
+extend type Mutation {
   createParkingRuleAssignment(
     input: ParkingRuleAssignmentCreateInput!
   ): ParkingRuleAssignmentResult!
@@ -214,4 +218,14 @@ extend type Mutation {
     input: ParkingRuleAssignmentUpdateInput!
   ): ParkingRuleAssignmentResult!
   deleteParkingRuleAssignment(id: ID!): ParkingRuleAssignment!
+}
+
+input ParkingSessionFilter {
+  id: ID
+  active: Boolean
+  vehicle: ID
+}
+
+extend type Query {
+  parkingSessions(filter: ParkingSessionFilter): [ParkingSession!]!
 }

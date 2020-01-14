@@ -10,6 +10,7 @@ import {
   ParkingRuleTimedFee,
   ParkingRulePermitAccess
 } from "../types/parking/parkingRule.model";
+import { ParkingSession } from "../types/parking/parkingSession.model";
 
 export const models = {
   User,
@@ -21,5 +22,6 @@ export const models = {
   ParkingRule,
   ParkingRuleTimedFee,
   ParkingRulePermitAccess,
-  ParkingRuleAssignment
+  ParkingRuleAssignment,
+  ParkingSession
 };

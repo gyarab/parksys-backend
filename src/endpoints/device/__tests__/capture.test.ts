@@ -133,7 +133,8 @@ describe("capture endpoint", () => {
             vehicleFilters: [],
             start: new Date("2019-12-01T00:00:00.000Z"),
             end: new Date("2019-12-01T20:00:00.000Z"),
-            priority: 1
+            priority: 1,
+            active: true
           },
           {
             rules: [parkingRules[1]],
@@ -142,7 +143,8 @@ describe("capture endpoint", () => {
             vehicleFilters: [vehicleFilters[1], vehicleFilters[0]],
             start: new Date("2019-12-01T12:00:00.000Z"),
             end: new Date("2019-12-01T15:00:00.000Z"),
-            priority: 2
+            priority: 2,
+            active: true
           },
           {
             rules: [parkingRules[2]],
@@ -151,7 +153,8 @@ describe("capture endpoint", () => {
             vehicleFilters: [vehicleFilters[2], vehicleFilters[1]],
             start: new Date("2019-12-01T14:00:00.000Z"),
             end: new Date("2019-12-01T18:00:00.000Z"),
-            priority: 3
+            priority: 3,
+            active: true
           }
         ]);
       });
@@ -266,7 +269,8 @@ describe("capture endpoint", () => {
             vehicleFilters: [],
             start: new Date("2019-10-01T00:00:00.000Z"),
             end: new Date("2019-12-02T16:00:00.000Z"),
-            priority: 8
+            priority: 8,
+            active: true
           },
           {
             rules: [parkingRules[1]],
@@ -274,7 +278,8 @@ describe("capture endpoint", () => {
             vehicleFilters: [],
             start: new Date("2019-12-01T15:30:00.000Z"),
             end: new Date("2019-12-01T17:00:00.000Z"),
-            priority: 11
+            priority: 11,
+            active: true
           },
           {
             rules: [parkingRules[2]],
@@ -282,7 +287,8 @@ describe("capture endpoint", () => {
             vehicleFilters: [],
             start: new Date("2019-12-01T07:00:00.000Z"),
             end: new Date("2019-12-01T17:00:00.000Z"),
-            priority: 9
+            priority: 9,
+            active: true
           },
           {
             rules: [parkingRules[0]],
@@ -290,7 +296,8 @@ describe("capture endpoint", () => {
             vehicleFilters: [],
             start: new Date("2019-12-01T14:00:00.000Z"),
             end: new Date("2019-12-01T16:00:00.000Z"),
-            priority: 12
+            priority: 12,
+            active: true
           },
           {
             rules: [parkingRules[0]],
@@ -298,7 +305,8 @@ describe("capture endpoint", () => {
             vehicleFilters: [],
             start: new Date("2019-12-01T20:00:00.000Z"),
             end: new Date("2019-12-02T16:00:00.000Z"),
-            priority: 10
+            priority: 10,
+            active: true
           },
           {
             rules: [parkingRules[0]],
@@ -306,7 +314,8 @@ describe("capture endpoint", () => {
             vehicleFilters: [],
             start: new Date("2019-12-02T02:00:00.000Z"),
             end: new Date("2019-12-02T16:00:00.000Z"),
-            priority: 12
+            priority: 12,
+            active: true
           },
           {
             rules: [parkingRules[2]],
@@ -314,7 +323,17 @@ describe("capture endpoint", () => {
             vehicleFilters: [],
             start: new Date("2019-12-02T16:30:00.000Z"),
             end: new Date("2019-12-02T18:00:00.000Z"),
-            priority: 9
+            priority: 9,
+            active: true
+          },
+          {
+            rules: [parkingRules[2]],
+            vehicleFilterMode: VehicleFilterMode.ALL,
+            vehicleFilters: [],
+            start: new Date("2018-12-02T16:30:00.000Z"),
+            end: new Date("2020-12-02T18:00:00.000Z"),
+            priority: 100,
+            active: false // Turned off
           }
         ]);
       });
@@ -486,6 +505,7 @@ describe("capture endpoint", () => {
     let ruleAssignment2: IParkingRuleAssignment = null;
     let ruleAssignment3: IParkingRuleAssignment = null;
     let ruleAssignment4: IParkingRuleAssignment = null;
+    let ruleAssignment5: IParkingRuleAssignment = null;
     beforeAll(async () => {
       [vehicle1, vehicle2] = await Vehicle.create([
         { licensePlate: "123" },
@@ -527,7 +547,8 @@ describe("capture endpoint", () => {
         ruleAssignment1,
         ruleAssignment2,
         ruleAssignment3,
-        ruleAssignment4
+        ruleAssignment4,
+        ruleAssignment5
       ] = await ParkingRuleAssignment.create([
         {
           ...rACommons,
@@ -537,19 +558,27 @@ describe("capture endpoint", () => {
         {
           ...rACommons,
           // ALL
-          vehicleFilterMode: VehicleFilterMode.ALL
+          vehicleFilterMode: VehicleFilterMode.ALL,
+          active: true
         },
         {
           ...rACommons,
           // 123 only
           vehicleFilterMode: VehicleFilterMode.NONE,
-          vehicleFilters: [include456, include123, exclude456]
+          vehicleFilters: [include456, include123, exclude456],
+          active: true
         },
         {
           ...rACommons,
           // 456 only
           vehicleFilterMode: VehicleFilterMode.ALL,
-          vehicleFilters: [exclude123]
+          vehicleFilters: [exclude123],
+          active: true
+        },
+        {
+          ...rACommons,
+          vehicleFilterMode: VehicleFilterMode.ALL,
+          active: false
         }
       ]);
     });
@@ -567,12 +596,14 @@ describe("capture endpoint", () => {
       expect(applier1(ruleAssignment2)).toBe(true);
       expect(applier1(ruleAssignment3)).toBe(true);
       expect(applier1(ruleAssignment4)).toBe(false);
+      expect(applier1(ruleAssignment5)).toBe(false);
 
       const applier2 = createFilterApplier(vehicle2);
       expect(applier2(ruleAssignment1)).toBe(false);
       expect(applier2(ruleAssignment2)).toBe(true);
       expect(applier2(ruleAssignment3)).toBe(false);
       expect(applier2(ruleAssignment4)).toBe(true);
+      expect(applier2(ruleAssignment5)).toBe(false);
     });
   });
 

@@ -10,6 +10,7 @@ import parkingRuleResolvers from "../types/parking/parkingRule.resolvers";
 import vehicleResolvers from "../types/vehicle/vehicle.resolvers";
 import authenticationResolvers from "../types/authentication/authentication.resolvers";
 import parkingRuleAssignmentResolvers from "../types/parking/parkingRuleAssignment.resolvers";
+import parkingSessionResolvers from "../types/parking/parkingSession.resolvers";
 import { Permission } from "../types/permissions";
 import { PRequest } from "../app";
 import { resolvers as scalarResolvers } from "graphql-scalars";
@@ -28,6 +29,7 @@ import {
 } from "../types/parking/parkingRule.model";
 import { IVehicle } from "../types/vehicle/vehicle.model";
 import { IParkingRuleAssignment } from "../types/parking/parkingRuleAssignment.model";
+import { IParkingSession } from "../types/parking/parkingSession.model";
 
 export type Context = Pick<PRequest<any>, "token"> & {
   models: {
@@ -41,6 +43,7 @@ export type Context = Pick<PRequest<any>, "token"> & {
     ParkingRulePermitAccess: Model<IParkingRulePermitAccess, {}>;
     Vehicle: Model<IVehicle, {}>;
     ParkingRuleAssignment: Model<IParkingRuleAssignment, {}>;
+    ParkingSession: Model<IParkingSession, {}>;
   };
 };
 
@@ -118,6 +121,7 @@ export const resolvers = _.merge(
   parkingRuleResolvers,
   authenticationResolvers,
   parkingRuleAssignmentResolvers,
+  parkingSessionResolvers,
   {
     ParkingRuleSelector: {
       __resolveType(obj) {
