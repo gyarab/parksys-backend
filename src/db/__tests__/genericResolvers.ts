@@ -73,7 +73,7 @@ describe("generic resolvers", () => {
       { models },
       null
     );
-    expect(user.toObject()).toMatchObject(dbUser.toObject());
+    expect(user.id).toBe(dbUser.id);
     const dbUserRefetch = await User.findById(dbUser._id.toString());
     expect(dbUserRefetch).toBeNull();
   });

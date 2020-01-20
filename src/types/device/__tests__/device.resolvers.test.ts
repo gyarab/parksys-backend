@@ -106,7 +106,7 @@ describe("device resolvers", () => {
       ctx,
       null
     );
-    expect(deletedDevice.toObject()).toMatchObject(device.toObject());
+    expect(deletedDevice.id).toBe(device.id);
     // Actualy gone from the db
     expect(await Device.findById(device.id)).toBeNull();
   });

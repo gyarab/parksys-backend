@@ -283,7 +283,7 @@ export const handleResult = async (
   device: IDevice,
   captureTime: Date
 ) => {
-  console.log(new Date(), best, candidates);
+  // console.log(new Date(), best, candidates);
   // No result
   if (!best) return;
   // TODO: This part may need some heuristic using past images to determine the actual license plate
@@ -306,7 +306,7 @@ export const handleResult = async (
       parkingSession.checkIn.time,
       captureTime
     );
-    console.log(new Date(), appliedRules);
+    // console.log(new Date(), appliedRules);
     // TODO: Use rules. Calculate fee, etc.
     parkingSession.checkOut = check;
     parkingSession.active = false;

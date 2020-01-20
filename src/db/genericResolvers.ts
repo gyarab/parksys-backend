@@ -30,7 +30,10 @@ export const gqlFindByIdDelete: ResolverFactory = modelGetter => async (
   _,
   args,
   ctx
-) => await modelGetter(ctx).findByIdAndRemove(args.id);
+) => {
+  await modelGetter(ctx).findByIdAndRemove(args.id);
+  return { id: args.id };
+};
 
 export const gqlPopulate = <D extends mongoose.Document, K extends keyof D>(
   modelGetter: ModelGetter<D>,
@@ -51,6 +54,7 @@ export const gqlRegexSearch = <D extends mongoose.Document, K extends keyof D>(
   modelGetter: ModelGetter<D>,
   fieldKey: K,
   limitArg: { max: number; default: number },
+  caseSensitive: boolean = true,
   sorting: object = { [fieldKey]: -1 }
 ): Resolver | never => {
   if (limitArg.max < limitArg.default) {
@@ -68,12 +72,12 @@ export const gqlRegexSearch = <D extends mongoose.Document, K extends keyof D>(
       /[-[\]{}()*+?.,\\/^$|#\s]/g,
       "\\$&"
     );
+    const query = { $regex: `.*${fieldValueEscaped}.*` };
+    if (!caseSensitive) query["$options"] = "i";
     const matchedObjects = await model
-      .find({
-        [fieldKey]: { $regex: `.*${fieldValueEscaped}.*` }
-      })
+      .find({ [fieldKey]: query })
       .sort(sorting)
-      // Skip not scale well: https://stackoverflow.com/questions/5539955/how-to-paginate-with-mongoose-in-node-js
+      // Skip does not scale well: https://stackoverflow.com/questions/5539955/how-to-paginate-with-mongoose-in-node-js
       .skip((page - 1) * limit)
       .limit(limit);
     return {
