@@ -81,8 +81,6 @@ input ParkingRulePermitAccessCreateInput {
 input ParkingRulePermitAccessUpdateInput {
   name: String
   permit: Boolean
-  # addVehicles: [VehicleSelector!]
-  # removeVehicles: [VehicleSelector!]
 }
 
 ## PARKING RULE ASSIGNMENT TYPES
@@ -199,14 +197,35 @@ extend type Mutation {
   deleteVehicleFilter(id: ID!): VehicleFilter!
 }
 
+enum ParkingRuleType {
+  ParkingRulePermitAccess
+  ParkingRuleTimedFee
+}
+
+input ParkingRuleCreateInput {
+  name: String!
+  _t: ParkingRuleType!
+  permit: Boolean
+  centsPerUnitTime: NonNegativeInt
+  unitTime: ParkingTimeUnit
+}
+
+type DeleteResult {
+  id: ID
+}
+
+input ParkingRuleUpdateInput {
+  name: String
+  _t: ParkingRuleType
+  permit: Boolean
+  centsPerUnitTime: NonNegativeInt
+  unitTime: ParkingTimeUnit
+}
+
 extend type Mutation {
-  createParkingRulePermitAccess(
-    input: ParkingRulePermitAccessCreateInput!
-  ): ParkingRulePermitAccess!
-  updateParkingRulePermitAccess(
-    id: ID!
-    input: ParkingRulePermitAccessUpdateInput!
-  ): ParkingRulePermitAccess!
+  createParkingRule(input: ParkingRuleCreateInput!): ParkingRule!
+  updateParkingRule(id: ID!, input: ParkingRuleUpdateInput!): ParkingRule!
+  deleteParkingRule(id: ID!): DeleteResult!
 }
 
 extend type Mutation {

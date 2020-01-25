@@ -24,12 +24,12 @@ describe("VehicleFilter resolvers", () => {
         name: "fitler2"
       }
     ]);
-    const resolverFilters = await resolvers.Query.vehicleFilters(
+    const resolverFilters = (await resolvers.Query.vehicleFilters(
       null,
       {},
       ctx,
       null
-    );
+    )).sort(); // Unordered
     expect(resolverFilters[0].toObject()).toMatchObject(
       dbFilters[0].toObject()
     );

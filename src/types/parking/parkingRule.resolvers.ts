@@ -9,7 +9,8 @@ import {
   ModelGetter,
   gqlFindUsingFilter,
   gqlCreate,
-  gqlRegexSearch
+  gqlRegexSearch,
+  gqlFindByIdDelete
 } from "../../db/genericResolvers";
 
 const ruleModelGetter: ModelGetter<IParkingRule> = ctx =>
@@ -24,13 +25,24 @@ const parkingRuleSearch: Resolver = gqlRegexSearch(ruleModelGetter, "name", {
   default: 50
 });
 
+const typeMapper = input => {
+  const type = input._t;
+  delete input._t;
+  return {
+    ...input,
+    __t: type
+  };
+};
+
 // Mutation
-const createParkingRulePermitAccess: Resolver = gqlCreate(
-  permitAccessModelGetter
+const createParkingRule: Resolver = gqlCreate(ruleModelGetter, typeMapper);
+
+const updateParkingRule: Resolver = gqlFindByIdUpdate(
+  ruleModelGetter,
+  typeMapper
 );
-const updateParkingRulePermitAccess: Resolver = gqlFindByIdUpdate(
-  permitAccessModelGetter
-);
+
+const deleteParkingRule: Resolver = gqlFindByIdDelete(ruleModelGetter);
 
 // ParkingRuleTimedFee
 
@@ -49,7 +61,8 @@ export default {
     }
   },
   Mutation: {
-    createParkingRulePermitAccess,
-    updateParkingRulePermitAccess
+    createParkingRule,
+    updateParkingRule,
+    deleteParkingRule
   }
 };

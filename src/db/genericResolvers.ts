@@ -5,11 +5,19 @@ export type ModelGetter<D extends mongoose.Document> = (
   ctx: Context
 ) => mongoose.Model<D, any>;
 export type ResolverFactory<D extends mongoose.Document = any> = (
-  modelGetter: ModelGetter<D>
+  modelGetter: ModelGetter<D>,
+  mapper?: (input: any) => any
 ) => Resolver;
 
-export const gqlCreate: ResolverFactory = modelGetter => async (_, args, ctx) =>
-  await modelGetter(ctx).create(args.input);
+const getInput = (input: any, mapper?: (input: any) => any) => {
+  return !mapper ? input : mapper(input);
+};
+
+export const gqlCreate: ResolverFactory = (modelGetter, mapper) => async (
+  _,
+  args,
+  ctx
+) => await modelGetter(ctx).create(getInput(args.input, mapper));
 
 export const gqlFindUsingFilter: ResolverFactory = modelGetter => async (
   _,
@@ -17,14 +25,15 @@ export const gqlFindUsingFilter: ResolverFactory = modelGetter => async (
   ctx
 ) => await modelGetter(ctx).find(args.filter || {});
 
-export const gqlFindByIdUpdate: ResolverFactory = modelGetter => async (
-  _,
-  args,
-  ctx
-) =>
-  await modelGetter(ctx).findByIdAndUpdate(args.id, args.input, {
-    new: true
-  });
+export const gqlFindByIdUpdate: ResolverFactory = (
+  modelGetter,
+  mapper
+) => async (_, args, ctx) =>
+  await modelGetter(ctx).findByIdAndUpdate(
+    args.id,
+    getInput(args.input, mapper),
+    { new: true }
+  );
 
 export const gqlFindByIdDelete: ResolverFactory = modelGetter => async (
   _,
