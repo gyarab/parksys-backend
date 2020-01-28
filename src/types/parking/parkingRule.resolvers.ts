@@ -13,10 +13,16 @@ import {
   gqlFindByIdDelete
 } from "../../db/genericResolvers";
 
-const ruleModelGetter: ModelGetter<IParkingRule> = ctx =>
-  ctx.models.ParkingRule;
-const permitAccessModelGetter: ModelGetter<IParkingRulePermitAccess> = ctx =>
-  ctx.models.ParkingRulePermitAccess;
+const ruleModelGetter: ModelGetter<IParkingRule> = (ctx, type) => {
+  switch (type) {
+    case "ParkingRulePermitAccess":
+      return ctx.models.ParkingRulePermitAccess;
+    case "ParkingRuleTimedFee":
+      return ctx.models.ParkingRuleTimedFee;
+    default:
+      return ctx.models.ParkingRule;
+  }
+};
 
 // Query
 const parkingRules: Resolver = gqlFindUsingFilter(ruleModelGetter);
@@ -28,10 +34,14 @@ const parkingRuleSearch: Resolver = gqlRegexSearch(ruleModelGetter, "name", {
 const typeMapper = input => {
   const type = input._t;
   delete input._t;
-  return {
-    ...input,
-    __t: type
-  };
+  if (!type) {
+    return input;
+  } else {
+    return {
+      ...input,
+      __t: type
+    };
+  }
 };
 
 // Mutation

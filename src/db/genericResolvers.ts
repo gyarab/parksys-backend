@@ -2,7 +2,8 @@ import { Context, Resolver } from "./gql";
 import mongoose from "mongoose";
 
 export type ModelGetter<D extends mongoose.Document> = (
-  ctx: Context
+  ctx: Context,
+  model?: string
 ) => mongoose.Model<D, any>;
 export type ResolverFactory<D extends mongoose.Document = any> = (
   modelGetter: ModelGetter<D>,
@@ -28,12 +29,14 @@ export const gqlFindUsingFilter: ResolverFactory = modelGetter => async (
 export const gqlFindByIdUpdate: ResolverFactory = (
   modelGetter,
   mapper
-) => async (_, args, ctx) =>
-  await modelGetter(ctx).findByIdAndUpdate(
+) => async (_, args, ctx) => {
+  const type = args.input._t;
+  return await modelGetter(ctx, type).findByIdAndUpdate(
     args.id,
     getInput(args.input, mapper),
     { new: true }
   );
+};
 
 export const gqlFindByIdDelete: ResolverFactory = modelGetter => async (
   _,
