@@ -18,12 +18,16 @@ import {
   VehicleFilterMode
 } from "../../types/parking/parkingRuleAssignment.model";
 import { VehicleFilterAction } from "../../types/parking/vehicleFilter.model";
+import {
+  ParkingTimeUnit,
+  ParkingRule,
+  IParkingRule
+} from "../../types/parking/parkingRule.model";
 
 const getLprResult = (file: any): Promise<LicensePlateRecognitionResult> => {
   return new Promise<LicensePlateRecognitionResult>((resolve, reject) => {
     tmp.file((err, fname, fd, removeTmpFile) => {
       if (err) reject(err);
-
       sharp(file.data)
         .resize(1000, 1000)
         .toFile(fname)
@@ -278,6 +282,20 @@ export const findAppliedRules = async (
   return appliedRuleAssignments;
 };
 
+const getRequiredRules = async (
+  ruleAssignments: AppliedRuleAssignment[]
+): Promise<{
+  [id: string]: any;
+}> => {
+  const requiredRules: {
+    [id: string]: IParkingRule;
+  } = {};
+  (await ParkingRule.find({
+    _id: { $in: ruleAssignments.map(rA => rA.assignment.rules).flat() }
+  })).map(rule => (requiredRules[rule.id.toString()] = rule));
+  return requiredRules;
+};
+
 export const handleResult = async (
   { best, candidates, coordinates, rectangle }: LicensePlateRecognitionResult,
   device: IDevice,
@@ -285,6 +303,7 @@ export const handleResult = async (
 ) => {
   // console.log(new Date(), best, candidates);
   // No result
+  console.log(best);
   if (!best) return;
   // TODO: This part may need some heuristic using past images to determine the actual license plate
   // Find Vehicle or create it
@@ -306,8 +325,24 @@ export const handleResult = async (
       parkingSession.checkIn.time,
       captureTime
     );
-    // console.log(new Date(), appliedRules);
-    // TODO: Use rules. Calculate fee, etc.
+    const result = { feeCents: 0 };
+    const requiredRules = await getRequiredRules(appliedRules);
+
+    for (const ruleApplication of appliedRules) {
+      const timeDelta =
+        ruleApplication.end.getTime() - ruleApplication.start.getTime();
+      for (const ruleId of ruleApplication.assignment.rules) {
+        const rule = requiredRules[ruleId];
+        if (rule.__t === "ParkingRuleTimedFee") {
+          const divider =
+            rule.unitTime === ParkingTimeUnit.MINUTE ? 1000 * 60 : 1000 * 3600;
+          // TODO: Make this configurable?
+          const units = Math.ceil(timeDelta / divider); // For every started time unit (2.5h == 3h)
+          result.feeCents += rule.centsPerUnitTime * units;
+        }
+      }
+    }
+    parkingSession.finalFee = result.feeCents;
     parkingSession.checkOut = check;
     parkingSession.active = false;
     await parkingSession.save();
