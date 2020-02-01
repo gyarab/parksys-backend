@@ -11,6 +11,7 @@ import vehicleResolvers from "../types/vehicle/vehicle.resolvers";
 import authenticationResolvers from "../types/authentication/authentication.resolvers";
 import parkingRuleAssignmentResolvers from "../types/parking/parkingRuleAssignment.resolvers";
 import parkingSessionResolvers from "../types/parking/parkingSession.resolvers";
+import statsResolvers from "../types/stats/stats.resolvers";
 import { Permission } from "../types/permissions";
 import { PRequest } from "../app";
 import { resolvers as scalarResolvers } from "graphql-scalars";
@@ -67,7 +68,8 @@ const types = [
   "device",
   "permissions",
   "parking",
-  "vehicle"
+  "vehicle",
+  "stats"
 ];
 
 function loadSchemaFile(path: string): Promise<string> {
@@ -122,6 +124,7 @@ export const resolvers = _.merge(
   authenticationResolvers,
   parkingRuleAssignmentResolvers,
   parkingSessionResolvers,
+  statsResolvers,
   {
     ParkingRuleSelector: {
       __resolveType(obj) {

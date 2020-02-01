@@ -1,0 +1,9 @@
+type DayStats {
+  day: String!
+  revenueCents: Int!
+  numParkingSessions: Int!
+}
+
+extend type Query {
+  dayStats: [DayStats!]
+}
