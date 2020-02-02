@@ -1,9 +1,25 @@
-type DayStats {
-  day: String!
+type StatsDataPoint {
   revenueCents: Int!
   numParkingSessions: Int!
 }
 
+type DayStats {
+  day: String!
+  data: StatsDataPoint!
+}
+
+type HourStats {
+  hour: String!
+  data: StatsDataPoint!
+}
+
+type HourlyDayStats {
+  day: String!
+  data: [HourStats!]
+}
+
 extend type Query {
   dayStats: [DayStats!]
+  # Arg day must be formatted as YYYY-MM-DD
+  dayStatsPerHour(day: String!): HourlyDayStats!
 }
