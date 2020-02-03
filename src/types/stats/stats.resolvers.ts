@@ -38,6 +38,13 @@ const dayStats: Resolver = async (_, args, ctx, info) => {
       }
     },
     {
+      $sort: {
+        "_id.year": -1,
+        "_id.month": -1,
+        "_id.date": -1
+      }
+    },
+    {
       $addFields: {
         numParkingSessions: { $toInt: "$numParkingSessions" }
       }
@@ -67,7 +74,6 @@ const dayStatsPerHour: Resolver = async (_, args, ctx) => {
   const start: Date = day.startOf("day").toDate();
   const end: Date = day.endOf("day").toDate();
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-    // Invalid date
     throw new Error("Supplied day is not of YYYY-MM-DD format");
   }
   const aggr = [
@@ -96,7 +102,6 @@ const dayStatsPerHour: Resolver = async (_, args, ctx) => {
     }
   ];
   const results = await ctx.models.ParkingSession.aggregate(aggr);
-  console.log(results);
   return {
     day: args.day,
     data: results
