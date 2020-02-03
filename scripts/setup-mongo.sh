@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-CONTAINER_NAME="parksys-mongo"
-CONTAINER_PORT_MAP="27017:27017"
+source "$(dirname "$BASH_SOURCE[0]")/config.sh"
 
 if [ -z "$1" ]
 then

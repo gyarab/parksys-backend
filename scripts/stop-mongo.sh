@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-CONTAINER_NAME="parksys-mongo"
+source "$(dirname "$BASH_SOURCE[0]")/config.sh"
 
-if [ -z "$1" ]
-then
+if [ -z "$1" ]; then
   echo "Using default container name $CONTAINER_NAME"
 else
   CONTAINER_NAME=$1
