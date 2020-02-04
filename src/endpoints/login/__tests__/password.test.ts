@@ -23,6 +23,7 @@ describe("password endpoint", () => {
     const { refreshToken, accessToken, user } = resp.body.data;
 
     expect(verifyTokenPair(refreshToken, accessToken, cryptSecret)).toBe(true);
+    expect(user.authentications[0].payload).toBeUndefined();
 
     // Check the accessToken body
     const [_, accessTokenBody] = verifyToken(cryptSecret, accessToken);

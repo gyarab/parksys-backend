@@ -39,7 +39,15 @@ const AuthenticationSchema = new mongoose.Schema(
       enum: Object.keys(AuthenticationMethod)
     }
   },
-  { _id: false, id: false }
+  {
+    _id: false,
+    id: false,
+    toJSON: {
+      transform(doc, ret) {
+        delete ret.payload;
+      }
+    }
+  }
 );
 
 const Authentication = mongoose.model<IAuthentication<any>>(
