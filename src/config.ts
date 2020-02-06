@@ -6,7 +6,9 @@ import path from "path";
 //   2. Environment variables
 //   3. A file located at '/config/{NODE_ENV}.json'
 //   4. Defaults
-nconf.argv().env();
+
+// Separator is __
+nconf.argv().env("__");
 nconf.file({
   file: path.join(__dirname, "..", "config", `${process.env.NODE_ENV}.json`)
 });

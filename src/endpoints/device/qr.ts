@@ -26,6 +26,8 @@ const qr: AsyncHandler<{ id: any }> = async (req, res) => {
     password: device.activationPassword.payload.password,
     expiresAt: device.activationPassword.payload.expiresAt.getTime()
   };
+  // TODO: This is here for dev purposes
+  console.log(imagePayload);
   qrcode.toFileStream(res, JSON.stringify(imagePayload));
   res.status(200);
 };
