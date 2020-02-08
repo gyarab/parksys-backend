@@ -3,9 +3,35 @@ type StatsDataPoint {
   numParkingSessions: Int!
 }
 
-type DayStats {
-  day: String!
+type YearStats {
+  year: PositiveInt!
   data: StatsDataPoint!
+
+  # Max length is 4.
+  quarterly: [QuerterStats!]
+  # Max length is 12.
+  monthly: [MonthStats!]
+}
+
+type QuerterStats {
+  quarter: PositiveInt!
+  data: StatsDataPoint!
+
+  monthly: [MonthStats!]
+}
+
+type MonthStats {
+  month: PositiveInt!
+  data: StatsDataPoint!
+
+  daily: [DayStats!]
+}
+
+type DayStats {
+  date: PositiveInt!
+  data: StatsDataPoint!
+
+  hourly: [HourStats!]
 }
 
 type HourStats {
@@ -13,13 +39,13 @@ type HourStats {
   data: StatsDataPoint!
 }
 
-type HourlyDayStats {
-  day: String!
-  data: [HourStats!]
-}
-
 extend type Query {
-  dayStats: [DayStats!]
-  # Arg day must be formatted as YYYY-MM-DD
-  dayStatsPerHour(day: String!): HourlyDayStats!
+  yearStats(year: PositiveInt!): YearStats!
+  monthStats(year: PositiveInt!, month: PositiveInt!): MonthStats!
+  dayStats(
+    year: PositiveInt!
+    month: PositiveInt!
+    date: PositiveInt!
+  ): DayStats!
+  dayStatsAll: MonthStats!
 }

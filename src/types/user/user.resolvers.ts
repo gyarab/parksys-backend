@@ -3,7 +3,11 @@ import lodash from "lodash";
 import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { Permission } from "../permissions";
 import { Resolver } from "../../db/gql";
-import { gqlFindUsingFilter, ModelGetter } from "../../db/genericResolvers";
+import {
+  gqlFindUsingFilter,
+  ModelGetter,
+  gqlRegexSearch
+} from "../../db/genericResolvers";
 
 const modelGetter: ModelGetter<IUser> = ctx => ctx.models.User;
 
@@ -18,7 +22,21 @@ const currentUser: Resolver = async (_, __, ctx) => {
   throw new Error("No current user");
 };
 
-const users: Resolver = gqlFindUsingFilter(modelGetter);
+const userSearch: Resolver = gqlRegexSearch(
+  modelGetter,
+  "name",
+  { max: 100, default: 50 },
+  false,
+  { name: 1 }
+);
+
+const userSearchByEmail: Resolver = gqlRegexSearch(
+  modelGetter,
+  "email",
+  { max: 100, default: 50 },
+  false,
+  { name: 1 }
+);
 
 // User
 const authentications: Resolver = (obj: IUser, _, ctx) => {
@@ -42,7 +60,11 @@ const isAdmin: Resolver = (obj: IUser) => {
 export default {
   Query: {
     currentUser,
-    users: checkPermissionsGqlBuilder([Permission.ALL], users)
+    userSearch: checkPermissionsGqlBuilder([Permission.ALL], userSearch),
+    userSearchByEmail: checkPermissionsGqlBuilder(
+      [Permission.ALL],
+      userSearchByEmail
+    )
   },
   User: {
     authentications,

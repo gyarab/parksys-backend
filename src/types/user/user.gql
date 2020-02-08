@@ -8,13 +8,26 @@ type User {
   isAdmin: Boolean!
 }
 
-input UserFilterInput {
-  id: ID
-  name: String
-  email: EmailAddress
+input UserSearchInput {
+  name: String!
+  limit: PositiveInt
+  page: PositiveInt
+}
+
+input UserByEmailSearchInput {
+  email: String!
+  limit: PositiveInt
+  page: PositiveInt
+}
+
+type UserSearchResult {
+  data: [User!]
+  page: PositiveInt!
+  limit: PositiveInt!
 }
 
 extend type Query {
   currentUser: User!
-  users(filter: UserFilterInput): [User!]!
+  userSearch(search: UserSearchInput!): UserSearchResult!
+  userSearchByEmail(search: UserByEmailSearchInput!): UserSearchResult!
 }

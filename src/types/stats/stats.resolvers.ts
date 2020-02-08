@@ -1,9 +1,25 @@
 import { Resolver } from "../../db/gql";
 import moment, { min } from "moment";
 
+const toIsoDate = ({ year, month, date }) => {
+  const filler = "0";
+  const m = String(month).padStart(2, filler);
+  const d = String(date).padStart(2, filler);
+  return `${year}-${m}-${d}`;
+};
+
+const sumLowerLevelStats = (lower: Array<any>) =>
+  lower.reduce(
+    (stats, low) => ({
+      revenueCents: stats.revenueCents + low.data.revenueCents,
+      numParkingSessions: stats.numParkingSessions + low.data.numParkingSessions
+    }),
+    // Initial
+    { revenueCents: 0, numParkingSessions: 0 }
+  );
 // Query
 // TODO: Range selection
-const dayStats: Resolver = async (_, args, ctx, info) => {
+const dayStatsAll: Resolver = async (_, args, ctx, info) => {
   // Calculate today
   const startDate: Date = moment()
     .subtract(2, "weeks")
@@ -65,12 +81,11 @@ const dayStats: Resolver = async (_, args, ctx, info) => {
   });
 };
 
-const dayStatsPerHour: Resolver = async (_, args, ctx) => {
+const dayStats: Resolver = async (_, args, ctx) => {
   const dateField = "checkOut.time";
   const dateField$ = `$${dateField}`;
   const timezone = "Europe/Prague";
-  // TODO: Catch invalid inputs (timestamp, iso date, etc.)
-  const day = moment(args.day);
+  const day = moment(toIsoDate(args));
   const start: Date = day.startOf("day").toDate();
   const end: Date = day.endOf("day").toDate();
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
@@ -85,15 +100,37 @@ const dayStatsPerHour: Resolver = async (_, args, ctx) => {
     {
       $group: {
         _id: {
-          $hour: { date: dateField$, timezone: timezone }
+          year: {
+            $year: { date: dateField$, timezone }
+          },
+          month: {
+            $month: { date: dateField$, timezone }
+          },
+          date: {
+            $dayOfMonth: { date: dateField$, timezone }
+          },
+          hour: {
+            $hour: { date: dateField$, timezone }
+          }
         },
         revenueCents: { $sum: "$finalFee" },
         numParkingSessions: { $sum: 1 }
       }
     },
     {
+      $sort: {
+        "_id.year": 1,
+        "_id.month": 1,
+        "_id.date": 1,
+        "_id.hour": 1
+      }
+    },
+    {
       $project: {
-        hour: "$_id",
+        year: "$_id.year",
+        month: "$_id.month",
+        date: "$_id.date",
+        hour: "$_id.hour",
         data: {
           revenueCents: "$revenueCents",
           numParkingSessions: { $toInt: "$numParkingSessions" }
@@ -101,16 +138,22 @@ const dayStatsPerHour: Resolver = async (_, args, ctx) => {
       }
     }
   ];
-  const results = await ctx.models.ParkingSession.aggregate(aggr);
+  const hourlyResults = await ctx.models.ParkingSession.aggregate(aggr);
+  const dayStats = sumLowerLevelStats(hourlyResults);
   return {
-    day: args.day,
-    data: results
+    date: day.date(),
+    data: dayStats,
+    hourly: hourlyResults,
+    __: {
+      timezone,
+      day
+    }
   };
 };
 
 export default {
   Query: {
     dayStats,
-    dayStatsPerHour
+    dayStatsAll
   }
 };
