@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import * as mem from "./inMemory";
 import config from "../config";
+import * as mem from "./inMemory";
 
 const options = {
   useNewUrlParser: true,
