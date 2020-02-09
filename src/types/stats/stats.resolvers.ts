@@ -1,13 +1,8 @@
 import { Resolver } from "../../db/gql";
-import moment, { min } from "moment";
+import moment from "moment";
 
-const toIsoDate = ({ year, month, date }) => {
-  const filler = "0";
-  const m = String(month).padStart(2, filler);
-  const d = String(date).padStart(2, filler);
-  return `${year}-${m}-${d}`;
-};
-
+// TODO: Rework this such that it is more readable
+// TODO: Limit nesting to prevent crashes?
 const sumLowerLevelStats = (lower: Array<any>) =>
   lower.reduce(
     (stats, low) => ({
@@ -17,143 +12,217 @@ const sumLowerLevelStats = (lower: Array<any>) =>
     // Initial
     { revenueCents: 0, numParkingSessions: 0 }
   );
+
 // Query
-// TODO: Range selection
-const dayStatsAll: Resolver = async (_, args, ctx, info) => {
-  // Calculate today
-  const startDate: Date = moment()
-    .subtract(2, "weeks")
-    .startOf("day")
-    .toDate();
-  // Constants
-  const dateField = "checkOut.time";
-  const dateField$ = `$${dateField}`;
-  const timezone = "Europe/Prague";
-  // Aggregation
-  const aggr = [
-    {
-      $match: {
-        [dateField]: { $gte: startDate }
-      }
-    },
-    {
-      $group: {
-        _id: {
-          year: {
-            $year: { date: dateField$, timezone: timezone }
-          },
-          month: {
-            $month: { date: dateField$, timezone: timezone }
-          },
-          date: {
-            $dayOfMonth: { date: dateField$, timezone: timezone }
-          }
-        },
-        revenueCents: { $sum: "$finalFee" },
-        numParkingSessions: { $sum: 1 }
-      }
-    },
-    {
-      $sort: {
-        "_id.year": -1,
-        "_id.month": -1,
-        "_id.date": -1
-      }
-    },
-    {
-      $addFields: {
+const aggrMatchByRange = (dateField: string, start: Date, end: Date) => ({
+  $match: {
+    [dateField]: { $gte: start, $lte: end }
+  }
+});
+
+const aggrGroupByDate = (
+  dateField: string,
+  timezone: string,
+  level: "year" | "month" | "dayOfMonth" | "hour"
+) => {
+  const levels = ["year", "month", "dayOfMonth", "hour"];
+  const arg = { date: dateField, timezone };
+  const group = {
+    $group: {
+      _id: {
+        year: { $year: arg }
+      },
+      revenueCents: { $sum: "$finalFee" },
+      numParkingSessions: { $sum: 1 }
+    }
+  };
+  // Until we reach the desired level
+  for (let i = 0; level !== levels[i]; i++) {
+    const current = levels[i + 1];
+    group.$group._id[current] = {
+      [`$${current}`]: arg
+    };
+  }
+  return group;
+};
+
+const aggrSort = () => {
+  return {
+    $sort: {
+      "_id.year": 1,
+      "_id.month": 1,
+      "_id.dayOfMonth": 1,
+      "_id.hour": 1
+    }
+  };
+};
+
+const aggrProject = () => {
+  return {
+    $project: {
+      year: "$_id.year",
+      month: "$_id.month",
+      date: "$_id.dayOfMonth",
+      hour: "$_id.hour",
+      data: {
+        revenueCents: "$revenueCents",
         numParkingSessions: { $toInt: "$numParkingSessions" }
       }
     }
-  ];
-  const result = await ctx.models.ParkingSession.aggregate(aggr);
-  return result.map(({ _id: id, numParkingSessions, revenueCents }) => {
-    const month = String(id.month).padStart(2, "0");
-    const date = String(id.date).padStart(2, "0");
-    const day = `${id.year}-${month}-${date}`;
-    return {
-      day,
-      data: {
-        numParkingSessions,
-        revenueCents
-      }
-    };
-  });
+  };
 };
 
-const dayStats: Resolver = async (_, args, ctx) => {
-  const dateField = "checkOut.time";
-  const dateField$ = `$${dateField}`;
-  const timezone = "Europe/Prague";
-  const day = moment(toIsoDate(args));
-  const start: Date = day.startOf("day").toDate();
-  const end: Date = day.endOf("day").toDate();
+const intervalFromArgs = (args): [Date, Date, moment.Moment] => {
+  let full = null;
+  let unit = null;
+  if (!!args.year && !!args.month && !!args.date) {
+    full = moment({
+      year: args.year,
+      month: args.month - 1,
+      date: args.date
+    });
+    unit = "day";
+  } else if (!!args.year && !!args.month) {
+    full = moment({
+      year: args.year,
+      month: args.month - 1
+    });
+    unit = "month";
+  } else if (!!args.year) {
+    full = moment({ year: args.year });
+    unit = "year";
+  }
+  const start = full.startOf(unit).toDate();
+  const end = full.endOf(unit).toDate();
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
     throw new Error("Supplied day is not of YYYY-MM-DD format");
   }
+  return [start, end, full];
+};
+
+// Defaults
+const dateField = "checkOut.time";
+const dateField$ = `$${dateField}`;
+const timezone = "Europe/Prague";
+
+const dayStats: Resolver = async (_, args, ctx) => {
+  const [start, end, day] = intervalFromArgs(args);
+
   const aggr = [
-    {
-      $match: {
-        [dateField]: { $gte: start, $lte: end }
-      }
-    },
-    {
-      $group: {
-        _id: {
-          year: {
-            $year: { date: dateField$, timezone }
-          },
-          month: {
-            $month: { date: dateField$, timezone }
-          },
-          date: {
-            $dayOfMonth: { date: dateField$, timezone }
-          },
-          hour: {
-            $hour: { date: dateField$, timezone }
-          }
-        },
-        revenueCents: { $sum: "$finalFee" },
-        numParkingSessions: { $sum: 1 }
-      }
-    },
-    {
-      $sort: {
-        "_id.year": 1,
-        "_id.month": 1,
-        "_id.date": 1,
-        "_id.hour": 1
-      }
-    },
-    {
-      $project: {
-        year: "$_id.year",
-        month: "$_id.month",
-        date: "$_id.date",
-        hour: "$_id.hour",
-        data: {
-          revenueCents: "$revenueCents",
-          numParkingSessions: { $toInt: "$numParkingSessions" }
-        }
-      }
-    }
+    aggrMatchByRange(dateField, start, end),
+    aggrGroupByDate(dateField$, timezone, "hour"),
+    aggrSort(),
+    aggrProject()
   ];
-  const hourlyResults = await ctx.models.ParkingSession.aggregate(aggr);
-  const dayStats = sumLowerLevelStats(hourlyResults);
+  const hourlyStats = await ctx.models.ParkingSession.aggregate(aggr);
+  const dayStats = sumLowerLevelStats(hourlyStats);
   return {
+    year: day.year(),
+    month: day.month(),
     date: day.date(),
     data: dayStats,
-    hourly: hourlyResults,
+
+    hourly: hourlyStats,
     __: {
       timezone,
-      day
+      start,
+      end
     }
   };
+};
+
+const monthStats: Resolver = async (_, args, ctx) => {
+  const [start, end] = intervalFromArgs(args);
+  const aggr = [
+    aggrMatchByRange(dateField, start, end),
+    aggrGroupByDate(dateField$, timezone, "dayOfMonth"),
+    aggrSort(),
+    aggrProject()
+  ];
+  const dayStats = await ctx.models.ParkingSession.aggregate(aggr);
+  const monthStats = sumLowerLevelStats(dayStats);
+  return {
+    month: start.getMonth(),
+    year: start.getFullYear(),
+
+    data: monthStats,
+    daily: dayStats,
+    __: {
+      timezone,
+      start,
+      end
+    }
+  };
+};
+
+const yearStats: Resolver = async (_, args, ctx) => {
+  const [start, end] = intervalFromArgs(args);
+  const aggr = [
+    aggrMatchByRange(dateField, start, end),
+    aggrGroupByDate(dateField$, timezone, "month"),
+    aggrSort(),
+    aggrProject()
+  ];
+  const monthStats = await ctx.models.ParkingSession.aggregate(aggr);
+  const yearStats = sumLowerLevelStats(monthStats);
+  return {
+    year: start.getFullYear(),
+
+    data: yearStats,
+    monthly: monthStats,
+    __: {
+      timezone,
+      start,
+      end
+    }
+  };
+};
+
+// YearStats
+const monthly: Resolver = (yearStats, args, ctx) => {
+  // yearlyStats.monthly is always populated
+  return yearStats.monthly;
+};
+
+// MonthStats
+const daily: Resolver = async (monthlyStats, args, ctx) => {
+  return (await monthStats(
+    null,
+    {
+      year: monthlyStats.year,
+      month: monthlyStats.month
+    },
+    ctx
+  )).daily;
+};
+
+// DayStats
+const hourly: Resolver = async (dayilyStats, _, ctx) => {
+  console.log("HOURLY");
+  return (await dayStats(
+    null,
+    {
+      year: dayilyStats.year,
+      month: dayilyStats.month,
+      date: dayilyStats.date
+    },
+    ctx
+  )).hourly;
 };
 
 export default {
   Query: {
     dayStats,
-    dayStatsAll
+    monthStats,
+    yearStats
+  },
+  YearStats: {
+    monthly
+  },
+  MonthStats: {
+    daily
+  },
+  DayStats: {
+    hourly
   }
 };

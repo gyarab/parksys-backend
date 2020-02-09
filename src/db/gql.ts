@@ -48,7 +48,7 @@ export type Context = Pick<PRequest<any>, "token"> & {
   };
 };
 
-export type ResolverArgs = [Document | null, any, Context, any];
+export type ResolverArgs = [Document | null | any, any, Context, any];
 export type Resolver<T = any> = (
   obj?: ResolverArgs[0],
   args?: ResolverArgs[1],

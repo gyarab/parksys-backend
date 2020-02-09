@@ -8,30 +8,33 @@ type YearStats {
   data: StatsDataPoint!
 
   # Max length is 4.
-  quarterly: [QuerterStats!]
+  # quarterly: [QuerterStats!]
   # Max length is 12.
   monthly: [MonthStats!]
 }
 
-type QuerterStats {
-  quarter: PositiveInt!
-  data: StatsDataPoint!
+# type QuerterStats {
+#   quarter: PositiveInt!
+#   data: StatsDataPoint!
 
-  monthly: [MonthStats!]
-}
+#   monthly: [MonthStats!]!
+# }
 
 type MonthStats {
+  year: PositiveInt!
   month: PositiveInt!
-  data: StatsDataPoint!
 
-  daily: [DayStats!]
+  data: StatsDataPoint!
+  daily: [DayStats!]!
 }
 
 type DayStats {
+  year: PositiveInt!
+  month: PositiveInt!
   date: PositiveInt!
-  data: StatsDataPoint!
 
-  hourly: [HourStats!]
+  data: StatsDataPoint!
+  hourly: [HourStats!]!
 }
 
 type HourStats {
