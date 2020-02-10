@@ -1,4 +1,4 @@
-import { Resolver } from "../../db/gql";
+import { Resolver, Context } from "../../db/gql";
 import moment from "moment";
 
 // TODO: Rework this such that it is more readable
@@ -20,10 +20,11 @@ const aggrMatchByRange = (dateField: string, start: Date, end: Date) => ({
   }
 });
 
+type AggregationLevel = "year" | "month" | "dayOfMonth" | "hour";
 const aggrGroupByDate = (
   dateField: string,
   timezone: string,
-  level: "year" | "month" | "dayOfMonth" | "hour"
+  level: AggregationLevel
 ) => {
   const levels = ["year", "month", "dayOfMonth", "hour"];
   const arg = { date: dateField, timezone };
@@ -100,29 +101,30 @@ const intervalFromArgs = (args): [Date, Date, moment.Moment] => {
   return [start, end, full];
 };
 
-// Defaults
-const dateField = "checkOut.time";
-const dateField$ = `$${dateField}`;
-const timezone = "Europe/Prague";
-
-const dayStats: Resolver = async (_, args, ctx) => {
+const genericStatsGenerator = (
+  dateField: string,
+  timezone: string,
+  level: AggregationLevel,
+  lowerLevelKey: string
+) => async (args, ctx: Context) => {
   const [start, end, day] = intervalFromArgs(args);
+  const dateField$ = `$${dateField}`;
 
   const aggr = [
     aggrMatchByRange(dateField, start, end),
-    aggrGroupByDate(dateField$, timezone, "hour"),
+    aggrGroupByDate(dateField$, timezone, level),
     aggrSort(),
     aggrProject()
   ];
-  const hourlyStats = await ctx.models.ParkingSession.aggregate(aggr);
-  const dayStats = sumLowerLevelStats(hourlyStats);
+  const subLevelStats = await ctx.models.ParkingSession.aggregate(aggr);
+  const thisLevelStats = sumLowerLevelStats(subLevelStats);
   return {
     year: day.year(),
     month: day.month(),
     date: day.date(),
-    data: dayStats,
+    data: thisLevelStats,
 
-    hourly: hourlyStats,
+    [lowerLevelKey]: subLevelStats,
     __: {
       timezone,
       start,
@@ -131,51 +133,36 @@ const dayStats: Resolver = async (_, args, ctx) => {
   };
 };
 
-const monthStats: Resolver = async (_, args, ctx) => {
-  const [start, end] = intervalFromArgs(args);
-  const aggr = [
-    aggrMatchByRange(dateField, start, end),
-    aggrGroupByDate(dateField$, timezone, "dayOfMonth"),
-    aggrSort(),
-    aggrProject()
-  ];
-  const dayStats = await ctx.models.ParkingSession.aggregate(aggr);
-  const monthStats = sumLowerLevelStats(dayStats);
-  return {
-    month: start.getMonth(),
-    year: start.getFullYear(),
+// Defaults
+const dateField = "checkOut.time";
+const timezone = "Europe/Prague";
 
-    data: monthStats,
-    daily: dayStats,
-    __: {
-      timezone,
-      start,
-      end
-    }
-  };
+const dayStats = genericStatsGenerator(dateField, timezone, "hour", "hourly");
+const monthStats = genericStatsGenerator(
+  dateField,
+  timezone,
+  "dayOfMonth",
+  "daily"
+);
+const yearStats = genericStatsGenerator(
+  dateField,
+  timezone,
+  "month",
+  "monthly"
+);
+
+const dayStatsResolver: Resolver = async (_, args, ctx) => {
+  return await dayStats(args, ctx);
 };
 
-const yearStats: Resolver = async (_, args, ctx) => {
-  const [start, end] = intervalFromArgs(args);
-  const aggr = [
-    aggrMatchByRange(dateField, start, end),
-    aggrGroupByDate(dateField$, timezone, "month"),
-    aggrSort(),
-    aggrProject()
-  ];
-  const monthStats = await ctx.models.ParkingSession.aggregate(aggr);
-  const yearStats = sumLowerLevelStats(monthStats);
-  return {
-    year: start.getFullYear(),
+const monthStatsResolver: Resolver = async (_, args, ctx) => {
+  return await monthStats(args, ctx);
+};
 
-    data: yearStats,
-    monthly: monthStats,
-    __: {
-      timezone,
-      start,
-      end
-    }
-  };
+const yearStatsResolver: Resolver = async (_, args, ctx) => {
+  const r = await yearStats(args, ctx);
+  console.log(r);
+  return r;
 };
 
 // YearStats
@@ -187,7 +174,6 @@ const monthly: Resolver = (yearStats, args, ctx) => {
 // MonthStats
 const daily: Resolver = async (monthlyStats, args, ctx) => {
   return (await monthStats(
-    null,
     {
       year: monthlyStats.year,
       month: monthlyStats.month
@@ -198,9 +184,7 @@ const daily: Resolver = async (monthlyStats, args, ctx) => {
 
 // DayStats
 const hourly: Resolver = async (dayilyStats, _, ctx) => {
-  console.log("HOURLY");
   return (await dayStats(
-    null,
     {
       year: dayilyStats.year,
       month: dayilyStats.month,
@@ -212,9 +196,9 @@ const hourly: Resolver = async (dayilyStats, _, ctx) => {
 
 export default {
   Query: {
-    dayStats,
-    monthStats,
-    yearStats
+    dayStats: dayStatsResolver,
+    monthStats: monthStatsResolver,
+    yearStats: yearStatsResolver
   },
   YearStats: {
     monthly
