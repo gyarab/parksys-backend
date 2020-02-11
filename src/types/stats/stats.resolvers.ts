@@ -1,7 +1,6 @@
 import { Resolver, Context } from "../../db/gql";
 import moment from "moment";
 
-// TODO: Rework this such that it is more readable
 // TODO: Limit nesting to prevent crashes?
 const sumLowerLevelStats = (lower: Array<any>) =>
   lower.reduce(
@@ -26,7 +25,12 @@ const aggrGroupByDate = (
   timezone: string,
   level: AggregationLevel
 ) => {
-  const levels = ["year", "month", "dayOfMonth", "hour"];
+  const levels: Array<AggregationLevel> = [
+    "year",
+    "month",
+    "dayOfMonth",
+    "hour"
+  ];
   const arg = { date: dateField, timezone };
   const group = {
     $group: {
@@ -120,7 +124,7 @@ const genericStatsGenerator = (
   const thisLevelStats = sumLowerLevelStats(subLevelStats);
   return {
     year: day.year(),
-    month: day.month(),
+    month: day.month() + 1,
     date: day.date(),
     data: thisLevelStats,
 
@@ -160,9 +164,7 @@ const monthStatsResolver: Resolver = async (_, args, ctx) => {
 };
 
 const yearStatsResolver: Resolver = async (_, args, ctx) => {
-  const r = await yearStats(args, ctx);
-  console.log(r);
-  return r;
+  return await yearStats(args, ctx);
 };
 
 // YearStats
