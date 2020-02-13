@@ -11,6 +11,7 @@ type YearStats {
   # quarterly: [QuerterStats!]
   # Max length is 12.
   monthly: [MonthStats!]
+  daily: [DayStats!]
 }
 
 # type QuerterStats {
@@ -50,5 +51,4 @@ extend type Query {
     month: PositiveInt!
     date: PositiveInt!
   ): DayStats!
-  dayStatsAll: MonthStats!
 }

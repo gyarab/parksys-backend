@@ -173,6 +173,14 @@ const monthly: Resolver = (yearStats, args, ctx) => {
   return yearStats.monthly;
 };
 
+const yearsDaily: Resolver = async (yearStats, args, ctx) =>
+  (await monthStats(
+    {
+      year: yearStats.year
+    },
+    ctx
+  )).daily;
+
 // MonthStats
 const daily: Resolver = async (monthlyStats, args, ctx) => {
   return (await monthStats(
@@ -203,7 +211,8 @@ export default {
     yearStats: yearStatsResolver
   },
   YearStats: {
-    monthly
+    monthly,
+    daily: yearsDaily
   },
   MonthStats: {
     daily
