@@ -22,12 +22,12 @@ describe("updateConfig endpoint", () => {
       .send({
         config: "string"
       });
-    expect(resp.status).toBe(400);
+    expect(resp.status).toBe(200);
     // Verify DB - should stay the same
     const device = await Device.findById(d1Id);
     expect(device.config).toMatchObject({
-      key1: "value1",
-      key2: [1, 2, 3]
+      capturing: false,
+      type: "IN"
     });
   });
 
@@ -37,16 +37,20 @@ describe("updateConfig endpoint", () => {
       .set("Authorization", `Bearer ${validAccessToken}`)
       .send({
         config: {
-          key1: "value2",
-          key2: [1, 2]
+          capturing: true,
+          type: "OUT"
         }
       });
     expect(resp.status).toBe(200);
+    expect(resp.body.data.config).toMatchObject({
+      capturing: true,
+      type: "OUT"
+    });
     // Verify DB
     const device = await Device.findById(d1Id);
     expect(device.config).toMatchObject({
-      key1: "value2",
-      key2: [1, 2]
+      capturing: true,
+      type: "OUT"
     });
   });
 

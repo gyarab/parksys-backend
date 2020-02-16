@@ -45,7 +45,12 @@ const UserSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: RefreshTokenName
     }
-  ]
+  ],
+  active: {
+    type: Boolean,
+    required: true,
+    default: true
+  }
 });
 
 const User = mongoose.model<IUser>(UserName, UserSchema);

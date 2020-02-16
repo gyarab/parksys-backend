@@ -6,6 +6,17 @@ type Device {
   # Calculated
   activationQrUrl: String!
   activationPasswordExpiresAt: DateTime
+  config: DeviceConfig!
+}
+
+enum DeviceType {
+  IN
+  OUT
+}
+
+type DeviceConfig {
+  type: DeviceType!
+  capturing: Boolean!
 }
 
 input NewDeviceInput {
@@ -19,6 +30,11 @@ input DeviceFilter {
   activatedAt: DateTime
 }
 
+input DeviceConfigUpdateInput {
+  type: DeviceType
+  capturing: Boolean
+}
+
 extend type Query {
   devices(filter: DeviceFilter): [Device]!
 }
@@ -27,4 +43,5 @@ extend type Mutation {
   createDevice(input: NewDeviceInput!): Device!
   deviceRegenerateActivationPassword(id: ID!): Device!
   deleteDevice(id: ID!): Device!
+  updateDeviceConfig(id: ID!, newConfig: DeviceConfigUpdateInput!): Device!
 }

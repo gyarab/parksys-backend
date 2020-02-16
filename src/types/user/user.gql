@@ -6,6 +6,7 @@ type User {
   authentications: [Authentication]
   refreshTokens: [RefreshToken]
   isAdmin: Boolean!
+  active: Boolean!
 }
 
 input UserSearchInput {

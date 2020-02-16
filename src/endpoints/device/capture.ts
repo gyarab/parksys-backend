@@ -377,7 +377,7 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
     device.shouldSendConfig = false;
     await device.save();
   } else {
-    res.status(200).end();
+    res.send({});
   }
 
   // Process

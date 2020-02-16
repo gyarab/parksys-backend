@@ -27,7 +27,8 @@ const userByIdWithPasswordAuthentications = async (
 ): Promise<IUser> => {
   const user = await userModel.findOne({
     _id: userId,
-    authentications: { $elemMatch: { method: AuthenticationMethod.PASSWORD } }
+    authentications: { $elemMatch: { method: AuthenticationMethod.PASSWORD } },
+    active: true
   });
   if (!user) throw new Error(errMsg);
   return user;
@@ -40,7 +41,8 @@ const userByUsernameWithPasswordAuthentications = async (
 ): Promise<IUser> => {
   const user = await userModel.findOne({
     $or: [{ name: username }, { email: username }],
-    authentications: { $elemMatch: { method: AuthenticationMethod.PASSWORD } }
+    authentications: { $elemMatch: { method: AuthenticationMethod.PASSWORD } },
+    active: true
   });
   if (!user) throw new Error(errMsg);
   return user;

@@ -50,8 +50,8 @@ describe("capture endpoint", () => {
     expect(resp.body).toMatchObject({
       data: {
         config: {
-          key1: "value1",
-          key2: [1, 2, 3]
+          capturing: false,
+          type: "IN"
         }
       }
     });

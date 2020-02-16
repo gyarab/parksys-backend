@@ -12,6 +12,11 @@ import {
   RefreshTokenName
 } from "../refreshToken/refreshToken.model";
 import config from "../../config";
+import {
+  DeviceConfigSchema,
+  DeviceConfig,
+  IDeviceConfig
+} from "./deviceConfig.model";
 
 // Returns a function that generates activation passwords
 export const generateDeviceActivationPassword: (
@@ -42,7 +47,7 @@ export interface IDevice extends mongoose.Document {
   activatedAt: Date;
   activationPassword: IAuthentication<IAuthenticationPayloadActivationPassword>;
   refreshToken: IRefreshToken;
-  config?: object;
+  config?: IDeviceConfig;
   shouldSendConfig: boolean;
   defaultActivationPasswordGenerator: string;
 }
@@ -76,8 +81,9 @@ export const DeviceSchema = new mongoose.Schema(
       ref: RefreshTokenName
     },
     config: {
-      type: {},
-      default: {}
+      required: true,
+      default: () => new DeviceConfig(),
+      type: DeviceConfigSchema
     },
     shouldSendConfig: {
       type: Boolean,
