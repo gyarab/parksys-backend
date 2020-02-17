@@ -34,8 +34,9 @@ const deviceRegenerateActivationPassword: Resolver = async (_, args, ctx) => {
 const updateDeviceConfig: Resolver = async (_, args, ctx): Promise<IDevice> => {
   const device = await ctx.models.Device.findById(args.id);
   device.config = { ...device.config.toObject(), ...args.config };
-  await device.save();
-  return device;
+  device.shouldSendConfig = true;
+  console.log("update config");
+  return await device.save();
 };
 
 // Device

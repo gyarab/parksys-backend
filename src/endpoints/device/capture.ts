@@ -372,9 +372,10 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
   }
 
   if (device.shouldSendConfig) {
-    res.send({
+    const response = {
       data: { config: device.config }
-    });
+    };
+    res.send(response);
     device.shouldSendConfig = false;
     await device.save();
   } else {

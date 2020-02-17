@@ -13,14 +13,20 @@ const updateConfig: AsyncHandler<{ any }> = async (req, res, next) => {
 
   if (typeof lodash.get(req.body, "config", undefined) === "object") {
     device.config = { ...device.config.toObject(), ...req.body.config };
-    res.send({
-      data: { config: device.config.toObject() }
-    });
+    device.shouldSendConfig = true;
+  }
+
+  if (device.shouldSendConfig) {
+    const response = {
+      data: { config: device.config }
+    };
+    res.send(response);
     device.shouldSendConfig = false;
     await device.save();
   } else {
     res.send({});
   }
+
   return next();
 };
 
