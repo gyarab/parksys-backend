@@ -31,6 +31,13 @@ const deviceRegenerateActivationPassword: Resolver = async (_, args, ctx) => {
   return await device.save();
 };
 
+const updateDeviceConfig: Resolver = async (_, args, ctx): Promise<IDevice> => {
+  const device = await ctx.models.Device.findById(args.id);
+  device.config = { ...device.config.toObject(), ...args.config };
+  await device.save();
+  return device;
+};
+
 // Device
 const activationQrUrl = (device: IDevice) => {
   return routes["devices/qr"].path.replace(":id", device.id);
@@ -53,7 +60,14 @@ export default {
       [Permission.DEVICES],
       deviceRegenerateActivationPassword
     ),
-    deleteDevice: checkPermissionsGqlBuilder([Permission.DEVICES], deleteDevice)
+    deleteDevice: checkPermissionsGqlBuilder(
+      [Permission.DEVICES],
+      deleteDevice
+    ),
+    updateDeviceConfig: checkPermissionsGqlBuilder(
+      [Permission.DEVICES],
+      updateDeviceConfig
+    )
   },
   Device: {
     activationQrUrl,

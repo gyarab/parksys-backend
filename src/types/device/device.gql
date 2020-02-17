@@ -43,5 +43,5 @@ extend type Mutation {
   createDevice(input: NewDeviceInput!): Device!
   deviceRegenerateActivationPassword(id: ID!): Device!
   deleteDevice(id: ID!): Device!
-  updateDeviceConfig(id: ID!, newConfig: DeviceConfigUpdateInput!): Device!
+  updateDeviceConfig(id: ID!, config: DeviceConfigUpdateInput!): Device!
 }

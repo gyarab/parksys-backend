@@ -28,6 +28,7 @@ const getLprResult = (file: any): Promise<LicensePlateRecognitionResult> => {
   return new Promise<LicensePlateRecognitionResult>((resolve, reject) => {
     tmp.file((err, fname, fd, removeTmpFile) => {
       if (err) reject(err);
+      // TODO: Parametrize this using config
       sharp(file.data)
         .resize(1000, 1000)
         .toFile(fname)
@@ -387,6 +388,7 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
   try {
     const filename = Object.keys(files)[0];
     const captureTime = filenameToDate(filename);
+    // TODO: Cache K results and average over them
     const result = await getLprResult(files[filename]);
     // console.log(id, "RSLT", new Date(), result);
     await handleResult(result, device, captureTime);
