@@ -26,10 +26,6 @@ const verifyAccessTokenBody = (body: any, time: Date): boolean => {
   );
 };
 
-const verifyRefreshTokenBody = (body: any): boolean => {
-  return false;
-};
-
 export const checkAuthorizationHeader = async (
   req: any
 ): Promise<AccessTokenData | null> => {

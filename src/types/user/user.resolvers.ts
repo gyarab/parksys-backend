@@ -7,7 +7,8 @@ import {
   gqlFindUsingFilter,
   ModelGetter,
   gqlRegexSearch,
-  gqlFindByIdUpdate
+  gqlFindByIdUpdate,
+  gqlFindByIdDelete
 } from "../../db/genericResolvers";
 
 const modelGetter: ModelGetter<IUser> = ctx => ctx.models.User;
@@ -38,7 +39,6 @@ const userSearchByEmail: Resolver = gqlRegexSearch(
   false,
   { name: 1 }
 );
-
 // User
 const authentications: Resolver = (obj: IUser, _, ctx) => {
   const uid = lodash.get(ctx, "token.user.id");
@@ -59,7 +59,27 @@ const isAdmin: Resolver = (obj: IUser) => {
 };
 
 // Mutation
-const updateUser: Resolver = gqlFindByIdUpdate(modelGetter);
+const _updateUser: Resolver = gqlFindByIdUpdate(modelGetter);
+const updateUser: Resolver = async (obj, args, ctx, info) => {
+  if (args.input.active === false && ctx.token.user.id === args.id) {
+    throw new Error("Cannot deactive yourself.");
+  }
+  if (
+    isAdmin(ctx.token.user) &&
+    !isAdmin({ permissions: args.input.permissions || [Permission.ALL] })
+  ) {
+    throw new Error("Cannot deadmin yourself,");
+  }
+  return await _updateUser(obj, args, ctx, info);
+};
+
+const _deleteUser: Resolver = gqlFindByIdDelete(modelGetter);
+const deleteUser: Resolver = async (obj, args, ctx, info) => {
+  if (ctx.token.user.id === args.id) {
+    throw Error("Cannot delete yourself.");
+  }
+  return _deleteUser(obj, args, ctx, info);
+};
 
 export default {
   Query: {
@@ -75,6 +95,7 @@ export default {
     isAdmin
   },
   Mutation: {
-    updateUser: checkPermissionsGqlBuilder([Permission.ALL], updateUser)
+    updateUser: checkPermissionsGqlBuilder([Permission.ALL], updateUser),
+    deleteUser: checkPermissionsGqlBuilder([Permission.ALL], deleteUser)
   }
 };

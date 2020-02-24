@@ -239,12 +239,10 @@ extend type Mutation {
   deleteParkingRuleAssignment(id: ID!): ParkingRuleAssignment!
 }
 
-input ParkingSessionFilter {
-  id: ID
-  active: Boolean
-  vehicle: ID
+type ParkingSessionResult {
+  data: [ParkingSession!]
 }
 
 extend type Query {
-  parkingSessions(filter: ParkingSessionFilter): [ParkingSession!]!
+  parkingSessions(limit: PositiveInt, page: PositiveInt): ParkingSessionResult!
 }

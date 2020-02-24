@@ -41,4 +41,5 @@ extend type Query {
 
 extend type Mutation {
   updateUser(id: ID!, input: UserUpdateInput!): User!
+  deleteUser(id: ID!): User!
 }

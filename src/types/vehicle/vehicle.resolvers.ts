@@ -4,7 +4,8 @@ import {
   ModelGetter,
   gqlFindByIdDelete,
   gqlFindUsingFilter,
-  gqlRegexSearch
+  gqlRegexSearch,
+  gqlPopulate
 } from "../../db/genericResolvers";
 import { IVehicle } from "./vehicle.model";
 
@@ -26,6 +27,11 @@ const deleteVehicleByLicensePlate: Resolver = async (_, args, ctx) => {
   });
 };
 
+// Vehicle
+const parkingSessions: Resolver = async (vehicle: IVehicle, _, ctx) => {
+  return ctx.models.ParkingSession.find({ vehicle: vehicle.id });
+};
+
 export default {
   Query: {
     vehicles,
@@ -35,5 +41,8 @@ export default {
     createVehicle,
     deleteVehicle,
     deleteVehicleByLicensePlate
+  },
+  Vehicle: {
+    parkingSessions
   }
 };
