@@ -6,7 +6,8 @@ import { Resolver } from "../../db/gql";
 import {
   gqlFindUsingFilter,
   ModelGetter,
-  gqlRegexSearch
+  gqlRegexSearch,
+  gqlFindByIdUpdate
 } from "../../db/genericResolvers";
 
 const modelGetter: ModelGetter<IUser> = ctx => ctx.models.User;
@@ -57,6 +58,9 @@ const isAdmin: Resolver = (obj: IUser) => {
   return obj.permissions.indexOf(Permission.ALL) >= 0;
 };
 
+// Mutation
+const updateUser: Resolver = gqlFindByIdUpdate(modelGetter);
+
 export default {
   Query: {
     currentUser,
@@ -69,5 +73,8 @@ export default {
   User: {
     authentications,
     isAdmin
+  },
+  Mutation: {
+    updateUser: checkPermissionsGqlBuilder([Permission.ALL], updateUser)
   }
 };

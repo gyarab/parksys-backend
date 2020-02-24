@@ -1,4 +1,6 @@
 enum Permission {
   ALL
   DEVICES
+  VEHICLES
+  STATS
 }

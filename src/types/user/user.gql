@@ -2,7 +2,7 @@ type User {
   id: ID!
   name: String!
   email: EmailAddress!
-  permissions: [String]!
+  permissions: [Permission]!
   authentications: [Authentication]
   refreshTokens: [RefreshToken]
   isAdmin: Boolean!
@@ -21,6 +21,12 @@ input UserByEmailSearchInput {
   page: PositiveInt
 }
 
+input UserUpdateInput {
+  permissions: [Permission!]
+  active: Boolean
+  name: String
+}
+
 type UserSearchResult {
   data: [User!]
   page: PositiveInt!
@@ -31,4 +37,8 @@ extend type Query {
   currentUser: User!
   userSearch(search: UserSearchInput!): UserSearchResult!
   userSearchByEmail(search: UserByEmailSearchInput!): UserSearchResult!
+}
+
+extend type Mutation {
+  updateUser(id: ID!, input: UserUpdateInput!): User!
 }

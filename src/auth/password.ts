@@ -1,4 +1,3 @@
-import config from "../config";
 import { Permission } from "../types/permissions";
 import lodash from "lodash";
 import { IRefreshToken } from "../types/refreshToken/refreshToken.model";

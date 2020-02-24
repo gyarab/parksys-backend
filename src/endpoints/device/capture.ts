@@ -375,10 +375,12 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
     const response = {
       data: { config: device.config }
     };
+    console.log("capture", response);
     res.send(response);
     device.shouldSendConfig = false;
     await device.save();
   } else {
+    console.log("capture {}");
     res.send({});
   }
 
