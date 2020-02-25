@@ -4,7 +4,7 @@ import crypto from "crypto";
 import { AsyncHandler } from "../../app";
 import lpr from "../../apis/lpr";
 import { Device, IDevice } from "../../types/device/device.model";
-import { LicensePlateRecognitionResult } from "../../apis/lpr/types";
+import { LicensePlateRecognitionResult, Candidate } from "../../apis/lpr/types";
 import { Vehicle, IVehicle } from "../../types/vehicle/vehicle.model";
 import { Check } from "../../types/parking/check.model";
 import {
@@ -23,6 +23,8 @@ import {
   ParkingRule,
   IParkingRule
 } from "../../types/parking/parkingRule.model";
+import cache from "../../cache";
+import config from "../../config";
 
 const getLprResult = (file: any): Promise<LicensePlateRecognitionResult> => {
   return new Promise<LicensePlateRecognitionResult>((resolve, reject) => {
@@ -298,7 +300,7 @@ const getRequiredRules = async (
 };
 
 export const handleResult = async (
-  { best, candidates, coordinates, rectangle }: LicensePlateRecognitionResult,
+  best: Candidate,
   device: IDevice,
   captureTime: Date
 ) => {
@@ -361,6 +363,29 @@ export const filenameToDate = (filename: string): Date => {
   return new Date(timestamp);
 };
 
+interface DeviceCacheValue {
+  n: number;
+  // Sums of percentages of all candidates
+  // To find average percentage divide by `n`
+  combinedResults: { [key: string]: number };
+  // Date.getTime()
+  start: number;
+}
+
+const combineCacheAndResults = (
+  cached: DeviceCacheValue,
+  result: LicensePlateRecognitionResult
+): DeviceCacheValue => {
+  for (const { plate, confidence } of result.candidates) {
+    if (typeof cached.combinedResults[plate] === "undefined") {
+      cached.combinedResults[plate] = confidence;
+    } else {
+      cached.combinedResults[plate] += confidence;
+    }
+  }
+  return cached;
+};
+
 const capture: AsyncHandler<any> = async (req, res, next) => {
   // Send back device config if updated
   const id = crypto.randomBytes(4).toString("hex");
@@ -375,12 +400,10 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
     const response = {
       data: { config: device.config }
     };
-    console.log("capture", response);
     res.send(response);
     device.shouldSendConfig = false;
     await device.save();
   } else {
-    console.log("capture {}");
     res.send({});
   }
 
@@ -391,10 +414,44 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
   try {
     const filename = Object.keys(files)[0];
     const captureTime = filenameToDate(filename);
-    // TODO: Cache K results and average over them
     const result = await getLprResult(files[filename]);
-    // console.log(id, "RSLT", new Date(), result);
-    await handleResult(result, device, captureTime);
+    // TODO: Cache K results and average over them
+    const K = <number>config.get("recognitionCache:k");
+    let cached: DeviceCacheValue = cache.get(device.cacheKey());
+    // Less than 7 seconds ago
+    if (!!cached && cached.start >= new Date().getTime() - 7000) {
+      cached = combineCacheAndResults(cached, result);
+      cached.n += 1;
+    } else {
+      cached = combineCacheAndResults(
+        {
+          n: 1,
+          combinedResults: {},
+          start: new Date().getTime()
+        },
+        result
+      );
+    }
+    console.log(cached);
+    if (cached.n >= K) {
+      // Consume cache
+      cache.delete(device.cacheKey());
+      // Find the best candidate
+      let best: Candidate = { plate: "-", confidence: 0 };
+      for (const [plate, newConfidence] of Object.entries(
+        cached.combinedResults
+      )) {
+        if (best === null || newConfidence > best.confidence) {
+          best = { plate, confidence: newConfidence };
+        }
+      }
+      // At least 80%
+      if (best.confidence / cached.n >= 80) {
+        await handleResult(best, device, captureTime);
+      }
+    } else {
+      cache.set(device.cacheKey(), cached);
+    }
     return next();
   } catch (err) {
     return next(err);

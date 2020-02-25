@@ -26,6 +26,12 @@ nconf.defaults({
           country_code: "eu"
         }
       }
+    },
+    cache: {
+      i: "memory",
+      memory: {
+        // No config needed
+      }
     }
   },
   security: {
@@ -43,7 +49,10 @@ nconf.defaults({
     host: "0.0.0.0",
     port: 8080
   },
-  ping: true
+  ping: true,
+  recognitionCache: {
+    k: 2
+  }
 });
 
 export default nconf;

@@ -50,6 +50,7 @@ export interface IDevice extends mongoose.Document {
   config?: IDeviceConfig;
   shouldSendConfig: boolean;
   defaultActivationPasswordGenerator: string;
+  cacheKey(): string;
 }
 
 export const DeviceLabel = "Device";
@@ -110,5 +111,8 @@ export const DeviceSchema = new mongoose.Schema(
 );
 
 DeviceSchema.statics.defaultActivationPasswordGenerator = defaultActivationPasswordGenerator;
+DeviceSchema.methods.cacheKey = function(this: IDevice) {
+  return `${DeviceLabel}:${this.id}`;
+};
 
 export const Device = mongoose.model<IDevice>(DeviceLabel, DeviceSchema);
