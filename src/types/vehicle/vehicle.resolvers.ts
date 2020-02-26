@@ -1,4 +1,4 @@
-import { Resolver } from "../../db/gql";
+import { Resolver, Context } from "../../db/gql";
 import {
   gqlCreate,
   ModelGetter,
@@ -13,10 +13,12 @@ const modelGetter: ModelGetter<IVehicle> = ctx => ctx.models.Vehicle;
 
 // Query
 const vehicles: Resolver = gqlFindUsingFilter(modelGetter);
-const vehicleSearch: Resolver = gqlRegexSearch(modelGetter, "licensePlate", {
-  max: 100,
-  default: 50
-});
+const vehicleSearch: Resolver = gqlRegexSearch(
+  modelGetter,
+  "licensePlate",
+  { max: 100, default: 50 },
+  false
+);
 
 // Mutation
 const createVehicle: Resolver = gqlCreate(modelGetter);
@@ -25,11 +27,6 @@ const deleteVehicleByLicensePlate: Resolver = async (_, args, ctx) => {
   return await ctx.models.Vehicle.findOneAndDelete({
     licensePlate: args.licensePlate
   });
-};
-
-// Vehicle
-const parkingSessions: Resolver = async (vehicle: IVehicle, _, ctx) => {
-  return ctx.models.ParkingSession.find({ vehicle: vehicle.id });
 };
 
 export default {
@@ -43,6 +40,11 @@ export default {
     deleteVehicleByLicensePlate
   },
   Vehicle: {
-    parkingSessions
+    parkingSessions: async (vehicle: IVehicle, _, ctx: Context) =>
+      ctx.models.ParkingSession.find({ vehicle: vehicle.id }),
+    numParkingSessions: async (vehicle: IVehicle, _, ctx: Context) =>
+      ctx.models.ParkingSession.countDocuments({
+        vehicle: vehicle.id
+      })
   }
 };

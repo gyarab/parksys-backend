@@ -1,6 +1,7 @@
 type Vehicle {
   id: ID!
   licensePlate: String!
+  numParkingSessions: Int!
   parkingSessions: [ParkingSession!]
   totalPaidCents: NonNegativeInt
 }
