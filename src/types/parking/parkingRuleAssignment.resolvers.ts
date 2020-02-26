@@ -10,33 +10,18 @@ import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { IParkingRuleAssignment } from "./parkingRuleAssignment.model";
 import { findAppliedRules } from "../../endpoints/device/capture";
 import { Model } from "mongoose";
+import dateFilter from "../dateFilter";
 
 const modelGetter: ModelGetter<IParkingRuleAssignment> = ctx =>
   ctx.models.ParkingRuleAssignment;
 
-const dateFilter = (query, key, originalKey) => {
-  if (!query[originalKey]) {
-    delete query[originalKey];
-    return;
-  }
-  const keys = ["lt", "lte", "gt", "gte"];
-  const f = {};
-  for (const k of keys) {
-    if (query[originalKey][k] !== undefined) {
-      f[`$${k}`] = query[originalKey][k];
-    }
-  }
-  if (Object.keys(f).length > 0) {
-    query[key] = f;
-  }
-  delete query[originalKey];
-};
-
 // Query
 const parkingRuleAssignments: Resolver = async (_, args, ctx) => {
   let query = args.filter || {};
+  console.log(query);
   if (!!query.startFilter) dateFilter(query, "start", "startFilter");
   if (!!query.endFilter) dateFilter(query, "end", "endFilter");
+  console.log(query);
   return await ctx.models.ParkingRuleAssignment.find(query);
 };
 

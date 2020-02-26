@@ -69,7 +69,8 @@ const types = [
   "permissions",
   "parking",
   "vehicle",
-  "stats"
+  "stats",
+  "dateFilter"
 ];
 
 function loadSchemaFile(path: string): Promise<string> {

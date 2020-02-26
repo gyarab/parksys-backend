@@ -96,7 +96,7 @@ type ParkingRuleAssignment {
   priority: NonNegativeInt!
 }
 
-input DateFilter {
+input DateFilterInput {
   lte: DateTime
   lt: DateTime
   gte: DateTime
@@ -241,8 +241,19 @@ extend type Mutation {
 
 type ParkingSessionResult {
   data: [ParkingSession!]
+  page: PositiveInt!
+  limit: PositiveInt!
+}
+
+input ParkingSessionFilterInput {
+  dateFilter: DateFilterInput!
+  page: PositiveInt
+  limit: PositiveInt
 }
 
 extend type Query {
   parkingSessions(limit: PositiveInt, page: PositiveInt): ParkingSessionResult!
+  parkingSessionsFilter(
+    input: ParkingSessionFilterInput!
+  ): ParkingSessionResult!
 }
