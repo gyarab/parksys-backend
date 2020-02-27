@@ -104,7 +104,7 @@ export const gqlPaged = <D extends mongoose.Document, K extends keyof D>(
   modelGetter: ModelGetter<D>,
   limitArg: { max: number; default: number },
   sorting: object,
-  find: object = {}
+  find1: object = {}
 ): Resolver | never => {
   if (limitArg.max < limitArg.default) {
     throw new Error(
@@ -118,8 +118,9 @@ export const gqlPaged = <D extends mongoose.Document, K extends keyof D>(
     const find2 = lodash.get(args, "_find", {});
     if (limit > limitArg.max)
       throw new Error(`Limit must be <= ${limitArg.max}!`);
+    const find = { ...find1, ...find2 };
     const matchedObjects = await model
-      .find({ ...find, ...find2 })
+      .find(find)
       .sort(sorting)
       // Skip does not scale well: https://stackoverflow.com/questions/5539955/how-to-paginate-with-mongoose-in-node-js
       .skip((page - 1) * limit)

@@ -239,21 +239,24 @@ extend type Mutation {
   deleteParkingRuleAssignment(id: ID!): ParkingRuleAssignment!
 }
 
-type ParkingSessionResult {
+type ParkingSessionPagedResult {
   data: [ParkingSession!]
   page: PositiveInt!
   limit: PositiveInt!
 }
 
 input ParkingSessionFilterInput {
-  dateFilter: DateFilterInput!
-  page: PositiveInt
-  limit: PositiveInt
+  dateFilter: DateFilterInput
 }
 
 extend type Query {
-  parkingSessions(limit: PositiveInt, page: PositiveInt): ParkingSessionResult!
+  parkingSessions(
+    limit: PositiveInt
+    page: PositiveInt
+  ): ParkingSessionPagedResult!
   parkingSessionsFilter(
-    input: ParkingSessionFilterInput!
-  ): ParkingSessionResult!
+    filter: DateFilterInput
+    limit: PositiveInt
+    page: PositiveInt
+  ): ParkingSessionPagedResult!
 }

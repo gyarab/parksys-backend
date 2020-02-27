@@ -5,9 +5,10 @@ import {
   gqlFindByIdDelete,
   gqlFindUsingFilter,
   gqlRegexSearch,
-  gqlPopulate
+  gqlPaged
 } from "../../db/genericResolvers";
 import { IVehicle } from "./vehicle.model";
+import dateFilter from "../dateFilter";
 
 const modelGetter: ModelGetter<IVehicle> = ctx => ctx.models.Vehicle;
 
@@ -29,6 +30,15 @@ const deleteVehicleByLicensePlate: Resolver = async (_, args, ctx) => {
   });
 };
 
+// Vehicle
+const _parkingSessions: Resolver = gqlPaged(
+  ctx => ctx.models.ParkingSession,
+  { default: 10, max: 50 },
+  {
+    "checkOut.time": 1
+  }
+);
+
 export default {
   Query: {
     vehicles,
@@ -40,11 +50,26 @@ export default {
     deleteVehicleByLicensePlate
   },
   Vehicle: {
-    parkingSessions: async (vehicle: IVehicle, _, ctx: Context) =>
-      ctx.models.ParkingSession.find({ vehicle: vehicle.id }),
+    parkingSessions: async (vehicle: IVehicle, args, ctx: Context) => {
+      args._find = { vehicle: vehicle._id };
+      if (!!args.filter) {
+        dateFilter(args, "date", "filter");
+        args._find["checkOut.time"] = args.date;
+        delete args.date;
+      }
+      return await _parkingSessions(null, args, ctx);
+    },
     numParkingSessions: async (vehicle: IVehicle, _, ctx: Context) =>
       ctx.models.ParkingSession.countDocuments({
         vehicle: vehicle.id
-      })
+      }),
+    totalPaidCents: async (vehicle: IVehicle, _, ctx: Context) => {
+      const result = await ctx.models.ParkingSession.aggregate([
+        { $match: { vehicle: vehicle._id } },
+        { $group: { _id: 0, totalPaidCents: { $sum: "$finalFee" } } }
+      ]);
+      if (result.length === 0) return 0;
+      return result[0].totalPaidCents;
+    }
   }
 };

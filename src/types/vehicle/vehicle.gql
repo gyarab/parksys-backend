@@ -2,7 +2,11 @@ type Vehicle {
   id: ID!
   licensePlate: String!
   numParkingSessions: Int!
-  parkingSessions: [ParkingSession!]
+  parkingSessions(
+    page: PositiveInt
+    limit: PositiveInt
+    filter: DateFilterInput
+  ): ParkingSessionPagedResult!
   totalPaidCents: NonNegativeInt
 }
 
@@ -18,7 +22,7 @@ input VehicleSearchInput {
   page: PositiveInt
 }
 
-type VehicleSearchResult {
+type VehiclePagedResult {
   data: [Vehicle!]
   page: PositiveInt!
   limit: PositiveInt!
@@ -26,7 +30,7 @@ type VehicleSearchResult {
 
 extend type Query {
   vehicles: [Vehicle!]
-  vehicleSearch(search: VehicleSearchInput!): VehicleSearchResult!
+  vehicleSearch(search: VehicleSearchInput!): VehiclePagedResult!
 }
 
 extend type Mutation {

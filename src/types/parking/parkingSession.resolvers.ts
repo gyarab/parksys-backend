@@ -15,16 +15,15 @@ const parkingSessions: Resolver = gqlPaged(
 );
 
 const parkingSessionsFilter: Resolver = async (obj, args, ctx, info) => {
-  const input = args.input;
-  if (!!input.dateFilter) dateFilter(input, "date", "dateFilter");
+  if (!!args.filter) dateFilter(args, "date", "filter");
   return await parkingSessions(
     obj,
     {
-      page: input.page,
-      limit: input.limit,
-      _find: !!input.date
+      page: args.page,
+      limit: args.limit,
+      _find: !!args.date
         ? {
-            "checkOut.time": input.date
+            "checkOut.time": args.date
           }
         : {}
     },
