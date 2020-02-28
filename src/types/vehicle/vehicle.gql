@@ -29,6 +29,7 @@ type VehiclePagedResult {
 }
 
 extend type Query {
+  vehicle(id: ID!): Vehicle
   vehicles: [Vehicle!]
   vehicleSearch(search: VehicleSearchInput!): VehiclePagedResult!
 }

@@ -132,3 +132,14 @@ export const gqlPaged = <D extends mongoose.Document, K extends keyof D>(
     };
   };
 };
+
+export const gqlById = <D extends mongoose.Document, K extends keyof D>(
+  modelGetter: ModelGetter<D>
+): Resolver => {
+  return async (_, args, ctx) => {
+    const model = modelGetter(ctx);
+    const id = lodash.get(args, "id", null);
+    if (id === null) throw new Error("Id not provided");
+    return await model.findById(id);
+  };
+};

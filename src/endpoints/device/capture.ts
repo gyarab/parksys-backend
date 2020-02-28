@@ -320,6 +320,7 @@ export const applyRules = async (
   const requiredRules = await getRequiredRules(appliedRules);
   const filledAppliedRules = [];
   for (let i = 0; i < appliedRules.length; i++) {
+    const startingFeeCents = result.feeCents;
     const ruleApplication = appliedRules[i];
     const timeDelta =
       ruleApplication.end.getTime() - ruleApplication.start.getTime();
@@ -350,6 +351,7 @@ export const applyRules = async (
     filledAppliedRules.push({
       start: ruleApplication.start,
       end: ruleApplication.end,
+      feeCents: result.feeCents - startingFeeCents,
       rules: filledRules
     });
   }

@@ -8,6 +8,7 @@ type Check {
 type AppliedRuleAssignments {
   start: DateTime!
   end: DateTime!
+  feeCents: NonNegativeInt
   # This is a copy, id may not work
   rules: [ParkingRule!]!
 }
@@ -262,6 +263,7 @@ input ParkingSessionFilterInput {
 }
 
 extend type Query {
+  parkingSession(id: ID!): ParkingSession
   parkingSessions(
     limit: PositiveInt
     page: PositiveInt

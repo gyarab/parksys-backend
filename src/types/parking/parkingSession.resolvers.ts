@@ -1,4 +1,9 @@
-import { ModelGetter, gqlPopulate, gqlPaged } from "../../db/genericResolvers";
+import {
+  ModelGetter,
+  gqlPopulate,
+  gqlPaged,
+  gqlById
+} from "../../db/genericResolvers";
 import { Resolver } from "../../db/gql";
 import { IParkingSession } from "./parkingSession.model";
 import dateFilter from "../dateFilter";
@@ -13,6 +18,8 @@ const parkingSessions: Resolver = gqlPaged(
   { "checkOut.time": -1, "checkIn.time": -1 },
   {}
 );
+
+const parkingSession: Resolver = gqlById(modelGetter);
 
 const parkingSessionsFilter: Resolver = async (obj, args, ctx, info) => {
   if (!!args.filter) dateFilter(args, "date", "filter");
@@ -35,7 +42,8 @@ const parkingSessionsFilter: Resolver = async (obj, args, ctx, info) => {
 export default {
   Query: {
     parkingSessions,
-    parkingSessionsFilter
+    parkingSessionsFilter,
+    parkingSession
   },
   ParkingSession: {
     vehicle: gqlPopulate(modelGetter, "vehicle")

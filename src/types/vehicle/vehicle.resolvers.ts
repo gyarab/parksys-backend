@@ -5,7 +5,8 @@ import {
   gqlFindByIdDelete,
   gqlFindUsingFilter,
   gqlRegexSearch,
-  gqlPaged
+  gqlPaged,
+  gqlById
 } from "../../db/genericResolvers";
 import { IVehicle } from "./vehicle.model";
 import dateFilter from "../dateFilter";
@@ -20,6 +21,7 @@ const vehicleSearch: Resolver = gqlRegexSearch(
   { max: 100, default: 50 },
   false
 );
+const vehicle: Resolver = gqlById(modelGetter);
 
 // Mutation
 const createVehicle: Resolver = gqlCreate(modelGetter);
@@ -38,10 +40,7 @@ const _parkingSessions: Resolver = gqlPaged(
 );
 
 export default {
-  Query: {
-    vehicles,
-    vehicleSearch
-  },
+  Query: { vehicle, vehicles, vehicleSearch },
   Mutation: {
     createVehicle,
     deleteVehicle,
