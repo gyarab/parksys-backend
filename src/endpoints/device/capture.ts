@@ -466,13 +466,14 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
     const filename = Object.keys(files)[0];
     const captureTime = filenameToDate(filename);
     const result = await getLprResult(files[filename], device);
+    if (result.best === null) {
+      return next();
+    }
     const licensePlateArea = result.rectangle.width * result.rectangle.height;
-    console.log(result.rectangle, licensePlateArea);
     if (licensePlateArea < device.config.minArea) {
       console.log("Low area: " + result.rectangle);
       return next();
     }
-    // TODO: Cache K results and average over them
     const K = <number>config.get("recognitionCache:k");
     let cached: DeviceCacheValue = cache.get(device.cacheKey());
     // Less than 7 seconds ago
