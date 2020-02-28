@@ -34,9 +34,7 @@ const deleteVehicleByLicensePlate: Resolver = async (_, args, ctx) => {
 const _parkingSessions: Resolver = gqlPaged(
   ctx => ctx.models.ParkingSession,
   { default: 10, max: 50 },
-  {
-    "checkOut.time": 1
-  }
+  { "checkOut.time": -1, "checkIn.time": -1 }
 );
 
 export default {
@@ -54,7 +52,10 @@ export default {
       args._find = { vehicle: vehicle._id };
       if (!!args.filter) {
         dateFilter(args, "date", "filter");
-        args._find["checkOut.time"] = args.date;
+        args._find["$or"] = [
+          { "checkOut.time": args.date },
+          { "checkIn.time": args.date }
+        ];
         delete args.date;
       }
       return await _parkingSessions(null, args, ctx);

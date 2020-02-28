@@ -332,9 +332,14 @@ export const applyRules = async (appliedRules: AppliedRuleAssignment[]) => {
           timeDelta / divider,
           rule.roundingMethod
         ); // For every started time unit (2.5h == 3h)
-        const paidUnits = Math.max(allUnits - result.freeTimeInMinutes / coeff);
+        console.log(result);
+        const paidUnits = Math.max(
+          allUnits - result.freeTimeInMinutes / coeff,
+          0
+        );
         result.freeTimeInMinutes -= paidUnits * coeff;
         result.feeCents += rule.centsPerUnitTime * paidUnits;
+        console.log(result);
       }
     }
   }
@@ -361,7 +366,6 @@ export const handleResult = async (
     vehicle,
     active: true
   });
-  // TODO: Branch based on device type (entry/exit)
   if (!!parkingSession && device.config.type === DeviceType.OUT) {
     // The vehicle is exiting
     const appliedRules = await findAppliedRules(
@@ -371,11 +375,12 @@ export const handleResult = async (
     );
     const result = await applyRules(appliedRules);
 
+    parkingSession.appliedRules = appliedRules;
     parkingSession.finalFee = result.feeCents;
     parkingSession.checkOut = check;
     parkingSession.active = false;
     await parkingSession.save();
-  } else if (device.config.type === DeviceType.IN) {
+  } else if (!parkingSession && device.config.type === DeviceType.IN) {
     // The vehicle is entering
     parkingSession = await new ParkingSession({
       vehicle,
