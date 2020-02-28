@@ -112,7 +112,7 @@ export const DeviceSchema = new mongoose.Schema(
 
 DeviceSchema.statics.defaultActivationPasswordGenerator = defaultActivationPasswordGenerator;
 DeviceSchema.methods.cacheKey = function(this: IDevice) {
-  return `${DeviceLabel}:${this.id}`;
+  return `${DeviceLabel}:${this.config.type}:${this.id}`;
 };
 
 export const Device = mongoose.model<IDevice>(DeviceLabel, DeviceSchema);

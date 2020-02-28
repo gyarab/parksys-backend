@@ -9,7 +9,7 @@ export interface IParkingSession extends mongoose.Document {
   checkIn: ICheck;
   checkOut?: ICheck;
   vehicle: IVehicle["_id"];
-  appliedRules?: Object[];
+  appliedAssignments?: Object[];
   finalFee: Money;
 }
 export const ParkingSessionLabel = "ParkingSession";
@@ -34,7 +34,7 @@ export const ParkingSessionSchema = new mongoose.Schema({
     required: true,
     index: true
   },
-  appliedRules: [
+  appliedAssignments: [
     {
       type: Object
     }

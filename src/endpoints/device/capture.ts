@@ -313,14 +313,21 @@ const ceilFloorRound = (x: number, method: ParkingRounding): number => {
   }
 };
 
-export const applyRules = async (appliedRules: AppliedRuleAssignment[]) => {
+export const applyRules = async (
+  appliedRules: AppliedRuleAssignment[]
+): Promise<[any, any]> => {
   const result = { feeCents: 0, freeTimeInMinutes: 0 };
   const requiredRules = await getRequiredRules(appliedRules);
-  for (const ruleApplication of appliedRules) {
+  const filledAppliedRules = [];
+  for (let i = 0; i < appliedRules.length; i++) {
+    const ruleApplication = appliedRules[i];
     const timeDelta =
       ruleApplication.end.getTime() - ruleApplication.start.getTime();
+    const filledRules = [];
     for (const ruleId of ruleApplication.assignment.rules) {
       const rule = requiredRules[ruleId];
+      filledRules.push(rule.toObject());
+      filledRules[filledRules.length - 1].id = rule.id;
       if (rule.__t === "ParkingRuleTimedFee") {
         const coeff = rule.unitTime === ParkingTimeUnit.HOUR ? 60 : 1;
         const divider =
@@ -332,18 +339,21 @@ export const applyRules = async (appliedRules: AppliedRuleAssignment[]) => {
           timeDelta / divider,
           rule.roundingMethod
         ); // For every started time unit (2.5h == 3h)
-        console.log(result);
         const paidUnits = Math.max(
           allUnits - result.freeTimeInMinutes / coeff,
           0
         );
         result.freeTimeInMinutes -= paidUnits * coeff;
         result.feeCents += rule.centsPerUnitTime * paidUnits;
-        console.log(result);
       }
     }
+    filledAppliedRules.push({
+      start: ruleApplication.start,
+      end: ruleApplication.end,
+      rules: filledRules
+    });
   }
-  return result;
+  return [result, filledAppliedRules];
 };
 
 export const handleResult = async (
@@ -373,9 +383,9 @@ export const handleResult = async (
       parkingSession.checkIn.time,
       captureTime
     );
-    const result = await applyRules(appliedRules);
+    const [result, filledAppliedRules] = await applyRules(appliedRules);
 
-    parkingSession.appliedRules = appliedRules;
+    parkingSession.appliedAssignments = filledAppliedRules;
     parkingSession.finalFee = result.feeCents;
     parkingSession.checkOut = check;
     parkingSession.active = false;

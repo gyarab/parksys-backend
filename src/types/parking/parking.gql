@@ -5,14 +5,21 @@ type Check {
   image: URL
 }
 
+type AppliedRuleAssignments {
+  start: DateTime!
+  end: DateTime!
+  # This is a copy, id may not work
+  rules: [ParkingRule!]!
+}
+
 type ParkingSession {
   id: ID!
   active: Boolean!
   checkIn: Check!
   checkOut: Check
   vehicle: Vehicle!
-  appliedRules: [ParkingRule!]!
   finalFee: NonNegativeInt
+  appliedAssignments: [AppliedRuleAssignments!]
 }
 
 ## PARKING RULE TYPES
