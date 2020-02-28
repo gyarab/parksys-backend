@@ -17,6 +17,9 @@ enum DeviceType {
 type DeviceConfig {
   type: DeviceType!
   capturing: Boolean!
+  minArea: NonNegativeInt!
+  resizeX: NonNegativeInt!
+  resizeY: NonNegativeInt!
 }
 
 input NewDeviceInput {
@@ -33,6 +36,9 @@ input DeviceFilter {
 input DeviceConfigUpdateInput {
   type: DeviceType
   capturing: Boolean
+  minArea: NonNegativeInt
+  resizeX: NonNegativeInt
+  resizeY: NonNegativeInt
 }
 
 extend type Query {

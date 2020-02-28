@@ -35,7 +35,7 @@ const simulateRuleAssignmentApplication: Resolver = async (
     start,
     end
   );
-  const results = await applyRules(appliedRules);
+  const [results] = await applyRules(appliedRules);
   return {
     appliedRules,
     feeCents: results.feeCents

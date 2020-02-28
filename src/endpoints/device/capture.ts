@@ -28,13 +28,15 @@ import cache from "../../cache";
 import config from "../../config";
 import { DeviceType } from "../../types/device/deviceConfig.model";
 
-const getLprResult = (file: any): Promise<LicensePlateRecognitionResult> => {
+const getLprResult = (
+  file: any,
+  device: IDevice
+): Promise<LicensePlateRecognitionResult> => {
   return new Promise<LicensePlateRecognitionResult>((resolve, reject) => {
     tmp.file((err, fname, fd, removeTmpFile) => {
       if (err) reject(err);
-      // TODO: Parametrize this using config
       sharp(file.data)
-        .resize(1000, 1000)
+        .resize(device.config.resizeX, device.config.resizeY)
         .toFile(fname)
         .then(_ => {
           lpr
@@ -463,7 +465,13 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
   try {
     const filename = Object.keys(files)[0];
     const captureTime = filenameToDate(filename);
-    const result = await getLprResult(files[filename]);
+    const result = await getLprResult(files[filename], device);
+    const licensePlateArea = result.rectangle.width * result.rectangle.height;
+    console.log(result.rectangle, licensePlateArea);
+    if (licensePlateArea < device.config.minArea) {
+      console.log("Low area: " + result.rectangle);
+      return next();
+    }
     // TODO: Cache K results and average over them
     const K = <number>config.get("recognitionCache:k");
     let cached: DeviceCacheValue = cache.get(device.cacheKey());
@@ -481,7 +489,6 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
         result
       );
     }
-    console.log(cached);
     if (cached.n >= K) {
       // Consume cache
       cache.delete(device.cacheKey());

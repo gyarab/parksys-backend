@@ -36,7 +36,7 @@ const deleteVehicleByLicensePlate: Resolver = async (_, args, ctx) => {
 const _parkingSessions: Resolver = gqlPaged(
   ctx => ctx.models.ParkingSession,
   { default: 10, max: 50 },
-  { "checkOut.time": -1, "checkIn.time": -1 }
+  { "checkIn.time": -1 }
 );
 
 export default {

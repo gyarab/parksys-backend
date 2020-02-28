@@ -82,9 +82,9 @@ export const DeviceSchema = new mongoose.Schema(
       ref: RefreshTokenName
     },
     config: {
+      type: DeviceConfigSchema,
       required: true,
-      default: () => new DeviceConfig(),
-      type: DeviceConfigSchema
+      default: () => new DeviceConfig()
     },
     shouldSendConfig: {
       type: Boolean,
