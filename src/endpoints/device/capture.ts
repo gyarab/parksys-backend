@@ -27,13 +27,8 @@ import {
 import cache from "../../cache";
 import config from "../../config";
 import { DeviceType } from "../../types/device/deviceConfig.model";
-import {
-  CaptureImage,
-  ICaptureImage
-} from "../../types/captureImage/captureImage.model";
-import base64Img from "base64-img";
-import { cropImageRectangle, Rectangle } from "../../utils/image";
-import fs from "fs";
+import { CaptureImage } from "../../types/captureImage/captureImage.model";
+import { Rectangle } from "../../utils/image";
 
 const getLprResult = (file: any, device: IDevice) =>
   new Promise<[LicensePlateRecognitionResult, string, () => void]>(

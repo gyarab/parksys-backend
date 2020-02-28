@@ -4,9 +4,11 @@ import {
   gqlPaged,
   gqlById
 } from "../../db/genericResolvers";
-import { Resolver } from "../../db/gql";
+import { Resolver, Context } from "../../db/gql";
 import { IParkingSession } from "./parkingSession.model";
 import dateFilter from "../dateFilter";
+import { ICheck } from "./check.model";
+import routes from "../../endpoints/routes";
 
 const modelGetter: ModelGetter<IParkingSession> = ctx =>
   ctx.models.ParkingSession;
@@ -28,11 +30,7 @@ const parkingSessionsFilter: Resolver = async (obj, args, ctx, info) => {
     {
       page: args.page,
       limit: args.limit,
-      _find: !!args.date
-        ? {
-            "checkOut.time": args.date
-          }
-        : {}
+      _find: !!args.date ? { "checkOut.time": args.date } : {}
     },
     ctx,
     info
@@ -47,5 +45,12 @@ export default {
   },
   ParkingSession: {
     vehicle: gqlPopulate(modelGetter, "vehicle")
+  },
+  Check: {
+    imagePaths: (check: ICheck, _, ctx: Context) => {
+      return check.images.map(id =>
+        routes.captureImage.path.replace(":id", id)
+      );
+    }
   }
 };

@@ -47,7 +47,7 @@ rootRouter.put(routes["devices/config"].path, deviceOnly, updateConfigEndpoint);
 // Capture Image
 rootRouter.get(
   routes["captureImage"].path,
-  // checkPermissionReqBuilder([Permission.ALL]),
+  checkPermissionReqBuilder([Permission.ALL]),
   captureImageEndpoint
 );
 

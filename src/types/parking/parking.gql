@@ -2,7 +2,7 @@
 
 type Check {
   time: DateTime!
-  images: [String!]
+  imagePaths: [String!]
 }
 
 type AppliedRuleAssignments {
