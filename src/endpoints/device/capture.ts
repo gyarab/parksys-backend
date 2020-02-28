@@ -334,7 +334,7 @@ export const applyRules = async (appliedRules: AppliedRuleAssignment[]) => {
         ); // For every started time unit (2.5h == 3h)
         const paidUnits = Math.max(allUnits - result.freeTimeInMinutes / coeff);
         result.freeTimeInMinutes -= paidUnits * coeff;
-        result.feeCents += rule.centsPerUnitTime * allUnits;
+        result.feeCents += rule.centsPerUnitTime * paidUnits;
       }
     }
   }
