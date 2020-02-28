@@ -33,6 +33,7 @@ WORKDIR /usr/src/app
 COPY src/ ./src
 COPY --from=deps /usr/src/app/node_modules ./node_modules/
 COPY --from=build /usr/src/app/dist ./dist/
+COPY --from=build /usr/src/app/package.json /usr/src/app/package-lock.json ./
 COPY config ./
 COPY typings ./
 
