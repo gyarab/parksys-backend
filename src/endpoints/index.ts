@@ -10,6 +10,7 @@ import captureEndpoint from "./device/capture";
 import { Handler } from "../app";
 import lodash from "lodash";
 import updateConfigEndpoint from "./device/updateConfig";
+import captureImageEndpoint from "./captureImage";
 
 const rootRouter = Router();
 
@@ -42,5 +43,12 @@ rootRouter.post(
   captureEndpoint
 );
 rootRouter.put(routes["devices/config"].path, deviceOnly, updateConfigEndpoint);
+
+// Capture Image
+rootRouter.get(
+  routes["captureImage"].path,
+  // checkPermissionReqBuilder([Permission.ALL]),
+  captureImageEndpoint
+);
 
 export default rootRouter;

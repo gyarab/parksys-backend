@@ -27,30 +27,34 @@ import {
 import cache from "../../cache";
 import config from "../../config";
 import { DeviceType } from "../../types/device/deviceConfig.model";
+import {
+  CaptureImage,
+  ICaptureImage
+} from "../../types/captureImage/captureImage.model";
+import base64Img from "base64-img";
+import { cropImageRectangle, Rectangle } from "../../utils/image";
+import fs from "fs";
 
-const getLprResult = (
-  file: any,
-  device: IDevice
-): Promise<LicensePlateRecognitionResult> => {
-  return new Promise<LicensePlateRecognitionResult>((resolve, reject) => {
-    tmp.file((err, fname, fd, removeTmpFile) => {
-      if (err) reject(err);
-      sharp(file.data)
-        .resize(device.config.resizeX, device.config.resizeY)
-        .toFile(fname)
-        .then(_ => {
-          lpr
-            .recognizeLicensePlate(fname)
-            .then(result => {
-              removeTmpFile();
-              resolve(result);
-            })
-            .catch(err => reject(err));
-        })
-        .catch(err => reject(err));
-    });
-  });
-};
+const getLprResult = (file: any, device: IDevice) =>
+  new Promise<[LicensePlateRecognitionResult, string, () => void]>(
+    (resolve, reject) => {
+      tmp.file((err, fname, fd, removeTmpFile) => {
+        if (err) reject(err);
+        sharp(file.data)
+          .resize(device.config.resizeX, device.config.resizeY)
+          .toFile(fname)
+          .then(_ => {
+            lpr
+              .recognizeLicensePlate(fname)
+              .then(result => {
+                resolve([result, fname, removeTmpFile]);
+              })
+              .catch(err => reject(err));
+          })
+          .catch(err => reject(err));
+      });
+    }
+  );
 
 export const createFilterApplier = (vehicle: IVehicle) => {
   const vId = vehicle._id.toString();
@@ -363,7 +367,9 @@ export const applyRules = async (
 export const handleResult = async (
   best: Candidate,
   device: IDevice,
-  captureTime: Date
+  captureTime: Date,
+  imgFilePath: string,
+  licensePlateRectangle: Rectangle
 ) => {
   // console.log(new Date(), best, candidates);
   // No result
@@ -380,6 +386,29 @@ export const handleResult = async (
     vehicle,
     active: true
   });
+  const saveImage = async (): Promise<string | null> => {
+    const { start, width, height } = licensePlateRectangle;
+    const offset = 10;
+    return sharp(imgFilePath)
+      .extract({
+        left: start.x - offset,
+        top: start.y - offset,
+        width: width + offset * 2,
+        height: height + offset * 2
+      })
+      .toBuffer()
+      .then(buffer =>
+        new CaptureImage({ data: buffer.toString("base64") }).save()
+      )
+      .then(captureImage => {
+        delete captureImage.data;
+        return captureImage.id;
+      })
+      .catch(err => {
+        console.log(err);
+        return null;
+      });
+  };
   if (!!parkingSession && device.config.type === DeviceType.OUT) {
     // The vehicle is exiting
     const appliedRules = await findAppliedRules(
@@ -393,13 +422,17 @@ export const handleResult = async (
     parkingSession.finalFee = result.feeCents;
     parkingSession.checkOut = check;
     parkingSession.active = false;
+    // Image may error out
+    check.images = [await saveImage()];
     await parkingSession.save();
   } else if (!parkingSession && device.config.type === DeviceType.IN) {
     // The vehicle is entering
+    check.images = [await saveImage()];
     parkingSession = await new ParkingSession({
       vehicle,
       checkIn: check
     }).save();
+    // Image may error out
   } else {
     const deviceIdentity = `${device.id}:${JSON.stringify(device.config)}`;
     const sessionIdentity = `${!!parkingSession ? parkingSession.id : "null"})`;
@@ -465,13 +498,18 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
   try {
     const filename = Object.keys(files)[0];
     const captureTime = filenameToDate(filename);
-    const result = await getLprResult(files[filename], device);
+    const [result, fname, deleteTmpFile] = await getLprResult(
+      files[filename],
+      device
+    );
     if (result.best === null) {
+      deleteTmpFile();
       return next();
     }
     const licensePlateArea = result.rectangle.width * result.rectangle.height;
     if (licensePlateArea < device.config.minArea) {
       console.log("Low area: " + result.rectangle);
+      deleteTmpFile();
       return next();
     }
     const K = <number>config.get("recognitionCache:k");
@@ -504,11 +542,12 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
       }
       // At least 80%
       if (best.confidence / cached.n >= 80) {
-        await handleResult(best, device, captureTime);
+        await handleResult(best, device, captureTime, fname, result.rectangle);
       }
     } else {
       cache.set(device.cacheKey(), cached);
     }
+    deleteTmpFile();
     return next();
   } catch (err) {
     return next(err);

@@ -28,6 +28,7 @@ export const cropImageRectangle = (
         rectangle.height + offset * 2
       ];
       this.crop(...args);
+      this.toFile("/home/tmscer/output.png", () => null);
       this.toFile(outputPath, () => resolve(true));
     });
   });

@@ -10,7 +10,8 @@ type RoutableEndpoints =
   | "devices/qr"
   | "devices/activate"
   | "devices/capture"
-  | "devices/config";
+  | "devices/config"
+  | "captureImage";
 
 type RouteConfig = Record<RoutableEndpoints, Omit<IRoute, "name">>;
 
@@ -21,7 +22,8 @@ const config: RouteConfig = {
   "devices/capture": { path: "/capture" },
   "devices/qr": { path: "/devices/qr/:id" },
   "devices/config": { path: "/devices/config" },
-  "devices/activate": { path: "/devices/activate" }
+  "devices/activate": { path: "/devices/activate" },
+  captureImage: { path: "/captureImage/:id" }
 };
 
 function getRoutes(

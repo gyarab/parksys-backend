@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 import { DeviceLabel } from "../device/device.model";
+import { CaptureImageLabel } from "../captureImage/captureImage.model";
 
 export interface ICheck extends mongoose.Document {
   time: Date;
-  image: string;
+  images: string[];
 }
 export const CheckLabel = "Check";
 export const CheckSchema = new mongoose.Schema(
@@ -15,7 +16,8 @@ export const CheckSchema = new mongoose.Schema(
     },
     images: [
       {
-        type: String
+        type: mongoose.Schema.Types.ObjectId,
+        ref: CaptureImageLabel
       }
     ],
     byDevice: {

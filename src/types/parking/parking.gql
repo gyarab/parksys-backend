@@ -2,7 +2,7 @@
 
 type Check {
   time: DateTime!
-  image: URL
+  images: [String!]
 }
 
 type AppliedRuleAssignments {
