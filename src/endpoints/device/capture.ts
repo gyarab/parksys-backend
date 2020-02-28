@@ -21,10 +21,12 @@ import { VehicleFilterAction } from "../../types/parking/vehicleFilter.model";
 import {
   ParkingTimeUnit,
   ParkingRule,
-  IParkingRule
+  IParkingRule,
+  ParkingRounding
 } from "../../types/parking/parkingRule.model";
 import cache from "../../cache";
 import config from "../../config";
+import { DeviceType } from "../../types/device/deviceConfig.model";
 
 const getLprResult = (file: any): Promise<LicensePlateRecognitionResult> => {
   return new Promise<LicensePlateRecognitionResult>((resolve, reject) => {
@@ -299,6 +301,46 @@ const getRequiredRules = async (
   return requiredRules;
 };
 
+const ceilFloorRound = (x: number, method: ParkingRounding): number => {
+  switch (method) {
+    case ParkingRounding.CEIL:
+      return Math.ceil(x);
+    case ParkingRounding.FLOOR:
+      return Math.floor(x);
+    case ParkingRounding.ROUND:
+    default:
+      return Math.round(x);
+  }
+};
+
+export const applyRules = async (appliedRules: AppliedRuleAssignment[]) => {
+  const result = { feeCents: 0, freeTimeInMinutes: 0 };
+  const requiredRules = await getRequiredRules(appliedRules);
+  for (const ruleApplication of appliedRules) {
+    const timeDelta =
+      ruleApplication.end.getTime() - ruleApplication.start.getTime();
+    for (const ruleId of ruleApplication.assignment.rules) {
+      const rule = requiredRules[ruleId];
+      if (rule.__t === "ParkingRuleTimedFee") {
+        const coeff = rule.unitTime === ParkingTimeUnit.HOUR ? 60 : 1;
+        const divider =
+          rule.unitTime === ParkingTimeUnit.MINUTE ? 1000 * 60 : 1000 * 3600;
+
+        result.freeTimeInMinutes += rule.freeInUnitTime * coeff;
+
+        const allUnits = ceilFloorRound(
+          timeDelta / divider,
+          rule.roundingMethod
+        ); // For every started time unit (2.5h == 3h)
+        const paidUnits = Math.max(allUnits - result.freeTimeInMinutes / coeff);
+        result.freeTimeInMinutes -= paidUnits * coeff;
+        result.feeCents += rule.centsPerUnitTime * allUnits;
+      }
+    }
+  }
+  return result;
+};
+
 export const handleResult = async (
   best: Candidate,
   device: IDevice,
@@ -308,7 +350,6 @@ export const handleResult = async (
   // No result
   console.log(best);
   if (!best) return;
-  // TODO: This part may need some heuristic using past images to determine the actual license plate
   // Find Vehicle or create it
   const vehicle =
     (await Vehicle.findOne({ licensePlate: best.plate })) ||
@@ -321,40 +362,31 @@ export const handleResult = async (
     active: true
   });
   // TODO: Branch based on device type (entry/exit)
-  if (!!parkingSession) {
+  if (!!parkingSession && device.config.type === DeviceType.OUT) {
     // The vehicle is exiting
     const appliedRules = await findAppliedRules(
       vehicle,
       parkingSession.checkIn.time,
       captureTime
     );
-    const result = { feeCents: 0 };
-    const requiredRules = await getRequiredRules(appliedRules);
+    const result = await applyRules(appliedRules);
 
-    for (const ruleApplication of appliedRules) {
-      const timeDelta =
-        ruleApplication.end.getTime() - ruleApplication.start.getTime();
-      for (const ruleId of ruleApplication.assignment.rules) {
-        const rule = requiredRules[ruleId];
-        if (rule.__t === "ParkingRuleTimedFee") {
-          const divider =
-            rule.unitTime === ParkingTimeUnit.MINUTE ? 1000 * 60 : 1000 * 3600;
-          // TODO: Make this configurable?
-          const units = Math.ceil(timeDelta / divider); // For every started time unit (2.5h == 3h)
-          result.feeCents += rule.centsPerUnitTime * units;
-        }
-      }
-    }
     parkingSession.finalFee = result.feeCents;
     parkingSession.checkOut = check;
     parkingSession.active = false;
     await parkingSession.save();
-  } else {
+  } else if (device.config.type === DeviceType.IN) {
     // The vehicle is entering
     parkingSession = await new ParkingSession({
       vehicle,
       checkIn: check
     }).save();
+  } else {
+    const deviceIdentity = `${device.id}:${JSON.stringify(device.config)}`;
+    const sessionIdentity = `${!!parkingSession ? parkingSession.id : "null"})`;
+    console.warn(
+      `Device (${deviceIdentity}) and vehicle direction (session=${sessionIdentity} do not match`
+    );
   }
 };
 

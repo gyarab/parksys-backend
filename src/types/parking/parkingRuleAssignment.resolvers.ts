@@ -8,7 +8,7 @@ import {
 } from "../../db/genericResolvers";
 import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { IParkingRuleAssignment } from "./parkingRuleAssignment.model";
-import { findAppliedRules } from "../../endpoints/device/capture";
+import { findAppliedRules, applyRules } from "../../endpoints/device/capture";
 import { Model } from "mongoose";
 import dateFilter from "../dateFilter";
 
@@ -30,11 +30,16 @@ const simulateRuleAssignmentApplication: Resolver = async (
   { vehicle, start, end },
   ctx
 ) => {
-  return await findAppliedRules(
+  const appliedRules = await findAppliedRules(
     await ctx.models.Vehicle.findById(vehicle),
     start,
     end
   );
+  const results = await applyRules(appliedRules);
+  return {
+    appliedRules,
+    feeCents: results.feeCents
+  };
 };
 
 // Mutation

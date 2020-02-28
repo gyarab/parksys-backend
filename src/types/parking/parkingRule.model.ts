@@ -25,11 +25,19 @@ export enum ParkingTimeUnit {
   HOUR = "HOUR"
 }
 
+export enum ParkingRounding {
+  CEIL = "CEIL",
+  FLOOR = "FLOOR",
+  ROUND = "ROUND"
+}
+
 // Implementations
 export interface IParkingRuleTimedFee extends IParkingRule {
   __t: string;
   centsPerUnitTime: Money;
   unitTime: ParkingTimeUnit;
+  freeInUnitTime: number;
+  roundingMethod: ParkingRounding;
 }
 export const ParkingRuleTimedFeeLabel = "ParkingRuleTimedFee";
 export const ParkingRuleTimedFeeSchema = new mongoose.Schema({
@@ -38,6 +46,17 @@ export const ParkingRuleTimedFeeSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: Object.keys(ParkingTimeUnit)
+  },
+  freeInUnitTime: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  roundingMethod: {
+    type: String,
+    required: true,
+    enum: Object.keys(ParkingRounding),
+    default: ParkingRounding.ROUND
   }
 });
 export const ParkingRuleTimedFee = ParkingRule.discriminator<

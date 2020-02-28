@@ -135,6 +135,11 @@ input ParkingRuleAssignmentUpdateInput {
 
 ## QUERIES & MUTATIONS
 
+type ParkingSessionResult {
+  appliedRules: [ParkingRuleAssignmentApplication!]!
+  feeCents: Int!
+}
+
 type ParkingRuleAssignmentApplication {
   start: DateTime!
   end: DateTime!
@@ -183,7 +188,7 @@ extend type Query {
     vehicle: ID!
     start: DateTime!
     end: DateTime!
-  ): [ParkingRuleAssignmentApplication!]
+  ): ParkingSessionResult!
 
   vehicleFilterSearch(
     search: VehicleFilterSearchInput!
