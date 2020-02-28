@@ -60,27 +60,25 @@ enum ParkingTimeUnit {
   HOUR
 }
 
+enum ParkingRounding {
+  CEIL
+  FLOOR
+  ROUND
+}
+
 type ParkingRuleTimedFee implements ParkingRule {
   id: ID!
   name: String!
   centsPerUnitTime: NonNegativeInt!
   unitTime: ParkingTimeUnit!
+  roundingMethod: ParkingRounding!
+  freeInUnitTime: NonNegativeInt!
 }
 
 type ParkingRulePermitAccess implements ParkingRule {
   id: ID!
   name: String!
   permit: Boolean!
-}
-
-input ParkingRulePermitAccessCreateInput {
-  name: String!
-  permit: Boolean!
-}
-
-input ParkingRulePermitAccessUpdateInput {
-  name: String
-  permit: Boolean
 }
 
 ## PARKING RULE ASSIGNMENT TYPES
@@ -108,8 +106,6 @@ input ParkingRuleAssignmentFilter {
   vehicleFilterMode: VehicleFilterMode
   startFilter: DateFilter
   endFilter: DateFilter
-  # TODO: Solve array matching
-  # TODO: Solve gt, lt, gte, lte with dates
 }
 
 input ParkingRuleAssignmentCreateInput {
@@ -213,6 +209,8 @@ input ParkingRuleCreateInput {
   permit: Boolean
   centsPerUnitTime: NonNegativeInt
   unitTime: ParkingTimeUnit
+  freeInUnitTime: NonNegativeInt
+  roundingMethod: ParkingRounding
 }
 
 type DeleteResult {
@@ -225,6 +223,8 @@ input ParkingRuleUpdateInput {
   permit: Boolean
   centsPerUnitTime: NonNegativeInt
   unitTime: ParkingTimeUnit
+  freeInUnitTime: NonNegativeInt
+  roundingMethod: ParkingRounding
 }
 
 extend type Mutation {
