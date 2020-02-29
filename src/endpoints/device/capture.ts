@@ -317,7 +317,7 @@ const ceilFloorRound = (x: number, method: ParkingRounding): number => {
 export const applyRules = async (
   appliedRules: AppliedRuleAssignment[]
 ): Promise<[any, any]> => {
-  const result = { feeCents: 0, freeTimeInMinutes: 0 };
+  const result = { feeCents: 0 };
   const requiredRules = await getRequiredRules(appliedRules);
   const filledAppliedRules = [];
   for (let i = 0; i < appliedRules.length; i++) {
@@ -326,6 +326,7 @@ export const applyRules = async (
     const timeDelta =
       ruleApplication.end.getTime() - ruleApplication.start.getTime();
     const filledRules = [];
+    let freeTimeInMinutes = 0;
     for (const ruleId of ruleApplication.assignment.rules) {
       const rule = requiredRules[ruleId];
       filledRules.push(rule.toObject());
@@ -335,17 +336,14 @@ export const applyRules = async (
         const divider =
           rule.unitTime === ParkingTimeUnit.MINUTE ? 1000 * 60 : 1000 * 3600;
 
-        result.freeTimeInMinutes += rule.freeInUnitTime * coeff;
+        freeTimeInMinutes = rule.freeInUnitTime * coeff;
 
         const allUnits = ceilFloorRound(
           timeDelta / divider,
           rule.roundingMethod
         ); // For every started time unit (2.5h == 3h)
-        const paidUnits = Math.max(
-          allUnits - result.freeTimeInMinutes / coeff,
-          0
-        );
-        result.freeTimeInMinutes -= paidUnits * coeff;
+        const paidUnits = Math.max(allUnits - freeTimeInMinutes / coeff, 0);
+        freeTimeInMinutes -= paidUnits * coeff;
         result.feeCents += rule.centsPerUnitTime * paidUnits;
       }
     }
