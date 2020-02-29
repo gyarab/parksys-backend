@@ -18,10 +18,8 @@ const modelGetter: ModelGetter<IParkingRuleAssignment> = ctx =>
 // Query
 const parkingRuleAssignments: Resolver = async (_, args, ctx) => {
   let query = args.filter || {};
-  console.log(query);
   if (!!query.startFilter) dateFilter(query, "start", "startFilter");
   if (!!query.endFilter) dateFilter(query, "end", "endFilter");
-  console.log(query);
   return await ctx.models.ParkingRuleAssignment.find(query);
 };
 
