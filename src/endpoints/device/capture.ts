@@ -415,10 +415,10 @@ export const handleResult = async (
 
     parkingSession.appliedAssignments = filledAppliedRules;
     parkingSession.finalFee = result.feeCents;
+    check.images = [await saveImage()];
     parkingSession.checkOut = check;
     parkingSession.active = false;
     // Image may error out
-    check.images = [await saveImage()];
     await parkingSession.save();
   } else if (!parkingSession && device.config.type === DeviceType.IN) {
     // The vehicle is entering

@@ -8,7 +8,7 @@ function toBase64Url(payload: any): string {
     .replace(/\+/g, "-")
     .replace(/\//g, "_");
 }
-
+//http://
 // From Mocasys Middleend
 export function fromBase64Url(payload: string): any {
   let s = payload;

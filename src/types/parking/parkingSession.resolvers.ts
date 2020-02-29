@@ -17,7 +17,7 @@ const modelGetter: ModelGetter<IParkingSession> = ctx =>
 const parkingSessions: Resolver = gqlPaged(
   modelGetter,
   { max: 100, default: 50 },
-  { "checkIn.time": -1 },
+  { active: -1, "checkIn.time": -1 },
   {}
 );
 

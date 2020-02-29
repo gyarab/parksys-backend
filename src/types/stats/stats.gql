@@ -43,6 +43,10 @@ type HourStats {
   data: StatsDataPoint!
 }
 
+type LiveStats {
+  numActiveParkingSessions: NonNegativeInt!
+}
+
 extend type Query {
   yearStats(year: PositiveInt!): YearStats!
   monthStats(year: PositiveInt!, month: PositiveInt!): MonthStats!
@@ -51,4 +55,5 @@ extend type Query {
     month: PositiveInt!
     date: PositiveInt!
   ): DayStats!
+  liveStats: LiveStats!
 }

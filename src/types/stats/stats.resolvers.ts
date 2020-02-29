@@ -1,5 +1,6 @@
 import { Resolver, Context } from "../../db/gql";
 import moment from "moment";
+import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 
 // TODO: Limit nesting to prevent crashes?
 const sumLowerLevelStats = (lower: Array<any>) =>
@@ -204,11 +205,16 @@ const hourly: Resolver = async (dayilyStats, _, ctx) => {
   )).hourly;
 };
 
+// LiveStats
+const numActiveParkingSessions: Resolver = async (_, __, ctx) =>
+  ctx.models.ParkingSession.countDocuments({ active: true });
+
 export default {
   Query: {
     dayStats: dayStatsResolver,
     monthStats: monthStatsResolver,
-    yearStats: yearStatsResolver
+    yearStats: yearStatsResolver,
+    liveStats: checkPermissionsGqlBuilder([], () => ({}))
   },
   YearStats: {
     monthly,
@@ -219,5 +225,8 @@ export default {
   },
   DayStats: {
     hourly
+  },
+  LiveStats: {
+    numActiveParkingSessions
   }
 };
