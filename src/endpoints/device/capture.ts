@@ -394,7 +394,7 @@ export const handleResult = async (
   });
   const saveImage = async (): Promise<string | null> => {
     const { start, width, height } = licensePlateRectangle;
-    const offset = 10;
+    const offset = config.get("capture:cutOffset") || 0;
     return sharp(imgFilePath)
       .extract({
         left: start.x - offset,

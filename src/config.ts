@@ -56,7 +56,8 @@ nconf.defaults({
   capture: {
     tofile: false,
     tofilePath: null,
-    log: false
+    log: false,
+    cutOffset: 0
   }
 });
 
