@@ -52,6 +52,11 @@ nconf.defaults({
   ping: true,
   recognitionCache: {
     k: 2
+  },
+  capture: {
+    tofile: false,
+    tofilePath: null,
+    log: false
   }
 });
 

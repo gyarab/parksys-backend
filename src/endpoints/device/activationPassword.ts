@@ -33,8 +33,8 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
       {
         id: device.id,
         permissions: [Permission.ALL]
-      },
-      now
+      }
+      //now
     ),
     {
       method: AuthenticationMethod.ACTIVATION_PASSWORD

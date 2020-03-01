@@ -38,6 +38,7 @@ export const userAccessTokenData = (
   user: UserAccessTokenData["user"],
   time: Date = new Date()
 ): UserAccessTokenData => {
+  if (!time) return { user };
   return {
     expiresAt: time.getTime() + config.get("security:userAccessTokenDuration"),
     user
@@ -48,6 +49,7 @@ export const deviceAccessTokenData = (
   device: DeviceAccessTokenData["device"],
   time: Date = new Date()
 ): DeviceAccessTokenData => {
+  if (!time) return { device };
   return {
     expiresAt: time.getTime() + config.get("security:userAccessTokenDuration"),
     device

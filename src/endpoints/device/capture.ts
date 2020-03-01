@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import tmp from "tmp";
+import path from "path";
 import crypto from "crypto";
 import { AsyncHandler } from "../../app";
 import lpr from "../../apis/lpr";
@@ -30,11 +31,21 @@ import { DeviceType } from "../../types/device/deviceConfig.model";
 import { CaptureImage } from "../../types/captureImage/captureImage.model";
 import { Rectangle } from "../../utils/image";
 
+const log = config.get("capture:log") || false;
+
 const getLprResult = (file: any, device: IDevice) =>
   new Promise<[LicensePlateRecognitionResult, string, () => void]>(
     (resolve, reject) => {
       tmp.file((err, fname, fd, removeTmpFile) => {
         if (err) reject(err);
+        if (config.get("capture:tofile")) {
+          sharp(file.data).toFile(
+            path.join(
+              config.get("capture:tofilePath"),
+              new Date().getTime() + ".jpg"
+            )
+          );
+        }
         sharp(file.data)
           .resize(device.config.resizeX, device.config.resizeY)
           .toFile(fname)
@@ -366,7 +377,9 @@ export const handleResult = async (
 ) => {
   // console.log(new Date(), best, candidates);
   // No result
-  console.log(best);
+  if (log) {
+    console.log("!handling", best);
+  }
   if (!best) return;
   // Find Vehicle or create it
   const vehicle =
@@ -429,9 +442,11 @@ export const handleResult = async (
   } else {
     const deviceIdentity = `${device.id}:${JSON.stringify(device.config)}`;
     const sessionIdentity = `${!!parkingSession ? parkingSession.id : "null"})`;
-    console.warn(
-      `Device (${deviceIdentity}) and vehicle direction (session=${sessionIdentity} do not match`
-    );
+    if (log) {
+      console.warn(
+        `Device (${deviceIdentity}) and vehicle direction (session=${sessionIdentity} do not match`
+      );
+    }
   }
 };
 
@@ -465,8 +480,6 @@ const combineCacheAndResults = (
 
 const capture: AsyncHandler<any> = async (req, res, next) => {
   // Send back device config if updated
-  const id = crypto.randomBytes(4).toString("hex");
-  // console.log(id, "READ", new Date());
   const device = await Device.findById(req.token.device.id);
   if (!device) {
     res.status(400).end();
@@ -485,7 +498,12 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
   }
 
   // Process
-  if (req.files == null) return next();
+  if (req.files == null) {
+    if (log) {
+      console.log("No file received");
+    }
+    return next();
+  }
   const files = req.files;
 
   try {
@@ -497,11 +515,18 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
     );
     if (result.best === null) {
       deleteTmpFile();
+      if (log) {
+        console.log("No result");
+      }
       return next();
+    } else if (log) {
+      console.log("result", result.best, result.candidates);
     }
     const licensePlateArea = result.rectangle.width * result.rectangle.height;
     if (licensePlateArea < device.config.minArea) {
-      console.log("Low area: " + result.rectangle);
+      if (log) {
+        console.log("Low area: " + result.rectangle);
+      }
       deleteTmpFile();
       return next();
     }
