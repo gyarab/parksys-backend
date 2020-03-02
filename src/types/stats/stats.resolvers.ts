@@ -1,6 +1,7 @@
 import { Resolver, Context } from "../../db/gql";
 import moment from "moment";
 import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
+import { Permission } from "../permissions";
 
 // TODO: Limit nesting to prevent crashes?
 const sumLowerLevelStats = (lower: Array<any>) =>
@@ -211,10 +212,16 @@ const numActiveParkingSessions: Resolver = async (_, __, ctx) =>
 
 export default {
   Query: {
-    dayStats: dayStatsResolver,
-    monthStats: monthStatsResolver,
-    yearStats: yearStatsResolver,
-    liveStats: checkPermissionsGqlBuilder([], () => ({}))
+    dayStats: checkPermissionsGqlBuilder([Permission.STATS], dayStatsResolver),
+    monthStats: checkPermissionsGqlBuilder(
+      [Permission.STATS],
+      monthStatsResolver
+    ),
+    yearStats: checkPermissionsGqlBuilder(
+      [Permission.STATS],
+      yearStatsResolver
+    ),
+    liveStats: checkPermissionsGqlBuilder([Permission.STATS], () => ({}))
   },
   YearStats: {
     monthly,

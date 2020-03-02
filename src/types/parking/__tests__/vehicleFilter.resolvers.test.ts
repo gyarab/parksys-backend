@@ -3,8 +3,13 @@ import { models } from "../../../db/models";
 import { VehicleFilter, VehicleFilterAction } from "../vehicleFilter.model";
 import resolvers from "../vehicleFilter.resolvers";
 import { Vehicle } from "../../../types/vehicle/vehicle.model";
+import { Context } from "../../../db/gql";
+import { Permission } from "../../permissions";
 
-const ctx = { models };
+const ctx: Context = {
+  models,
+  token: { user: { id: "", permissions: [Permission.ALL] } }
+};
 
 describe("VehicleFilter resolvers", () => {
   beforeAll(connect);

@@ -32,8 +32,14 @@ const vehicles: Resolver = gqlPopulate(modelGetter, "vehicles");
 
 export default {
   Query: {
-    vehicleFilters,
-    vehicleFilterSearch
+    vehicleFilters: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      vehicleFilters
+    ),
+    vehicleFilterSearch: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      vehicleFilterSearch
+    )
   },
   Mutation: {
     createVehicleFilter: checkPermissionsGqlBuilder(

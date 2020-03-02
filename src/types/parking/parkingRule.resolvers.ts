@@ -12,6 +12,8 @@ import {
   gqlRegexSearch,
   gqlFindByIdDelete
 } from "../../db/genericResolvers";
+import { Permission } from "../permissions";
+import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 
 const ruleModelGetter: ModelGetter<IParkingRule> = (ctx, type) => {
   switch (type) {
@@ -60,8 +62,14 @@ const deleteParkingRule: Resolver = gqlFindByIdDelete(ruleModelGetter);
 
 export default {
   Query: {
-    parkingRules,
-    parkingRuleSearch
+    parkingRules: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      parkingRules
+    ),
+    parkingRuleSearch: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      parkingRuleSearch
+    )
   },
   ParkingRule: {
     __resolveType(
@@ -71,8 +79,17 @@ export default {
     }
   },
   Mutation: {
-    createParkingRule,
-    updateParkingRule,
-    deleteParkingRule
+    createParkingRule: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      createParkingRule
+    ),
+    updateParkingRule: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      updateParkingRule
+    ),
+    deleteParkingRule: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      deleteParkingRule
+    )
   }
 };

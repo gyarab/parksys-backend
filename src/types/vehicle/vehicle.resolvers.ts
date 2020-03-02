@@ -10,6 +10,8 @@ import {
 } from "../../db/genericResolvers";
 import { IVehicle } from "./vehicle.model";
 import dateFilter from "../dateFilter";
+import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
+import { Permission } from "../permissions";
 
 const modelGetter: ModelGetter<IVehicle> = ctx => ctx.models.Vehicle;
 
@@ -40,11 +42,27 @@ const _parkingSessions: Resolver = gqlPaged(
 );
 
 export default {
-  Query: { vehicle, vehicles, vehicleSearch },
+  Query: {
+    vehicle: checkPermissionsGqlBuilder([Permission.VEHICLES], vehicle),
+    vehicles: checkPermissionsGqlBuilder([Permission.VEHICLES], vehicles),
+    vehicleSearch: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      vehicleSearch
+    )
+  },
   Mutation: {
-    createVehicle,
-    deleteVehicle,
-    deleteVehicleByLicensePlate
+    createVehicle: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      createVehicle
+    ),
+    deleteVehicle: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      deleteVehicle
+    ),
+    deleteVehicleByLicensePlate: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      deleteVehicleByLicensePlate
+    )
   },
   Vehicle: {
     parkingSessions: async (vehicle: IVehicle, args, ctx: Context) => {

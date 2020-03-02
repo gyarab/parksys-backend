@@ -9,6 +9,8 @@ import { IParkingSession } from "./parkingSession.model";
 import dateFilter from "../dateFilter";
 import { ICheck } from "./check.model";
 import routes from "../../endpoints/routes";
+import { Permission } from "../permissions";
+import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 
 const modelGetter: ModelGetter<IParkingSession> = ctx =>
   ctx.models.ParkingSession;
@@ -39,9 +41,18 @@ const parkingSessionsFilter: Resolver = async (obj, args, ctx, info) => {
 
 export default {
   Query: {
-    parkingSessions,
-    parkingSessionsFilter,
-    parkingSession
+    parkingSessions: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      parkingSessions
+    ),
+    parkingSessionsFilter: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      parkingSessionsFilter
+    ),
+    parkingSession: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      parkingSession
+    )
   },
   ParkingSession: {
     vehicle: gqlPopulate(modelGetter, "vehicle")

@@ -11,6 +11,7 @@ import { IParkingRuleAssignment } from "./parkingRuleAssignment.model";
 import { findAppliedRules, applyRules } from "../../endpoints/device/capture";
 import { Model } from "mongoose";
 import dateFilter from "../dateFilter";
+import { Permission } from "../permissions";
 
 const modelGetter: ModelGetter<IParkingRuleAssignment> = ctx =>
   ctx.models.ParkingRuleAssignment;
@@ -106,8 +107,14 @@ const vehicleFilters: Resolver = gqlPopulate(modelGetter, "vehicleFilters");
 
 export default {
   Query: {
-    parkingRuleAssignments,
-    simulateRuleAssignmentApplication
+    parkingRuleAssignments: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      parkingRuleAssignments
+    ),
+    simulateRuleAssignmentApplication: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      simulateRuleAssignmentApplication
+    )
   },
   Mutation: {
     createParkingRuleAssignment: checkPermissionsGqlBuilder(
@@ -124,8 +131,11 @@ export default {
     )
   },
   ParkingRuleAssignment: {
-    rules,
-    vehicleFilters
+    rules: checkPermissionsGqlBuilder([Permission.VEHICLES], rules),
+    vehicleFilters: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      vehicleFilters
+    )
   },
   ParkingRuleAssignmentResult: {
     __resolveType(obj) {
