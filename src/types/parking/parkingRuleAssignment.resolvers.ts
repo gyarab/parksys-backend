@@ -8,10 +8,11 @@ import {
 } from "../../db/genericResolvers";
 import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { IParkingRuleAssignment } from "./parkingRuleAssignment.model";
-import { findAppliedRules, applyRules } from "../../endpoints/device/capture";
+import { applyRules } from "../../endpoints/device/capture/ruleApplier";
 import { Model } from "mongoose";
 import dateFilter from "../dateFilter";
 import { Permission } from "../permissions";
+import { findAppliedRules } from "../../endpoints/device/capture/ruleResolver";
 
 const modelGetter: ModelGetter<IParkingRuleAssignment> = ctx =>
   ctx.models.ParkingRuleAssignment;
