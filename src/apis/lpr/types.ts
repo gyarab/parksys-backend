@@ -1,17 +1,17 @@
 import base64Img from "base64-img";
 import { Coordinate, Rectangle } from "../../utils/image";
 
-export interface LicensePlateRecognitionResult {
+export type LicensePlateRecognitionResult = {
   best: Candidate | null;
   candidates?: (Candidate[]) | null;
   coordinates?: (Coordinate[]) | null;
   rectangle?: (Rectangle) | null;
-}
+};
 
-export interface Candidate {
+export type Candidate = {
   plate: string;
   confidence?: number | null;
-}
+};
 
 export abstract class LicensePlateRecognition {
   // *image* is a base64 encoded image content
