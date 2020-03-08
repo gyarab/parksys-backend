@@ -3,7 +3,7 @@ import {
   ParkingRuleAssignment
 } from "../../../types/parking/parkingRuleAssignment.model";
 import { IVehicle } from "../../../types/vehicle/vehicle.model";
-import { LinearHeap } from "../../../utils/heap";
+import { LinearHeap, BinaryHeap } from "../../../utils/heap";
 import { createFilterApplier } from "./filterApplier";
 import {
   AppliedRuleAssignment,
@@ -25,7 +25,7 @@ const getAppliedRuleAssignments = (
   );
   // Stores indexes and orders them according to the values
   // under indices in group.ruleAssignments
-  const heap = new LinearHeap<number>(
+  const heap = new BinaryHeap<number>(
     (i, j) =>
       // Priority by ParkingRuleAssignment's priority
       ruleAssignments[i].priority - ruleAssignments[j].priority
@@ -103,12 +103,12 @@ const getAppliedRuleAssignments = (
           assignment: currentRuleAssignment
         });
         // Get rule assignment from the heap
-        let nextRuleAssignmentI = heap.extractTop();
+        let nextRuleAssignmentI = heap.pop();
         const canBeUsed = (j: number) =>
           millisMemo[j][RuleEventEnum.END] > eventMillis &&
           ruleAppliesToVehicle(ruleAssignments[j]);
         while (heap.size() && !canBeUsed(nextRuleAssignmentI)) {
-          nextRuleAssignmentI = heap.extractTop();
+          nextRuleAssignmentI = heap.pop();
         }
         if (nextRuleAssignmentI !== null && canBeUsed(nextRuleAssignmentI)) {
           // Use next rule

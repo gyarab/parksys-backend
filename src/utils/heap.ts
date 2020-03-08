@@ -1,6 +1,6 @@
-interface Heap<T> {
+export interface Heap<T> {
   add(elem: T): void;
-  extractTop(): T;
+  pop(): T;
   size(): number;
 }
 
@@ -29,7 +29,7 @@ export class LinearHeap<T> implements Heap<T> {
   }
 
   // O(N)
-  public extractTop(): T {
+  public pop(): T {
     if (this.arr.length > 0) {
       const top = this.arr[this.topIndex];
       this.arr.splice(this.topIndex, 1);
@@ -51,4 +51,81 @@ export class LinearHeap<T> implements Heap<T> {
   }
 }
 
-// TODO: Make a binary heap which is faster than the linear heap
+export class BinaryHeap<T> implements Heap<T> {
+  public arr: Array<T>;
+  private comparator: (o1: T, o2: T) => number;
+  private topIndex: number = null;
+  constructor(comparator: (o1: T, o2: T) => number) {
+    // First element - to make the math simpler, we set the first element to null
+    this.arr = [null];
+    this.comparator = comparator;
+  }
+
+  // O(log N)
+  add(elem: T): void {
+    this.arr.push(elem);
+    this.siftUp(this.arr.length - 1);
+  }
+
+  // O(log N)
+  pop(): T {
+    if (this.size() > 0) {
+      this.swap(1, this.size());
+      const returnValue: T = this.arr.pop();
+      this.siftDown(1);
+      return returnValue;
+    } else {
+      return null;
+    }
+  }
+
+  // O(1)
+  size(): number {
+    return this.arr.length - 1;
+  }
+
+  private swap(a: number, b: number): void {
+    const temp: T = this.arr[a];
+    this.arr[a] = this.arr[b];
+    this.arr[b] = temp;
+  }
+
+  private compare(a: number, b: number): number {
+    return this.comparator(this.arr[a], this.arr[b]);
+  }
+
+  // Fix the heap from bottom to top starting at *index*
+  private siftUp(index: number): void {
+    const parent = Math.floor(index / 2);
+    if (parent <= 0) return;
+    if (this.compare(parent, index) < 0) {
+      this.swap(parent, index);
+      this.siftUp(parent);
+    }
+  }
+
+  private siftDown(index: number): void {
+    const childLeft = index * 2;
+    const childRight = index * 2;
+
+    const next = (childIndex: number) => {
+      this.swap(index, childIndex);
+      this.siftDown(childIndex);
+    };
+
+    if (this.size() < childLeft) {
+      return;
+    } else if (this.size() < childRight && this.compare(index, childLeft) < 0) {
+      // One child: childLeft AND we should swap
+      return next(childLeft);
+    }
+
+    const childCompare = this.compare(childLeft, childRight);
+
+    if (childCompare < 0) {
+      return next(childRight);
+    } else if (childCompare > 0) {
+      return next(childLeft);
+    }
+  }
+}

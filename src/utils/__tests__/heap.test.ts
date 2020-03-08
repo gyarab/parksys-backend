@@ -1,21 +1,30 @@
-import { LinearHeap } from "../heap";
+import { LinearHeap, Heap, BinaryHeap } from "../heap";
 
-describe("LinearHeap", () => {
-  it("should work", () => {
-    const heap = new LinearHeap<number>((i, j) => i - j);
+describe("Heap", () => {
+  const testHeap = (heap: Heap<number>) => {
     heap.add(0);
     heap.add(2);
     heap.add(1);
 
-    expect(heap.extractTop()).toBe(2);
-    expect(heap.extractTop()).toBe(1);
-    expect(heap.extractTop()).toBe(0);
-    expect(heap.extractTop()).toBe(null);
+    expect(heap.pop()).toBe(2);
+    expect(heap.pop()).toBe(1);
+    expect(heap.pop()).toBe(0);
+    expect(heap.pop()).toBe(null);
 
     heap.add(10);
     heap.add(9);
 
-    expect(heap.extractTop()).toBe(10);
-    expect(heap.extractTop()).toBe(9);
+    expect(heap.pop()).toBe(10);
+    expect(heap.pop()).toBe(9);
+  };
+
+  it("LinearHeap", () => {
+    const linHeap = new LinearHeap<number>((i, j) => i - j);
+    testHeap(linHeap);
+  });
+
+  it("BinaryHeap", () => {
+    const binHeap = new BinaryHeap<number>((i, j) => i - j);
+    testHeap(binHeap);
   });
 });
