@@ -38,6 +38,7 @@ const CAPTURE_ENDPOINT = () => routes["devices/capture"].path;
 
 describe("capture endpoint", () => {
   let validAccessToken = null;
+  let did = null;
   it("should return config once", async () => {
     let resp = await req
       .post(CAPTURE_ENDPOINT())
@@ -47,7 +48,7 @@ describe("capture endpoint", () => {
     expect(resp.body).toMatchObject({
       data: {
         config: {
-          capturing: false,
+          capturing: true,
           type: "IN"
         }
       }
@@ -508,8 +509,8 @@ describe("capture endpoint", () => {
         shouldSendConfig: true,
         activated: true,
         config: {
-          key1: "value1",
-          key2: [1, 2, 3]
+          capturing: true,
+          type: "IN"
         }
       }
     ]);
@@ -525,6 +526,7 @@ describe("capture endpoint", () => {
     );
     validAccessToken = tokens.accessToken.str;
     devices[0].refreshToken = tokens.refreshToken.db;
+    did = devices[0].id;
     await devices[0].save();
   });
 

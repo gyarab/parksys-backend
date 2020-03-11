@@ -44,6 +44,7 @@ export const generateDeviceActivationPassword: (
 export interface IDevice extends mongoose.Document {
   name: string;
   activated: boolean;
+  lastContact: Date;
   activatedAt: Date;
   activationPassword: IAuthentication<IAuthenticationPayloadActivationPassword>;
   refreshToken: IRefreshToken;
@@ -76,6 +77,10 @@ export const DeviceSchema = new mongoose.Schema(
       required: true,
       default: false
     },
+    lastContact: {
+      type: Date,
+      required: false
+    },
     activatedAt: Date,
     refreshToken: {
       type: mongoose.Schema.Types.ObjectId,
@@ -89,7 +94,7 @@ export const DeviceSchema = new mongoose.Schema(
     shouldSendConfig: {
       type: Boolean,
       required: true,
-      default: false
+      default: true
     }
   },
   {

@@ -11,6 +11,7 @@ const updateConfig: AsyncHandler<{ any }> = async (req, res, next) => {
     return next();
   }
 
+  device.lastContact = new Date();
   if (typeof lodash.get(req.body, "config", undefined) === "object") {
     device.config = { ...device.config.toObject(), ...req.body.config };
     device.shouldSendConfig = true;
@@ -23,11 +24,11 @@ const updateConfig: AsyncHandler<{ any }> = async (req, res, next) => {
     console.log("config", response);
     res.send(response);
     device.shouldSendConfig = false;
-    await device.save();
   } else {
     console.log("config {}");
     res.send({});
   }
+  await device.save();
 
   return next();
 };

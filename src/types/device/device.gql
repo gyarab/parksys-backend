@@ -3,6 +3,7 @@ type Device {
   name: String!
   activated: Boolean!
   activatedAt: DateTime
+  lastContact: DateTime
   # Calculated
   activationQrUrl: String!
   activationPasswordExpiresAt: DateTime

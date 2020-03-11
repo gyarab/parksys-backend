@@ -166,21 +166,29 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
   // Send back device config if updated
   const device = await Device.findById(req.token.device.id);
   if (!device) {
-    res.status(400).end();
+    res.status(400).send("device not found");
     return next();
   }
 
-  if (device.shouldSendConfig) {
+  if (device.shouldSendConfig || !device.config.capturing) {
     const response = {
       data: { config: device.config }
     };
     res.send(response);
     device.shouldSendConfig = false;
-    await device.save();
   } else {
     res.send({});
   }
 
+  device.lastContact = new Date();
+  await device.save();
+
+  if (!device.config.capturing) {
+    console.log(
+      `Device ${device.id} is trying to capture although config says otherwise`
+    );
+    return next();
+  }
   // Process
   if (req.files == null) {
     if (log) {
