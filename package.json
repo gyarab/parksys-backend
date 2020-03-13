@@ -41,6 +41,7 @@
     "image-clipper": "^0.4.4",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
+    "mongodb-memory-server": "^6.0.1",
     "mongoose": "^5.7.11",
     "morgan": "^1.9.1",
     "nconf": "^0.10.0",
@@ -48,8 +49,7 @@
     "reflect-metadata": "^0.1.13",
     "sharp": "^0.23.3",
     "socket.io": "^2.3.0",
-    "tmp": "^0.1.0",
-    "mongodb-memory-server": "^6.0.1"
+    "tmp": "^0.1.0"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
