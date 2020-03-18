@@ -32,6 +32,7 @@ const getLprResult = (file: any) =>
         const recognition = sharp(file.data)
           .toFile(fname)
           .then(_ => lpr.recognizeLicensePlate(fname));
+        // This Promise can fail
         const toFile = !!config.get("capture:tofile")
           ? sharp(file.data)
               .toFile(
@@ -256,7 +257,9 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
     deleteTmpFile();
     return next();
   } catch (err) {
-    return next(err);
+    // This prevents the whole file to be logged in the case of 413 from
+    // the recognition server
+    return next(new Error(err.message));
   }
 };
 
