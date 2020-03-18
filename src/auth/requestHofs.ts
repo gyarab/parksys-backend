@@ -69,10 +69,10 @@ export const checkPermissionReqBuilder = (
       lodash.get(req, "token.device.permissions", [])
     );
     if (hasPermissions(requiredPermissions, permissions)) {
-      next();
+      return next();
     } else {
-      res.status(403);
-      next(new Error("Unauthorized"));
+      res.status(403).send("Unauthorized");
+      return next(new Error("Unauthorized"));
     }
   };
   wrapper.requiredPermissions = requiredPermissions;

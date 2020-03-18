@@ -24,13 +24,12 @@ import { findAppliedRules } from "./ruleResolver";
 
 const log = config.get("capture:log") || false;
 
-const getLprResult = (file: any, device: IDevice) =>
+const getLprResult = (file: any) =>
   new Promise<[LicensePlateRecognitionResult, string, () => void]>(
     (resolve, reject) => {
       tmp.file((err, fname, _, removeTmpFile) => {
         if (err) reject(err);
         const recognition = sharp(file.data)
-          .resize(device.config.resizeX, device.config.resizeY)
           .toFile(fname)
           .then(_ => lpr.recognizeLicensePlate(fname));
         const toFile = !!config.get("capture:tofile")
@@ -201,10 +200,7 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
   try {
     const filename = Object.keys(files)[0];
     const captureTime = filenameToDate(filename);
-    const [result, fname, deleteTmpFile] = await getLprResult(
-      files[filename],
-      device
-    );
+    const [result, fname, deleteTmpFile] = await getLprResult(files[filename]);
     if (result.best === null) {
       deleteTmpFile();
       if (log) {

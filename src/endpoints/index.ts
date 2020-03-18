@@ -18,7 +18,7 @@ const deviceOnly: Handler<any> = (req, res, next) => {
   if (lodash.get(req, "token.device") instanceof Object) {
     return next();
   } else {
-    res.status(403);
+    res.status(403).send("Only devices are allowed to access this endpoint.");
     return next(new Error("Only devices are allowed to access this endpoint."));
   }
 };
@@ -38,8 +38,8 @@ rootRouter.get(
 rootRouter.post(routes["devices/activate"].path, deviceAactivationEndpoint);
 rootRouter.post(
   routes["devices/capture"].path,
-  deviceOnly,
   checkPermissionReqBuilder([Permission.ALL]),
+  deviceOnly,
   captureEndpoint
 );
 rootRouter.put(routes["devices/config"].path, deviceOnly, updateConfigEndpoint);

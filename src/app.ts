@@ -54,6 +54,13 @@ if (config.get("ping")) {
   });
 }
 
+app.use((err, req, res, next) => {
+  if (![401, 403].includes(res.statusCode)) {
+    console.error(err);
+  }
+  return next();
+});
+
 const connectApollo = async () => {
   const apollo = await constructGraphQLServer();
   apollo.applyMiddleware({ app });
