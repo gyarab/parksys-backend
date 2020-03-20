@@ -250,6 +250,13 @@ extend type Mutation {
     input: ParkingRuleAssignmentUpdateInput!
   ): ParkingRuleAssignmentResult!
   deleteParkingRuleAssignment(id: ID!): ParkingRuleAssignment!
+  # TODO: ADD TRIMMING OPTIONS
+  duplicateParkingRuleAssignments(
+    start: DateTime!
+    end: DateTime!
+    targetStarts: [DateTime!]!
+  ): [[ParkingRuleAssignment!]!]
+  deleteParkingRuleAssignments(start: DateTime!, end: DateTime!): Boolean!
 }
 
 type ParkingSessionPagedResult {

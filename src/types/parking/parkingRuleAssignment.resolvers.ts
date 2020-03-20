@@ -102,6 +102,57 @@ const updateParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
 };
 const deleteParkingRuleAssignment: Resolver = gqlFindByIdDelete(modelGetter);
 
+const duplicateParkingRuleAssignments: Resolver = async (
+  _,
+  { start, end, targetStarts },
+  ctx
+) => {
+  if (start.getTime() > end.getTime()) {
+    throw new Error("start > end");
+  }
+  // TODO: Add trimming option
+  const promises = targetStarts.map(
+    async (targetStart): Promise<any> => {
+      const difference = targetStart.getTime() - start.getTime();
+      // Find PRAs
+      const source = await ctx.models.ParkingRuleAssignment.find({
+        start: { $lte: end },
+        end: { $gte: start }
+      });
+      const duplicates = source.map(assignment => {
+        // Delete id and shallow copy values
+        const obj = assignment.toObject();
+        delete obj["_id"];
+        delete obj["id"];
+        const copy = { ...obj };
+        // Offset start and end
+        copy.start = new Date(copy.start.getTime() + difference);
+        copy.end = new Date(copy.end.getTime() + difference);
+        return copy;
+      });
+      return await ctx.models.ParkingRuleAssignment.create(duplicates);
+    }
+  );
+  const results = await Promise.all(promises);
+  return results;
+};
+
+const deleteParkingRuleAssignments: Resolver = async (
+  _,
+  { start, end },
+  ctx
+) => {
+  if (start.getTime() > end.getTime()) {
+    throw new Error("start > end");
+  }
+  // TODO: Add trimming option
+  await ctx.models.ParkingRuleAssignment.deleteMany({
+    start: { $lte: end },
+    end: { $gte: start }
+  });
+  return true;
+};
+
 // ParkingRuleAssignment
 const rules: Resolver = gqlPopulate(modelGetter, "rules");
 const vehicleFilters: Resolver = gqlPopulate(modelGetter, "vehicleFilters");
@@ -119,16 +170,24 @@ export default {
   },
   Mutation: {
     createParkingRuleAssignment: checkPermissionsGqlBuilder(
-      [],
+      [Permission.VEHICLES],
       createParkingRuleAssignment
     ),
     updateParkingRuleAssignment: checkPermissionsGqlBuilder(
-      [],
+      [Permission.VEHICLES],
       updateParkingRuleAssignment
     ),
     deleteParkingRuleAssignment: checkPermissionsGqlBuilder(
-      [],
+      [Permission.VEHICLES],
       deleteParkingRuleAssignment
+    ),
+    duplicateParkingRuleAssignments: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      duplicateParkingRuleAssignments
+    ),
+    deleteParkingRuleAssignments: checkPermissionsGqlBuilder(
+      [Permission.VEHICLES],
+      deleteParkingRuleAssignments
     )
   },
   ParkingRuleAssignment: {

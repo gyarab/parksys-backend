@@ -8,7 +8,12 @@ import {
 } from "../parkingRuleAssignment.model";
 import { Context } from "../../../db/gql";
 
-const ctx: Context = { models };
+const ctx: Context = {
+  models,
+  token: {
+    user: { permissions: ["ALL"], id: "" }
+  }
+};
 
 describe("ParkingRuleAssignment resolvers", () => {
   describe("ParkingRuleAssignment.updateParkingRuleAssignment(id, input)", () => {
