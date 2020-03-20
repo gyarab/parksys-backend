@@ -241,9 +241,14 @@ extend type Mutation {
   deleteParkingRule(id: ID!): DeleteResult!
 }
 
+input ParkingRuleAssignmentManipulationFilter {
+  active: Boolean!
+}
+
 input ParkingRuleAssignmentMultiDeleteOptions {
   # Default is true
   trim: Boolean
+  filter: ParkingRuleAssignmentManipulationFilter
 }
 
 input ParkingRuleAssignmentDuplicationOptions {
@@ -251,6 +256,7 @@ input ParkingRuleAssignmentDuplicationOptions {
   trim: Boolean
   # Default is true
   onCollisionFail: Boolean
+  filter: ParkingRuleAssignmentManipulationFilter
 }
 
 extend type Mutation {

@@ -121,11 +121,13 @@ const duplicateParkingRuleAssignments: Resolver = async (
   }
   const trim = lodash.get(options, "trim", true);
   const onCollisionFail = lodash.get(options, "onCollisionFail", true);
+  const filter = lodash.get(options, "filter", {});
   const promises = targetStarts.map(
     async (targetStart): Promise<any> => {
       const difference = targetStart.getTime() - start.getTime();
       // Find PRAs
       const source = await ctx.models.ParkingRuleAssignment.find({
+        ...filter,
         start: { $lte: end },
         end: { $gte: start }
       });
@@ -169,9 +171,11 @@ const deleteParkingRuleAssignments: Resolver = async (
     throw new Error("start > end");
   }
   const trim = lodash.get(options, "trim", true);
+  const filter = lodash.get(options, "filter", {});
   if (trim) {
     // Delete those that are wholly between start and end
     await ctx.models.ParkingRuleAssignment.deleteMany({
+      ...filter,
       start: { $gte: start },
       end: { $lte: end }
     });
@@ -179,16 +183,17 @@ const deleteParkingRuleAssignments: Resolver = async (
     await Promise.all([
       // Start is outside, end is inside
       ctx.models.ParkingRuleAssignment.updateMany(
-        { start: { $lt: start }, end: { $gt: start, $lte: end } },
+        { ...filter, start: { $lt: start }, end: { $gt: start, $lte: end } },
         { $set: { end: start } }
       ),
       // End is outside, start is inside
       ctx.models.ParkingRuleAssignment.updateMany(
-        { start: { $gte: start, $lt: end }, end: { $gt: end } },
+        { ...filter, start: { $gte: start, $lt: end }, end: { $gt: end } },
         { $set: { start: end } }
       ),
       // Both start and end are outside -> divide into two assignments
       ctx.models.ParkingRuleAssignment.find({
+        ...filter,
         end: { $gt: end },
         start: { $lt: start }
       }).then(results => {
@@ -206,6 +211,7 @@ const deleteParkingRuleAssignments: Resolver = async (
     ]);
   } else {
     await ctx.models.ParkingRuleAssignment.deleteMany({
+      ...filter,
       start: { $lte: end },
       end: { $gte: start }
     });
