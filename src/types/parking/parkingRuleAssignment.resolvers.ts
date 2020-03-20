@@ -9,10 +9,11 @@ import {
 import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { IParkingRuleAssignment } from "./parkingRuleAssignment.model";
 import { applyRules } from "../../endpoints/device/capture/ruleApplier";
-import { Model } from "mongoose";
+import mongoose, { Model } from "mongoose";
 import dateFilter from "../dateFilter";
 import { Permission } from "../permissions";
 import { findAppliedRules } from "../../endpoints/device/capture/ruleResolver";
+import lodash from "lodash";
 
 const modelGetter: ModelGetter<IParkingRuleAssignment> = ctx =>
   ctx.models.ParkingRuleAssignment;
@@ -102,15 +103,24 @@ const updateParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
 };
 const deleteParkingRuleAssignment: Resolver = gqlFindByIdDelete(modelGetter);
 
+const _duplicate = (doc: mongoose.Document) => {
+  // Delete id
+  const obj = doc.toObject();
+  delete obj["_id"];
+  delete obj["id"];
+  return obj;
+};
+
 const duplicateParkingRuleAssignments: Resolver = async (
   _,
-  { start, end, targetStarts },
+  { start, end, targetStarts, options },
   ctx
 ) => {
   if (start.getTime() > end.getTime()) {
     throw new Error("start > end");
   }
-  // TODO: Add trimming option
+  const trim = lodash.get(options, "trim", true);
+  const onCollisionFail = lodash.get(options, "onCollisionFail", true);
   const promises = targetStarts.map(
     async (targetStart): Promise<any> => {
       const difference = targetStart.getTime() - start.getTime();
@@ -119,18 +129,31 @@ const duplicateParkingRuleAssignments: Resolver = async (
         start: { $lte: end },
         end: { $gte: start }
       });
-      const duplicates = source.map(assignment => {
-        // Delete id and shallow copy values
-        const obj = assignment.toObject();
-        delete obj["_id"];
-        delete obj["id"];
-        const copy = { ...obj };
+      const duplicates = source.map(async assignment => {
+        const copy = _duplicate(assignment);
+        if (trim) {
+          copy.start = new Date(Math.max(copy.start, start));
+          copy.end = new Date(Math.min(copy.end, end));
+        }
         // Offset start and end
         copy.start = new Date(copy.start.getTime() + difference);
         copy.end = new Date(copy.end.getTime() + difference);
-        return copy;
+
+        const { collisions } = await __verifyNoCollisions(
+          { id: "000000000000000000000000", input: copy },
+          assignment,
+          ctx.models.ParkingRuleAssignment
+        );
+        return collisions === -1 ? copy : null;
       });
-      return await ctx.models.ParkingRuleAssignment.create(duplicates);
+      const resolved = await Promise.all(duplicates);
+      if (onCollisionFail && resolved.some(t => t === null)) {
+        // TODO: Handle this better with a result.
+        throw new Error("There are collisions.");
+      }
+      return await ctx.models.ParkingRuleAssignment.create(
+        resolved.filter(t => t !== null)
+      );
     }
   );
   const results = await Promise.all(promises);
@@ -139,17 +162,54 @@ const duplicateParkingRuleAssignments: Resolver = async (
 
 const deleteParkingRuleAssignments: Resolver = async (
   _,
-  { start, end },
+  { start, end, options },
   ctx
 ) => {
   if (start.getTime() > end.getTime()) {
     throw new Error("start > end");
   }
-  // TODO: Add trimming option
-  await ctx.models.ParkingRuleAssignment.deleteMany({
-    start: { $lte: end },
-    end: { $gte: start }
-  });
+  const trim = lodash.get(options, "trim", true);
+  if (trim) {
+    // Delete those that are wholly between start and end
+    await ctx.models.ParkingRuleAssignment.deleteMany({
+      start: { $gte: start },
+      end: { $lte: end }
+    });
+    // Trim the rest
+    await Promise.all([
+      // Start is outside, end is inside
+      ctx.models.ParkingRuleAssignment.updateMany(
+        { start: { $lt: start }, end: { $gt: start, $lte: end } },
+        { $set: { end: start } }
+      ),
+      // End is outside, start is inside
+      ctx.models.ParkingRuleAssignment.updateMany(
+        { start: { $gte: start, $lt: end }, end: { $gt: end } },
+        { $set: { start: end } }
+      ),
+      // Both start and end are outside -> divide into two assignments
+      ctx.models.ParkingRuleAssignment.find({
+        end: { $gt: end },
+        start: { $lt: start }
+      }).then(results => {
+        const copies = results.map(a => {
+          const copy = _duplicate(a);
+          copy.start = end;
+          return copy;
+        });
+        results.forEach(a => (a.end = start));
+        return Promise.all([
+          ctx.models.ParkingRuleAssignment.create(copies),
+          Promise.all(results.map(r => r.save()))
+        ]);
+      })
+    ]);
+  } else {
+    await ctx.models.ParkingRuleAssignment.deleteMany({
+      start: { $lte: end },
+      end: { $gte: start }
+    });
+  }
   return true;
 };
 

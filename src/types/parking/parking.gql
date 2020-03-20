@@ -241,6 +241,18 @@ extend type Mutation {
   deleteParkingRule(id: ID!): DeleteResult!
 }
 
+input ParkingRuleAssignmentMultiDeleteOptions {
+  # Default is true
+  trim: Boolean
+}
+
+input ParkingRuleAssignmentDuplicationOptions {
+  # Default is true
+  trim: Boolean
+  # Default is true
+  onCollisionFail: Boolean
+}
+
 extend type Mutation {
   createParkingRuleAssignment(
     input: ParkingRuleAssignmentCreateInput!
@@ -250,13 +262,17 @@ extend type Mutation {
     input: ParkingRuleAssignmentUpdateInput!
   ): ParkingRuleAssignmentResult!
   deleteParkingRuleAssignment(id: ID!): ParkingRuleAssignment!
-  # TODO: ADD TRIMMING OPTIONS
   duplicateParkingRuleAssignments(
     start: DateTime!
     end: DateTime!
     targetStarts: [DateTime!]!
+    options: ParkingRuleAssignmentDuplicationOptions
   ): [[ParkingRuleAssignment!]!]
-  deleteParkingRuleAssignments(start: DateTime!, end: DateTime!): Boolean!
+  deleteParkingRuleAssignments(
+    start: DateTime!
+    end: DateTime!
+    options: ParkingRuleAssignmentMultiDeleteOptions
+  ): Boolean!
 }
 
 type ParkingSessionPagedResult {
