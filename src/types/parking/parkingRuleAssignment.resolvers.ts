@@ -181,32 +181,16 @@ const duplicateParkingRuleAssignments: Resolver = async (
   const filter = lodash.get(options, "filter", {});
   // Required arg
   const mode = options.mode;
-  let promises = [];
+  let allResults = [];
 
+  const collisions = [];
   if (mode === "REPEAT") {
     const targetStart = targetStarts[0];
     const repeat = lodash.get(options, "repeat", 1);
     for (let i = 1; i <= repeat; i++) {
       const difference = (targetStart.getTime() - start.getTime()) * i;
       console.log(mode, targetStart, start, difference);
-      promises.push(
-        p(
-          filter,
-          ctx.models.ParkingRuleAssignment,
-          start,
-          end,
-          difference,
-          onCollisionFail,
-          trim
-        )
-      );
-    }
-  } else {
-    // MULTI
-    promises = targetStarts.map(target => {
-      const difference = target.getTime() - start.getTime();
-      console.log(mode, target, start, difference);
-      return p(
+      const promise = p(
         filter,
         ctx.models.ParkingRuleAssignment,
         start,
@@ -215,33 +199,54 @@ const duplicateParkingRuleAssignments: Resolver = async (
         onCollisionFail,
         trim
       );
-    });
+      const result = await promise;
+      result.forEach(res => {
+        if (res instanceof CollisionError) {
+          collisions.push(res.collisions);
+        }
+      });
+      if (collisions.length > 0) {
+        break;
+      } else {
+        allResults.push(await ctx.models.ParkingRuleAssignment.create(result));
+      }
+    }
+  } else {
+    // MULTI
+    for (const targetStart of targetStarts) {
+      const difference = targetStart.getTime() - start.getTime();
+      console.log(mode, targetStarts, start, difference);
+      const result = await p(
+        filter,
+        ctx.models.ParkingRuleAssignment,
+        start,
+        end,
+        difference,
+        onCollisionFail,
+        trim
+      );
+      result.forEach(res => {
+        if (res instanceof CollisionError) {
+          collisions.push(res.collisions);
+        }
+      });
+      if (collisions.length > 0) {
+        break;
+      } else {
+        allResults.push(await ctx.models.ParkingRuleAssignment.create(result));
+      }
+    }
   }
 
-  // Wait for collision check before saving anything
-  const results = await Promise.all(promises);
-  const collisions = [];
-  results.forEach(row => {
-    row.forEach(res => {
-      if (res instanceof CollisionError) {
-        collisions.push(res.collisions);
-      }
-    });
-  });
   if (collisions.length > 0) {
     return {
       _t: "ParkingRuleAssignmentResultError",
       collisions: collisions.flat(1)
     };
   }
-  const retResults = await Promise.all(
-    results.map(assignments =>
-      ctx.models.ParkingRuleAssignment.create(assignments)
-    )
-  );
   return {
     _t: "ParkingRuleAssignmentDuplicationResult",
-    newAssignments: retResults
+    newAssignments: allResults
   };
 };
 
