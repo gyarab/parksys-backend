@@ -251,6 +251,11 @@ input ParkingRuleAssignmentMultiDeleteOptions {
   filter: ParkingRuleAssignmentManipulationFilter
 }
 
+enum ParkingRuleAssignmentDuplicationTargetMode {
+  MULTI
+  REPEAT
+}
+
 input ParkingRuleAssignmentDuplicationOptions {
   # Default is true
   trim: Boolean
@@ -259,6 +264,7 @@ input ParkingRuleAssignmentDuplicationOptions {
   # Default is 1
   repeat: PositiveInt
   filter: ParkingRuleAssignmentManipulationFilter
+  mode: ParkingRuleAssignmentDuplicationTargetMode!
 }
 
 type ParkingRuleAssignmentDuplicationResult {
@@ -281,8 +287,8 @@ extend type Mutation {
   duplicateParkingRuleAssignments(
     start: DateTime!
     end: DateTime!
-    targetStart: DateTime!
-    options: ParkingRuleAssignmentDuplicationOptions
+    targetStarts: [DateTime!]
+    options: ParkingRuleAssignmentDuplicationOptions!
   ): ParkingRuleAssignmentsResult!
   deleteParkingRuleAssignments(
     start: DateTime!

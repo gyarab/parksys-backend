@@ -122,57 +122,102 @@ class CollisionError extends Error {
   }
 }
 
+const p = (
+  filter: any,
+  ParkingRuleAssignment: mongoose.Model<IParkingRuleAssignment>,
+  start,
+  end,
+  difference: number,
+  onCollisionFail: boolean,
+  trim: boolean
+) => {
+  return ParkingRuleAssignment.find({
+    ...filter,
+    start: { $lte: end },
+    end: { $gte: start }
+  }).then(source => {
+    return Promise.all(
+      source.map(assignment => {
+        const copy = _duplicate(assignment);
+        if (trim) {
+          copy.start = new Date(Math.max(copy.start, start));
+          copy.end = new Date(Math.min(copy.end, end));
+        }
+        // Offset start and end
+        copy.start = new Date(copy.start.getTime() + difference);
+        copy.end = new Date(copy.end.getTime() + difference);
+
+        return __verifyNoCollisions(
+          { id: "000000000000000000000000", input: copy },
+          assignment,
+          ParkingRuleAssignment
+        ).then(({ collisions }) => {
+          if (collisions === -1) {
+            return copy;
+          } else if (onCollisionFail) {
+            const colls = <IParkingRuleAssignment[]>collisions;
+            return new CollisionError("There are collisions.", colls);
+          } else {
+            return null;
+          }
+        });
+      })
+    );
+  });
+};
+
 const duplicateParkingRuleAssignments: Resolver = async (
   _,
-  { start, end, targetStart, options },
+  { start, end, targetStarts, options },
   ctx
 ) => {
   if (start.getTime() > end.getTime()) {
     throw new Error("start > end");
+  } else if (targetStarts.length === 0) {
+    throw new Error("need to supply at least one targetStart");
   }
   const trim = lodash.get(options, "trim", true);
   const onCollisionFail = lodash.get(options, "onCollisionFail", true);
   const filter = lodash.get(options, "filter", {});
-  const repeat = lodash.get(options, "repeat", 1);
+  // Required arg
+  const mode = options.mode;
+  let promises = [];
 
-  const promises = [];
-  for (let i = 1; i <= repeat; i++) {
-    const difference = (targetStart.getTime() - start.getTime()) * i;
-    const promise = ctx.models.ParkingRuleAssignment.find({
-      ...filter,
-      start: { $lte: end },
-      end: { $gte: start }
-    }).then(source => {
-      return Promise.all(
-        source.map(assignment => {
-          const copy = _duplicate(assignment);
-          if (trim) {
-            copy.start = new Date(Math.max(copy.start, start));
-            copy.end = new Date(Math.min(copy.end, end));
-          }
-          // Offset start and end
-          copy.start = new Date(copy.start.getTime() + difference);
-          copy.end = new Date(copy.end.getTime() + difference);
-
-          return __verifyNoCollisions(
-            { id: "000000000000000000000000", input: copy },
-            assignment,
-            ctx.models.ParkingRuleAssignment
-          ).then(({ collisions }) => {
-            if (collisions === -1) {
-              return copy;
-            } else if (onCollisionFail) {
-              const colls = <IParkingRuleAssignment[]>collisions;
-              return new CollisionError("There are collisions.", colls);
-            } else {
-              return null;
-            }
-          });
-        })
+  if (mode === "REPEAT") {
+    const targetStart = targetStarts[0];
+    const repeat = lodash.get(options, "repeat", 1);
+    for (let i = 1; i <= repeat; i++) {
+      const difference = (targetStart.getTime() - start.getTime()) * i;
+      console.log(mode, targetStart, start, difference);
+      promises.push(
+        p(
+          filter,
+          ctx.models.ParkingRuleAssignment,
+          start,
+          end,
+          difference,
+          onCollisionFail,
+          trim
+        )
+      );
+    }
+  } else {
+    // MULTI
+    promises = targetStarts.map(target => {
+      const difference = target.getTime() - start.getTime();
+      console.log(mode, target, start, difference);
+      return p(
+        filter,
+        ctx.models.ParkingRuleAssignment,
+        start,
+        end,
+        difference,
+        onCollisionFail,
+        trim
       );
     });
-    promises.push(promise);
   }
+
   // Wait for collision check before saving anything
   const results = await Promise.all(promises);
   const collisions = [];
