@@ -48,7 +48,7 @@ const __verifyNoCollisions = async (
   args: any,
   current: any,
   ParkingRuleAssignment: Model<IParkingRuleAssignment, {}>
-) => {
+): Promise<{ collisions: IParkingRuleAssignment[] | number }> => {
   if (
     ["priority", "start", "end"].some(
       field => field in args.input && args.input[field] !== current[field]
@@ -111,9 +111,20 @@ const _duplicate = (doc: mongoose.Document) => {
   return obj;
 };
 
+class CollisionError extends Error {
+  collisions: IParkingRuleAssignment[] = null;
+  constructor(message: string, collisions: IParkingRuleAssignment[]) {
+    super(message);
+    this.collisions = collisions;
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, CollisionError.prototype);
+  }
+}
+
 const duplicateParkingRuleAssignments: Resolver = async (
   _,
-  { start, end, targetStarts, options },
+  { start, end, targetStart, options },
   ctx
 ) => {
   if (start.getTime() > end.getTime()) {
@@ -122,44 +133,71 @@ const duplicateParkingRuleAssignments: Resolver = async (
   const trim = lodash.get(options, "trim", true);
   const onCollisionFail = lodash.get(options, "onCollisionFail", true);
   const filter = lodash.get(options, "filter", {});
-  const promises = targetStarts.map(
-    async (targetStart): Promise<any> => {
-      const difference = targetStart.getTime() - start.getTime();
-      // Find PRAs
-      const source = await ctx.models.ParkingRuleAssignment.find({
-        ...filter,
-        start: { $lte: end },
-        end: { $gte: start }
-      });
-      const duplicates = source.map(async assignment => {
-        const copy = _duplicate(assignment);
-        if (trim) {
-          copy.start = new Date(Math.max(copy.start, start));
-          copy.end = new Date(Math.min(copy.end, end));
-        }
-        // Offset start and end
-        copy.start = new Date(copy.start.getTime() + difference);
-        copy.end = new Date(copy.end.getTime() + difference);
+  const repeat = lodash.get(options, "repeat", 1);
 
-        const { collisions } = await __verifyNoCollisions(
-          { id: "000000000000000000000000", input: copy },
-          assignment,
-          ctx.models.ParkingRuleAssignment
-        );
-        return collisions === -1 ? copy : null;
-      });
-      const resolved = await Promise.all(duplicates);
-      if (onCollisionFail && resolved.some(t => t === null)) {
-        // TODO: Handle this better with a result.
-        throw new Error("There are collisions.");
-      }
-      return await ctx.models.ParkingRuleAssignment.create(
-        resolved.filter(t => t !== null)
+  const promises = [];
+  for (let i = 1; i <= repeat; i++) {
+    const difference = (targetStart.getTime() - start.getTime()) * i;
+    const promise = ctx.models.ParkingRuleAssignment.find({
+      ...filter,
+      start: { $lte: end },
+      end: { $gte: start }
+    }).then(source => {
+      return Promise.all(
+        source.map(assignment => {
+          const copy = _duplicate(assignment);
+          if (trim) {
+            copy.start = new Date(Math.max(copy.start, start));
+            copy.end = new Date(Math.min(copy.end, end));
+          }
+          // Offset start and end
+          copy.start = new Date(copy.start.getTime() + difference);
+          copy.end = new Date(copy.end.getTime() + difference);
+
+          return __verifyNoCollisions(
+            { id: "000000000000000000000000", input: copy },
+            assignment,
+            ctx.models.ParkingRuleAssignment
+          ).then(({ collisions }) => {
+            if (collisions === -1) {
+              return copy;
+            } else if (onCollisionFail) {
+              const colls = <IParkingRuleAssignment[]>collisions;
+              return new CollisionError("There are collisions.", colls);
+            } else {
+              return null;
+            }
+          });
+        })
       );
-    }
-  );
+    });
+    promises.push(promise);
+  }
+  // Wait for collision check before saving anything
   const results = await Promise.all(promises);
-  return results;
+  const collisions = [];
+  results.forEach(row => {
+    row.forEach(res => {
+      if (res instanceof CollisionError) {
+        collisions.push(res.collisions);
+      }
+    });
+  });
+  if (collisions.length > 0) {
+    return {
+      _t: "ParkingRuleAssignmentResultError",
+      collisions: collisions.flat(1)
+    };
+  }
+  const retResults = await Promise.all(
+    results.map(assignments =>
+      ctx.models.ParkingRuleAssignment.create(assignments)
+    )
+  );
+  return {
+    _t: "ParkingRuleAssignmentDuplicationResult",
+    newAssignments: retResults
+  };
 };
 
 const deleteParkingRuleAssignments: Resolver = async (
@@ -277,5 +315,8 @@ export default {
       // It should already be populated
       return obj.collisions;
     }
+  },
+  ParkingRuleAssignmentsResult: {
+    __resolveType: obj => obj._t
   }
 };

@@ -256,8 +256,18 @@ input ParkingRuleAssignmentDuplicationOptions {
   trim: Boolean
   # Default is true
   onCollisionFail: Boolean
+  # Default is 1
+  repeat: PositiveInt
   filter: ParkingRuleAssignmentManipulationFilter
 }
+
+type ParkingRuleAssignmentDuplicationResult {
+  newAssignments: [[ParkingRuleAssignment!]!]
+}
+
+union ParkingRuleAssignmentsResult =
+    ParkingRuleAssignmentResultError
+  | ParkingRuleAssignmentDuplicationResult
 
 extend type Mutation {
   createParkingRuleAssignment(
@@ -271,9 +281,9 @@ extend type Mutation {
   duplicateParkingRuleAssignments(
     start: DateTime!
     end: DateTime!
-    targetStarts: [DateTime!]!
+    targetStart: DateTime!
     options: ParkingRuleAssignmentDuplicationOptions
-  ): [[ParkingRuleAssignment!]!]
+  ): ParkingRuleAssignmentsResult!
   deleteParkingRuleAssignments(
     start: DateTime!
     end: DateTime!
