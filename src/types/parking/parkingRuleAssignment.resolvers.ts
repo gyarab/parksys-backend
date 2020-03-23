@@ -189,7 +189,6 @@ const duplicateParkingRuleAssignments: Resolver = async (
     const repeat = lodash.get(options, "repeat", 1);
     for (let i = 1; i <= repeat; i++) {
       const difference = (targetStart.getTime() - start.getTime()) * i;
-      console.log(mode, targetStart, start, difference);
       const promise = p(
         filter,
         ctx.models.ParkingRuleAssignment,
@@ -215,7 +214,6 @@ const duplicateParkingRuleAssignments: Resolver = async (
     // MULTI
     for (const targetStart of targetStarts) {
       const difference = targetStart.getTime() - start.getTime();
-      console.log(mode, targetStarts, start, difference);
       const result = await p(
         filter,
         ctx.models.ParkingRuleAssignment,
