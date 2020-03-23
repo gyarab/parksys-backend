@@ -21,11 +21,9 @@ const updateConfig: AsyncHandler<{ any }> = async (req, res, next) => {
     const response = {
       data: { config: device.config }
     };
-    console.log("config", response);
     res.send(response);
     device.shouldSendConfig = false;
   } else {
-    console.log("config {}");
     res.send({});
   }
   await device.save();

@@ -32,12 +32,12 @@ const getRandomPassword = (): Promise<[string, string]> => {
 
 (async () => {
   if (process.env.NODE_ENV === "development") {
-    const user1 = await User.findOne({ name: "user1" });
+    const user1 = await User.findOne({ name: "admin" });
     if (user1) return;
     await User.create([
       {
-        name: "user1",
-        email: "user1@example.com",
+        name: "admin",
+        email: "admin@example.com",
         permissions: [Permission.ALL],
         authentications: [
           {
@@ -50,12 +50,17 @@ const getRandomPassword = (): Promise<[string, string]> => {
         ]
       }
     ]);
+    console.log("======================================");
+    console.log(`> ADMIN ACCOUNT: admin:1234`);
+    console.log("======================================");
   } else if (process.env.NODE_ENV === "production") {
     if ((await User.count({})) === 0) {
       // No user - create
       const username = "admin";
       const [password, salt] = await getRandomPassword();
-      console.log(`ADMIN ACCOUNT: ${username}:${password}`);
+      console.log("======================================");
+      console.log(`> ADMIN ACCOUNT: ${username}:${password}`);
+      console.log("======================================");
       await User.create({
         name: username,
         email: "tmscer@gmail.com",
