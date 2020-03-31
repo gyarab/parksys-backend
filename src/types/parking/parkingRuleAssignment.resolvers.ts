@@ -251,45 +251,53 @@ const duplicateParkingRuleAssignments: Resolver = async (
 
 const deleteParkingRuleAssignments: Resolver = async (
   _,
-  { start, end, options },
+  { start: deleteStart, end: deleteEnd, options },
   ctx
 ) => {
-  if (start.getTime() > end.getTime()) {
+  if (deleteStart.getTime() > deleteEnd.getTime()) {
     throw new Error("start > end");
   }
   const trim = lodash.get(options, "trim", true);
   const filter = lodash.get(options, "filter", {});
   if (trim) {
-    // Delete those that are wholly between start and end
-    await ctx.models.ParkingRuleAssignment.deleteMany({
-      ...filter,
-      start: { $gte: start },
-      end: { $lte: end }
-    });
     // Trim the rest
     await Promise.all([
+      // Delete those that are wholly between start and end
+      ctx.models.ParkingRuleAssignment.deleteMany({
+        ...filter,
+        start: { $gte: deleteStart },
+        end: { $lte: deleteEnd }
+      }),
       // Start is outside, end is inside
       ctx.models.ParkingRuleAssignment.updateMany(
-        { ...filter, start: { $lt: start }, end: { $gt: start, $lte: end } },
-        { $set: { end: start } }
+        {
+          ...filter,
+          start: { $lt: deleteStart },
+          end: { $gt: deleteStart, $lte: deleteEnd }
+        },
+        { $set: { end: deleteStart } }
       ),
       // End is outside, start is inside
       ctx.models.ParkingRuleAssignment.updateMany(
-        { ...filter, start: { $gte: start, $lt: end }, end: { $gt: end } },
-        { $set: { start: end } }
+        {
+          ...filter,
+          start: { $gte: deleteStart, $lt: deleteEnd },
+          end: { $gt: deleteEnd }
+        },
+        { $set: { start: deleteEnd } }
       ),
       // Both start and end are outside -> divide into two assignments
       ctx.models.ParkingRuleAssignment.find({
         ...filter,
-        end: { $gt: end },
-        start: { $lt: start }
+        end: { $gt: deleteEnd },
+        start: { $lt: deleteStart }
       }).then(results => {
         const copies = results.map(a => {
           const copy = _duplicate(a);
-          copy.start = end;
+          copy.start = deleteEnd;
           return copy;
         });
-        results.forEach(a => (a.end = start));
+        results.forEach(a => (a.end = deleteStart));
         return Promise.all([
           ctx.models.ParkingRuleAssignment.create(copies),
           Promise.all(results.map(r => r.save()))
@@ -299,8 +307,8 @@ const deleteParkingRuleAssignments: Resolver = async (
   } else {
     await ctx.models.ParkingRuleAssignment.deleteMany({
       ...filter,
-      start: { $lte: end },
-      end: { $gte: start }
+      start: { $lte: deleteEnd },
+      end: { $gte: deleteStart }
     });
   }
   return true;

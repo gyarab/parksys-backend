@@ -11,7 +11,9 @@ type User {
 
 input UserSearchInput {
   name: String!
+  # Default is 50
   limit: PositiveInt
+  # Default is 1
   page: PositiveInt
 }
 

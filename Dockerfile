@@ -23,7 +23,6 @@ WORKDIR /usr/src/app
 # be isolated to this stage.
 COPY package.json package-lock.json ./
 COPY tsconfig.json ./
-COPY src/ ./src/
 RUN npm install --only=prod
 
 ### FINAL
@@ -33,9 +32,7 @@ WORKDIR /usr/src/app
 COPY src/ ./src
 COPY --from=deps /usr/src/app/node_modules ./node_modules/
 COPY --from=build /usr/src/app/dist ./dist/
-COPY --from=build /usr/src/app/package.json /usr/src/app/package-lock.json ./
 COPY config ./
-COPY typings ./
 
 EXPOSE 8080
 CMD ["node", "dist/index.js", "-e", "ts"]
