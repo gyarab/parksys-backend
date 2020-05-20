@@ -4,7 +4,7 @@ import {
   gqlCreate,
   gqlFindByIdUpdate,
   gqlFindByIdDelete,
-  gqlPopulate
+  gqlPopulate,
 } from "../../db/genericResolvers";
 import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { IParkingRuleAssignment } from "./parkingRuleAssignment.model";
@@ -15,14 +15,18 @@ import { Permission } from "../permissions";
 import { findAppliedRules } from "../../endpoints/device/capture/ruleResolver";
 import lodash from "lodash";
 
-const modelGetter: ModelGetter<IParkingRuleAssignment> = ctx =>
+const modelGetter: ModelGetter<IParkingRuleAssignment> = (ctx) =>
   ctx.models.ParkingRuleAssignment;
 
 // Query
 const parkingRuleAssignments: Resolver = async (_, args, ctx) => {
-  let query = args.filter || {};
-  if (!!query.startFilter) dateFilter(query, "start", "startFilter");
-  if (!!query.endFilter) dateFilter(query, "end", "endFilter");
+  let { startFilter, endFilter, ...query } = args.filter || {};
+  if (!!startFilter) {
+    query.start = dateFilter(startFilter);
+  }
+  if (!!endFilter) {
+    query.end = dateFilter(endFilter);
+  }
   return await ctx.models.ParkingRuleAssignment.find(query);
 };
 
@@ -39,7 +43,7 @@ const simulateRuleAssignmentApplication: Resolver = async (
   const [results] = await applyRules(appliedRules);
   return {
     appliedRules,
-    feeCents: results.feeCents
+    feeCents: results.feeCents,
   };
 };
 
@@ -51,7 +55,7 @@ const __verifyNoCollisions = async (
 ): Promise<{ collisions: IParkingRuleAssignment[] | number }> => {
   if (
     ["priority", "start", "end"].some(
-      field => field in args.input && args.input[field] !== current[field]
+      (field) => field in args.input && args.input[field] !== current[field]
     )
   ) {
     const newObj = { ...current, ...args.input };
@@ -64,7 +68,7 @@ const __verifyNoCollisions = async (
       ...idSearch,
       priority: newObj.priority,
       start: { $lt: newObj.end }, // not equal because assignments can start when one ends
-      end: { $gt: newObj.start }
+      end: { $gt: newObj.start },
     });
     if (collisions.length > 0) {
       return { collisions };
@@ -134,10 +138,10 @@ const p = (
   return ParkingRuleAssignment.find({
     ...filter,
     start: { $lte: end },
-    end: { $gte: start }
-  }).then(source => {
+    end: { $gte: start },
+  }).then((source) => {
     return Promise.all(
-      source.map(assignment => {
+      source.map((assignment) => {
         const copy = _duplicate(assignment);
         if (trim) {
           copy.start = new Date(Math.max(copy.start, start));
@@ -200,7 +204,7 @@ const duplicateParkingRuleAssignments: Resolver = async (
         trim
       );
       const result = await promise;
-      result.forEach(res => {
+      result.forEach((res) => {
         if (res instanceof CollisionError) {
           collisions.push(res.collisions);
         }
@@ -224,7 +228,7 @@ const duplicateParkingRuleAssignments: Resolver = async (
         onCollisionFail,
         trim
       );
-      result.forEach(res => {
+      result.forEach((res) => {
         if (res instanceof CollisionError) {
           collisions.push(res.collisions);
         }
@@ -240,12 +244,12 @@ const duplicateParkingRuleAssignments: Resolver = async (
   if (collisions.length > 0) {
     return {
       _t: "ParkingRuleAssignmentResultError",
-      collisions: collisions.flat(1)
+      collisions: collisions.flat(1),
     };
   }
   return {
     _t: "ParkingRuleAssignmentDuplicationResult",
-    newAssignments: allResults
+    newAssignments: allResults,
   };
 };
 
@@ -266,14 +270,14 @@ const deleteParkingRuleAssignments: Resolver = async (
       ctx.models.ParkingRuleAssignment.deleteMany({
         ...filter,
         start: { $gte: deleteStart },
-        end: { $lte: deleteEnd }
+        end: { $lte: deleteEnd },
       }),
       // Start is outside, end is inside
       ctx.models.ParkingRuleAssignment.updateMany(
         {
           ...filter,
           start: { $lt: deleteStart },
-          end: { $gt: deleteStart, $lte: deleteEnd }
+          end: { $gt: deleteStart, $lte: deleteEnd },
         },
         { $set: { end: deleteStart } }
       ),
@@ -282,7 +286,7 @@ const deleteParkingRuleAssignments: Resolver = async (
         {
           ...filter,
           start: { $gte: deleteStart, $lt: deleteEnd },
-          end: { $gt: deleteEnd }
+          end: { $gt: deleteEnd },
         },
         { $set: { start: deleteEnd } }
       ),
@@ -290,25 +294,25 @@ const deleteParkingRuleAssignments: Resolver = async (
       ctx.models.ParkingRuleAssignment.find({
         ...filter,
         end: { $gt: deleteEnd },
-        start: { $lt: deleteStart }
-      }).then(results => {
-        const copies = results.map(a => {
+        start: { $lt: deleteStart },
+      }).then((results) => {
+        const copies = results.map((a) => {
           const copy = _duplicate(a);
           copy.start = deleteEnd;
           return copy;
         });
-        results.forEach(a => (a.end = deleteStart));
+        results.forEach((a) => (a.end = deleteStart));
         return Promise.all([
           ctx.models.ParkingRuleAssignment.create(copies),
-          Promise.all(results.map(r => r.save()))
+          Promise.all(results.map((r) => r.save())),
         ]);
-      })
+      }),
     ]);
   } else {
     await ctx.models.ParkingRuleAssignment.deleteMany({
       ...filter,
       start: { $lte: deleteEnd },
-      end: { $gte: deleteStart }
+      end: { $gte: deleteStart },
     });
   }
   return true;
@@ -327,7 +331,7 @@ export default {
     simulateRuleAssignmentApplication: checkPermissionsGqlBuilder(
       [Permission.VEHICLES],
       simulateRuleAssignmentApplication
-    )
+    ),
   },
   Mutation: {
     createParkingRuleAssignment: checkPermissionsGqlBuilder(
@@ -349,14 +353,14 @@ export default {
     deleteParkingRuleAssignments: checkPermissionsGqlBuilder(
       [Permission.VEHICLES],
       deleteParkingRuleAssignments
-    )
+    ),
   },
   ParkingRuleAssignment: {
     rules: checkPermissionsGqlBuilder([Permission.VEHICLES], rules),
     vehicleFilters: checkPermissionsGqlBuilder(
       [Permission.VEHICLES],
       vehicleFilters
-    )
+    ),
   },
   ParkingRuleAssignmentResult: {
     __resolveType(obj) {
@@ -365,15 +369,15 @@ export default {
       } else {
         return "ParkingRuleAssignment";
       }
-    }
+    },
   },
   ParkingRuleAssignmentResultError: {
     collisions: (obj, _, __, ___) => {
       // It should already be populated
       return obj.collisions;
-    }
+    },
   },
   ParkingRuleAssignmentsResult: {
-    __resolveType: obj => obj._t
-  }
+    __resolveType: (obj) => obj._t,
+  },
 };

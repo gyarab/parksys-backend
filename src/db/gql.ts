@@ -26,7 +26,7 @@ import { IVehicleFilter } from "../types/parking/vehicleFilter.model";
 import {
   IParkingRule,
   IParkingRuleTimedFee,
-  IParkingRulePermitAccess
+  IParkingRulePermitAccess,
 } from "../types/parking/parkingRule.model";
 import { IVehicle } from "../types/vehicle/vehicle.model";
 import { IParkingRuleAssignment } from "../types/parking/parkingRuleAssignment.model";
@@ -48,12 +48,12 @@ export type Context = Pick<PRequest<any>, "token"> & {
   };
 };
 
-export type ResolverArgs = [Document | null | any, any, Context, any];
+export type ResolverArgs<T = any, K = any> = [Document | T, K, Context, any];
 export type Resolver<T = any> = (
   obj?: ResolverArgs[0],
   args?: ResolverArgs[1],
   ctx?: ResolverArgs[2],
-  infotrue?: ResolverArgs[3]
+  info?: ResolverArgs[3]
 ) => T;
 
 export interface ResolverWithPermissions extends Resolver {
@@ -70,12 +70,12 @@ const types = [
   "parking",
   "vehicle",
   "stats",
-  "dateFilter"
+  "dateFilter",
 ];
 
 function loadSchemaFile(path: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    fs.exists(path, exists => {
+    fs.exists(path, (exists) => {
       if (!exists) reject(`File does not exist (${path})`);
       fs.readFile(path, { encoding: "UTF-8" }, (err, schema) => {
         if (err) reject(err);
@@ -130,8 +130,8 @@ export const resolvers = _.merge(
     ParkingRuleSelector: {
       __resolveType(obj) {
         return obj.__t;
-      }
-    }
+      },
+    },
   }
 );
 
@@ -147,12 +147,12 @@ export const constructGraphQLServer = async ():
       context({ req }: { req: PRequest<any> }): Context {
         return {
           token: req.token,
-          models
+          models,
         };
       },
       tracing: isDev,
       playground: isDev,
-      introspection: isDev
+      introspection: isDev,
     });
 
     return apollo;

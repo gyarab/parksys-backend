@@ -19,16 +19,15 @@ export const cropImageRectangle = (
   rectangle: Rectangle,
   offset: number = 50
 ): Promise<boolean> => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     Clipper(imagePath, { canvas: Canvas }, function() {
       const args = [
         rectangle.start.x - offset,
         rectangle.start.y - offset,
         rectangle.width + offset * 2,
-        rectangle.height + offset * 2
+        rectangle.height + offset * 2,
       ];
       this.crop(...args);
-      this.toFile("/home/tmscer/output.png", () => null);
       this.toFile(outputPath, () => resolve(true));
     });
   });
@@ -48,24 +47,24 @@ export const findRectangle = (a: Coordinate[]) => {
   const points = [
     {
       x: xMin,
-      y: yMin
+      y: yMin,
     },
     {
       x: xMin,
-      y: yMax
+      y: yMax,
     },
     {
       x: xMax,
-      y: yMax
+      y: yMax,
     },
     {
       x: xMax,
-      y: yMin
-    }
+      y: yMin,
+    },
   ];
   return {
     points,
     width: xMax - xMin,
-    height: yMax - yMin
+    height: yMax - yMin,
   };
 };

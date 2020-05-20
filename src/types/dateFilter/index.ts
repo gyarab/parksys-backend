@@ -1,20 +1,20 @@
-const dateFilter = <T, K extends keyof T>(query: T, key, originalKey: K) => {
-  if (!query[originalKey]) {
-    delete query[originalKey];
-    return query;
+interface DateFilter {
+  gt?: Date;
+  gte?: Date;
+  lt?: Date;
+  lte?: Date;
+}
+
+const dateFilter = (filter: DateFilter) => {
+  if (!filter) {
+    return {};
   }
-  const keys = ["lt", "lte", "gt", "gte"];
-  const f = {};
-  for (const k of keys) {
-    if (query[originalKey][k] !== undefined) {
-      f[`$${k}`] = query[originalKey][k];
-    }
-  }
-  if (Object.keys(f).length > 0) {
-    query[key] = f;
-  }
-  delete query[originalKey];
-  return query;
+  return ["gt", "gte", "lt", "lte"]
+    .filter((key) => !!filter[key])
+    .reduce((newFilter, key) => {
+      newFilter[`$${key}`] = filter[key];
+      return newFilter;
+    }, {});
 };
 
 export default dateFilter;

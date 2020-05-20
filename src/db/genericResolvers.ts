@@ -21,7 +21,7 @@ export const gqlCreate: ResolverFactory = (modelGetter, mapper) => async (
   ctx
 ) => await modelGetter(ctx).create(getInput(args.input, mapper));
 
-export const gqlFindUsingFilter: ResolverFactory = modelGetter => async (
+export const gqlFindUsingFilter: ResolverFactory = (modelGetter) => async (
   _,
   args,
   ctx
@@ -39,7 +39,7 @@ export const gqlFindByIdUpdate: ResolverFactory = (
   );
 };
 
-export const gqlFindByIdDelete: ResolverFactory = modelGetter => async (
+export const gqlFindByIdDelete: ResolverFactory = (modelGetter) => async (
   _,
   args,
   ctx
@@ -57,7 +57,7 @@ export const gqlPopulate = <D extends mongoose.Document, K extends keyof D>(
     return obj[key];
   } else {
     const populated: D = await modelGetter(ctx).populate(obj, {
-      path: keyStr
+      path: keyStr,
     });
     return populated[key];
   }
@@ -79,8 +79,9 @@ export const gqlRegexSearch = <D extends mongoose.Document, K extends keyof D>(
     const model = modelGetter(ctx);
     const limit = lodash.get(args, "search.limit", limitArg.default);
     const page = lodash.get(args, "search.page", 1);
-    if (limit > limitArg.max)
+    if (limit > limitArg.max) {
       throw new Error(`Limit must be <= ${limitArg.max}!`);
+    }
     const fieldValueEscaped = lodash
       .get(args, `search.${fieldKey}`, "")
       .replace(/[-[\]{}()*+?.,\\/^$|#\s]/g, "\\$&");
@@ -95,7 +96,7 @@ export const gqlRegexSearch = <D extends mongoose.Document, K extends keyof D>(
     return {
       data: matchedObjects,
       page,
-      limit
+      limit,
     };
   };
 };
@@ -128,18 +129,16 @@ export const gqlPaged = <D extends mongoose.Document, K extends keyof D>(
     return {
       data: matchedObjects,
       page,
-      limit
+      limit,
     };
   };
 };
 
 export const gqlById = <D extends mongoose.Document, K extends keyof D>(
   modelGetter: ModelGetter<D>
-): Resolver => {
-  return async (_, args, ctx) => {
-    const model = modelGetter(ctx);
-    const id = lodash.get(args, "id", null);
-    if (id === null) throw new Error("Id not provided");
-    return await model.findById(id);
-  };
+): Resolver => async (_, args, ctx) => {
+  const model = modelGetter(ctx);
+  const id = lodash.get(args, "id", null);
+  if (id === null) throw new Error("Id not provided");
+  return await model.findById(id);
 };

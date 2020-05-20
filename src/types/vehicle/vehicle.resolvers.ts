@@ -6,14 +6,14 @@ import {
   gqlFindUsingFilter,
   gqlRegexSearch,
   gqlPaged,
-  gqlById
+  gqlById,
 } from "../../db/genericResolvers";
 import { IVehicle } from "./vehicle.model";
 import dateFilter from "../dateFilter";
 import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { Permission } from "../permissions";
 
-const modelGetter: ModelGetter<IVehicle> = ctx => ctx.models.Vehicle;
+const modelGetter: ModelGetter<IVehicle> = (ctx) => ctx.models.Vehicle;
 
 // Query
 const vehicles: Resolver = gqlFindUsingFilter(modelGetter);
@@ -30,16 +30,44 @@ const createVehicle: Resolver = gqlCreate(modelGetter);
 const deleteVehicle: Resolver = gqlFindByIdDelete(modelGetter);
 const deleteVehicleByLicensePlate: Resolver = async (_, args, ctx) => {
   return await ctx.models.Vehicle.findOneAndDelete({
-    licensePlate: args.licensePlate
+    licensePlate: args.licensePlate,
   });
 };
 
 // Vehicle
 const _parkingSessions: Resolver = gqlPaged(
-  ctx => ctx.models.ParkingSession,
+  (ctx) => ctx.models.ParkingSession,
   { default: 10, max: 50 },
   { active: -1, "checkIn.time": -1 }
 );
+
+const parkingSessions: Resolver = async (
+  vehicle: IVehicle,
+  args,
+  ctx: Context
+) => {
+  args._find = { vehicle: vehicle._id };
+  const { filter, ...query } = args || {};
+  if (!!filter) {
+    const date = dateFilter(filter);
+    query._find["$or"] = [{ "checkOut.time": date }, { "checkIn.time": date }];
+  }
+  return await _parkingSessions(null, query, ctx);
+};
+
+const numParkingSessions = async (vehicle: IVehicle, _, ctx: Context) =>
+  ctx.models.ParkingSession.countDocuments({
+    vehicle: vehicle.id,
+  });
+
+const totalPaidCents = async (vehicle: IVehicle, _, ctx: Context) => {
+  const result = await ctx.models.ParkingSession.aggregate([
+    { $match: { vehicle: vehicle._id } },
+    { $group: { _id: 0, totalPaidCents: { $sum: "$finalFee" } } },
+  ]);
+  if (result.length === 0) return 0;
+  return result[0].totalPaidCents;
+};
 
 export default {
   Query: {
@@ -48,7 +76,7 @@ export default {
     vehicleSearch: checkPermissionsGqlBuilder(
       [Permission.VEHICLES],
       vehicleSearch
-    )
+    ),
   },
   Mutation: {
     createVehicle: checkPermissionsGqlBuilder(
@@ -62,32 +90,11 @@ export default {
     deleteVehicleByLicensePlate: checkPermissionsGqlBuilder(
       [Permission.VEHICLES],
       deleteVehicleByLicensePlate
-    )
+    ),
   },
   Vehicle: {
-    parkingSessions: async (vehicle: IVehicle, args, ctx: Context) => {
-      args._find = { vehicle: vehicle._id };
-      if (!!args.filter) {
-        dateFilter(args, "date", "filter");
-        args._find["$or"] = [
-          { "checkOut.time": args.date },
-          { "checkIn.time": args.date }
-        ];
-        delete args.date;
-      }
-      return await _parkingSessions(null, args, ctx);
-    },
-    numParkingSessions: async (vehicle: IVehicle, _, ctx: Context) =>
-      ctx.models.ParkingSession.countDocuments({
-        vehicle: vehicle.id
-      }),
-    totalPaidCents: async (vehicle: IVehicle, _, ctx: Context) => {
-      const result = await ctx.models.ParkingSession.aggregate([
-        { $match: { vehicle: vehicle._id } },
-        { $group: { _id: 0, totalPaidCents: { $sum: "$finalFee" } } }
-      ]);
-      if (result.length === 0) return 0;
-      return result[0].totalPaidCents;
-    }
-  }
+    parkingSessions,
+    numParkingSessions,
+    totalPaidCents,
+  },
 };

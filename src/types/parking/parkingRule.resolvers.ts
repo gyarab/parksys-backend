@@ -2,7 +2,7 @@ import { Resolver } from "../../db/gql";
 import {
   IParkingRulePermitAccess,
   IParkingRuleTimedFee,
-  IParkingRule
+  IParkingRule,
 } from "./parkingRule.model";
 import {
   gqlFindByIdUpdate,
@@ -10,7 +10,7 @@ import {
   gqlFindUsingFilter,
   gqlCreate,
   gqlRegexSearch,
-  gqlFindByIdDelete
+  gqlFindByIdDelete,
 } from "../../db/genericResolvers";
 import { Permission } from "../permissions";
 import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
@@ -30,18 +30,16 @@ const ruleModelGetter: ModelGetter<IParkingRule> = (ctx, type) => {
 const parkingRules: Resolver = gqlFindUsingFilter(ruleModelGetter);
 const parkingRuleSearch: Resolver = gqlRegexSearch(ruleModelGetter, "name", {
   max: 100,
-  default: 50
+  default: 50,
 });
 
-const typeMapper = input => {
-  const type = input._t;
-  delete input._t;
+const typeMapper = ({ _t: type, ...input }) => {
   if (!type) {
     return input;
   } else {
     return {
       ...input,
-      __t: type
+      __t: type,
     };
   }
 };
@@ -69,14 +67,14 @@ export default {
     parkingRuleSearch: checkPermissionsGqlBuilder(
       [Permission.VEHICLES],
       parkingRuleSearch
-    )
+    ),
   },
   ParkingRule: {
     __resolveType(
       parkingRule: IParkingRulePermitAccess | IParkingRuleTimedFee
     ) {
       return parkingRule.__t;
-    }
+    },
   },
   Mutation: {
     createParkingRule: checkPermissionsGqlBuilder(
@@ -90,6 +88,6 @@ export default {
     deleteParkingRule: checkPermissionsGqlBuilder(
       [Permission.VEHICLES],
       deleteParkingRule
-    )
-  }
+    ),
+  },
 };

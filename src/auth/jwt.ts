@@ -8,7 +8,7 @@ function toBase64Url(payload: any): string {
     .replace(/\+/g, "-")
     .replace(/\//g, "_");
 }
-//http://
+
 // From Mocasys Middleend
 export function fromBase64Url(payload: string): any {
   let s = payload;
@@ -57,7 +57,7 @@ export function verifyToken(secret: string, token: string): [boolean, object] {
 export function createToken(secret: string, body: object): string {
   const head = {
     alg: "HS256",
-    typ: "JWT"
+    typ: "JWT",
   };
   const head64 = toBase64Url(head);
   const body64 = toBase64Url(body);

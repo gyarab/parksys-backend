@@ -16,7 +16,7 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
     "activationPassword.method": AuthenticationMethod.ACTIVATION_PASSWORD,
     "activationPassword.payload.password": activationPassword,
     "activationPassword.payload.expiresAt": { $gt: now },
-    activated: false
+    activated: false,
   });
   if (!device) {
     res
@@ -27,17 +27,17 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
 
   const {
     accessToken: { str: accessToken },
-    refreshToken: { str: refreshToken, db: refreshTokenDb }
+    refreshToken: { str: refreshToken, db: refreshTokenDb },
   } = await createTokenPair(
     deviceAccessTokenData(
       {
         id: device.id,
-        permissions: [Permission.ALL]
+        permissions: [Permission.ALL],
       }
       //now
     ),
     {
-      method: AuthenticationMethod.ACTIVATION_PASSWORD
+      method: AuthenticationMethod.ACTIVATION_PASSWORD,
     },
     RefreshToken
   );
@@ -49,7 +49,7 @@ const deviceActivationEndpoint: AsyncHandler<any> = async (req, res, next) => {
   await device.save();
 
   res.send({
-    data: { refreshToken, accessToken, device: device.toJSON() }
+    data: { refreshToken, accessToken, device: device.toJSON() },
   });
   return next();
 };

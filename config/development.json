@@ -3,6 +3,11 @@
   "security": {
     "userAccessTokenDuration": 60000000,
     "deviceAccessTokenDuration": 60000000,
-    "activationPasswordDuration": 60000000
+    "activationPasswordDuration": 60000
+  },
+  "capture": {
+    "tofile": true,
+    "tofilePath": "/home/tmscer/cap",
+    "log": true
   }
 }

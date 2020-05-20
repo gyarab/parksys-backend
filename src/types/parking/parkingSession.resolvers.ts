@@ -2,7 +2,7 @@ import {
   ModelGetter,
   gqlPopulate,
   gqlPaged,
-  gqlById
+  gqlById,
 } from "../../db/genericResolvers";
 import { Resolver, Context } from "../../db/gql";
 import { IParkingSession } from "./parkingSession.model";
@@ -12,7 +12,7 @@ import routes from "../../endpoints/routes";
 import { Permission } from "../permissions";
 import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 
-const modelGetter: ModelGetter<IParkingSession> = ctx =>
+const modelGetter: ModelGetter<IParkingSession> = (ctx) =>
   ctx.models.ParkingSession;
 
 // Query
@@ -26,13 +26,12 @@ const parkingSessions: Resolver = gqlPaged(
 const parkingSession: Resolver = gqlById(modelGetter);
 
 const parkingSessionsFilter: Resolver = async (obj, args, ctx, info) => {
-  if (!!args.filter) dateFilter(args, "date", "filter");
+  const { filter: dateFilter, ...query } = args || {};
   return await parkingSessions(
     obj,
     {
-      page: args.page,
-      limit: args.limit,
-      _find: !!args.date ? { "checkOut.time": args.date } : {}
+      ...query,
+      _find: !!dateFilter ? { "checkOut.time": dateFilter(dateFilter) } : {},
     },
     ctx,
     info
@@ -52,16 +51,16 @@ export default {
     parkingSession: checkPermissionsGqlBuilder(
       [Permission.VEHICLES],
       parkingSession
-    )
+    ),
   },
   ParkingSession: {
-    vehicle: gqlPopulate(modelGetter, "vehicle")
+    vehicle: gqlPopulate(modelGetter, "vehicle"),
   },
   Check: {
     imagePaths: (check: ICheck, _, ctx: Context) => {
-      return check.images.map(id =>
+      return check.images.map((id) =>
         routes.captureImage.path.replace(":id", id)
       );
-    }
-  }
+    },
+  },
 };
