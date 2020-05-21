@@ -6,13 +6,13 @@ import lpr from "../../../apis/lpr";
 import { Device, IDevice } from "../../../types/device/device.model";
 import {
   LicensePlateRecognitionResult,
-  Candidate
+  Candidate,
 } from "../../../apis/lpr/types";
 import { Vehicle } from "../../../types/vehicle/vehicle.model";
 import { Check } from "../../../types/parking/check.model";
 import {
   ParkingSession,
-  IParkingSession
+  IParkingSession,
 } from "../../../types/parking/parkingSession.model";
 import cache from "../../../cache";
 import config from "../../../config";
@@ -31,7 +31,7 @@ const getLprResult = (file: any) =>
         if (err) reject(err);
         const recognition = sharp(file.data)
           .toFile(fname)
-          .then(_ => lpr.recognizeLicensePlate(fname));
+          .then((_) => lpr.recognizeLicensePlate(fname));
         // This Promise can fail
         const toFile = !!config.get("capture:tofile")
           ? sharp(file.data)
@@ -41,18 +41,45 @@ const getLprResult = (file: any) =>
                   new Date().getTime() + ".jpg"
                 )
               )
-              .catch(err => console.error(err))
+              .catch((err) => console.error(err))
           : null;
         Promise.all([recognition, toFile])
           .then(([result, _]) => {
             resolve([result, fname, removeTmpFile]);
           })
-          .catch(err => reject(err));
+          .catch((err) => reject(err));
       });
     }
   );
 
-export const handleResult = async (
+const saveLicensePlateImage = async (
+  licensePlateRectangle: Rectangle,
+  imgFilePath: string
+): Promise<string | null> => {
+  const { start, width, height } = licensePlateRectangle;
+  const offset = config.get("capture:cutOffset") || 0;
+  return sharp(imgFilePath)
+    .extract({
+      left: start.x - offset,
+      top: start.y - offset,
+      width: width + offset * 2,
+      height: height + offset * 2,
+    })
+    .toBuffer()
+    .then((buffer) =>
+      new CaptureImage({ data: buffer.toString("base64") }).save()
+    )
+    .then((captureImage) => {
+      delete captureImage.data;
+      return captureImage.id;
+    })
+    .catch((err) => {
+      console.log(err);
+      return null;
+    });
+};
+
+const handleResult = async (
   best: Candidate,
   device: IDevice,
   captureTime: Date,
@@ -74,31 +101,9 @@ export const handleResult = async (
   const check = new Check({ byDevice: device, time: captureTime });
   let parkingSession: IParkingSession = await ParkingSession.findOne({
     vehicle,
-    active: true
+    active: true,
   });
-  const saveImage = async (): Promise<string | null> => {
-    const { start, width, height } = licensePlateRectangle;
-    const offset = config.get("capture:cutOffset") || 0;
-    return sharp(imgFilePath)
-      .extract({
-        left: start.x - offset,
-        top: start.y - offset,
-        width: width + offset * 2,
-        height: height + offset * 2
-      })
-      .toBuffer()
-      .then(buffer =>
-        new CaptureImage({ data: buffer.toString("base64") }).save()
-      )
-      .then(captureImage => {
-        delete captureImage.data;
-        return captureImage.id;
-      })
-      .catch(err => {
-        console.log(err);
-        return null;
-      });
-  };
+
   if (!!parkingSession && device.config.type === DeviceType.OUT) {
     // The vehicle is exiting
     const appliedRules = await findAppliedRules(
@@ -106,23 +111,27 @@ export const handleResult = async (
       parkingSession.checkIn.time,
       captureTime
     );
+    // Apply rules
     const [result, filledAppliedRules] = await applyRules(appliedRules);
 
     parkingSession.appliedAssignments = filledAppliedRules;
     parkingSession.finalFee = result.feeCents;
-    check.images = [await saveImage()];
+    check.images = [
+      await saveLicensePlateImage(licensePlateRectangle, imgFilePath),
+    ];
     parkingSession.checkOut = check;
     parkingSession.active = false;
-    // Image may error out
+
     await parkingSession.save();
   } else if (!parkingSession && device.config.type === DeviceType.IN) {
     // The vehicle is entering
-    check.images = [await saveImage()];
+    check.images = [
+      await saveLicensePlateImage(licensePlateRectangle, imgFilePath),
+    ];
     parkingSession = await new ParkingSession({
       vehicle,
-      checkIn: check
+      checkIn: check,
     }).save();
-    // Image may error out
   } else {
     const deviceIdentity = `${device.id}:${JSON.stringify(device.config)}`;
     const sessionIdentity = `${!!parkingSession ? parkingSession.id : "null"})`;
@@ -172,7 +181,7 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
 
   if (device.shouldSendConfig || !device.config.capturing) {
     const response = {
-      data: { config: device.config }
+      data: { config: device.config },
     };
     res.send(response);
     device.shouldSendConfig = false;
@@ -185,7 +194,7 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
 
   if (!device.config.capturing) {
     console.log(
-      `Device ${device.id} is trying to capture although config says otherwise`
+      `Device '${device.name}' (${device.id}) is trying to capture although config says it shouldn't`
     );
     return next();
   }
@@ -202,22 +211,27 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
     const filename = Object.keys(files)[0];
     const captureTime = filenameToDate(filename);
     const [result, fname, deleteTmpFile] = await getLprResult(files[filename]);
-    if (result.best === null) {
+
+    const cleanupAndNext = (...args) => {
       deleteTmpFile();
+      return next(...args);
+    };
+
+    if (result.best === null) {
       if (log) {
         console.log("No result");
       }
-      return next();
+      return cleanupAndNext();
     } else if (log) {
       console.log("result", result.best, result.candidates);
     }
+
     const licensePlateArea = result.rectangle.width * result.rectangle.height;
     if (licensePlateArea < device.config.minArea) {
       if (log) {
         console.log("Low area: " + result.rectangle);
       }
-      deleteTmpFile();
-      return next();
+      return cleanupAndNext();
     }
     const K = <number>config.get("recognitionCache:k");
     let cached: DeviceCacheValue = cache.get(device.cacheKey());
@@ -230,7 +244,7 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
         {
           n: 1,
           combinedResults: {},
-          start: new Date().getTime()
+          start: new Date().getTime(),
         },
         result
       );
@@ -254,8 +268,7 @@ const capture: AsyncHandler<any> = async (req, res, next) => {
     } else {
       cache.set(device.cacheKey(), cached);
     }
-    deleteTmpFile();
-    return next();
+    return cleanupAndNext();
   } catch (err) {
     // This prevents the whole file to be logged in the case of 413 from
     // the recognition server

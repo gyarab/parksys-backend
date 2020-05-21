@@ -1,15 +1,15 @@
 import {
   IParkingRuleAssignment,
-  ParkingRuleAssignment
+  ParkingRuleAssignment,
 } from "../../../types/parking/parkingRuleAssignment.model";
 import { IVehicle } from "../../../types/vehicle/vehicle.model";
-import { LinearHeap, BinaryHeap } from "../../../utils/heap";
+import { BinaryHeap } from "../../../utils/heap";
 import { createFilterApplier } from "./filterApplier";
 import {
   AppliedRuleAssignment,
   RuleEventEnum,
   RuleEvent,
-  MillisMemo
+  MillisMemo,
 } from "./types";
 
 const getAppliedRuleAssignments = (
@@ -68,7 +68,7 @@ const getAppliedRuleAssignments = (
         addAppliedRuleAssignment({
           start: new Date(currentRuleAssignmentFrom),
           end: new Date(eventMillis),
-          assignment: currentRuleAssignment
+          assignment: currentRuleAssignment,
         });
         // Stash if current rule assignment may be used in future
         if (
@@ -100,7 +100,7 @@ const getAppliedRuleAssignments = (
         addAppliedRuleAssignment({
           start: new Date(currentRuleAssignmentFrom),
           end: new Date(eventMillis),
-          assignment: currentRuleAssignment
+          assignment: currentRuleAssignment,
         });
         // Get rule assignment from the heap
         let nextRuleAssignmentI = heap.pop();
@@ -155,7 +155,7 @@ const transformRuleAssignmentsIntoRuleEvents = (
       return [[i, RuleEventEnum.START], [i, RuleEventEnum.END]];
     })
     // Filter after to preserve indexes from group.ruleAssignments
-    .filter(assignment => !!assignment);
+    .filter((assignment) => !!assignment);
   const events = [].concat
     .apply([], timePairs)
     .sort((a: RuleEvent, b: RuleEvent) => {
@@ -178,7 +178,7 @@ export const findAppliedRules = async (
   // Fetch ParkingRuleDayAssignment
   const ruleAssignments = await ParkingRuleAssignment.find({
     start: { $lte: end },
-    end: { $gte: start }
+    end: { $gte: start },
   }).populate({ path: "vehicleFilters" });
   // Result object
   const appliedRuleAssignments = getAppliedRuleAssignments(
