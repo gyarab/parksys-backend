@@ -1,4 +1,4 @@
-import { Resolver, Context } from "../../db/gql";
+import { Resolver } from "../../db/gql";
 import {
   ModelGetter,
   gqlCreate,
@@ -89,7 +89,7 @@ const duplicateParkingRuleAssignments: Resolver = async (_, args, ctx) => {
     throw new Error("need to supply at least one targetStart");
   }
 
-  const [assignmentCreators, collisions] = await checkCollisionsWhenDuplicating(
+  const [assignmentCopies, collisions] = await checkCollisionsWhenDuplicating(
     args,
     ctx
   );
@@ -102,7 +102,9 @@ const duplicateParkingRuleAssignments: Resolver = async (_, args, ctx) => {
   }
 
   const newAssignments = await Promise.all(
-    assignmentCreators.map((creator) => creator())
+    assignmentCopies.map((assignment) =>
+      ctx.models.ParkingRuleAssignment.create(assignment)
+    )
   );
   return {
     _t: "ParkingRuleAssignmentDuplicationResult",
