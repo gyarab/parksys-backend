@@ -28,7 +28,7 @@ const app = express();
 
 const corsOptions = {
   // TODO: Move this to settings
-  origin: "*"
+  origin: "*",
 };
 
 // Compression

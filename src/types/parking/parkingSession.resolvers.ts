@@ -38,6 +38,11 @@ const parkingSessionsFilter: Resolver = async (obj, args, ctx, info) => {
   );
 };
 
+// Check
+const imagePaths: Resolver = (check: ICheck) => {
+  return check.images.map((id) => routes.captureImage.path.replace(":id", id));
+};
+
 export default {
   Query: {
     parkingSessions: checkPermissionsGqlBuilder(
@@ -57,10 +62,6 @@ export default {
     vehicle: gqlPopulate(modelGetter, "vehicle"),
   },
   Check: {
-    imagePaths: (check: ICheck, _, ctx: Context) => {
-      return check.images.map((id) =>
-        routes.captureImage.path.replace(":id", id)
-      );
-    },
+    imagePaths,
   },
 };

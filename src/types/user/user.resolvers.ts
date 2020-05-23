@@ -4,14 +4,13 @@ import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { Permission } from "../permissions";
 import { Resolver } from "../../db/gql";
 import {
-  gqlFindUsingFilter,
   ModelGetter,
   gqlRegexSearch,
   gqlFindByIdUpdate,
-  gqlFindByIdDelete
+  gqlFindByIdDelete,
 } from "../../db/genericResolvers";
 
-const modelGetter: ModelGetter<IUser> = ctx => ctx.models.User;
+const modelGetter: ModelGetter<IUser> = (ctx) => ctx.models.User;
 
 // Query
 const currentUser: Resolver = async (_, __, ctx) => {
@@ -39,6 +38,7 @@ const userSearchByEmail: Resolver = gqlRegexSearch(
   false,
   { name: 1 }
 );
+
 // User
 const authentications: Resolver = (obj: IUser, _, ctx) => {
   const uid = lodash.get(ctx, "token.user.id");
@@ -88,14 +88,14 @@ export default {
     userSearchByEmail: checkPermissionsGqlBuilder(
       [Permission.ALL],
       userSearchByEmail
-    )
+    ),
   },
   User: {
     authentications,
-    isAdmin
+    isAdmin,
   },
   Mutation: {
     updateUser: checkPermissionsGqlBuilder([Permission.ALL], updateUser),
-    deleteUser: checkPermissionsGqlBuilder([Permission.ALL], deleteUser)
-  }
+    deleteUser: checkPermissionsGqlBuilder([Permission.ALL], deleteUser),
+  },
 };

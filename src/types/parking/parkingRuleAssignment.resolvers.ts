@@ -1,4 +1,4 @@
-import { Resolver } from "../../db/gql";
+import { Resolver, Context } from "../../db/gql";
 import {
   ModelGetter,
   gqlCreate,
@@ -9,11 +9,15 @@ import {
 import { checkPermissionsGqlBuilder } from "../../auth/requestHofs";
 import { IParkingRuleAssignment } from "./parkingRuleAssignment.model";
 import { applyRules } from "../../endpoints/device/capture/ruleApplier";
-import mongoose, { Model } from "mongoose";
 import dateFilter from "../dateFilter";
 import { Permission } from "../permissions";
 import { findAppliedRules } from "../../endpoints/device/capture/ruleResolver";
 import lodash from "lodash";
+import {
+  countCollisions,
+  checkCollisionsWhenDuplicating,
+} from "./parkingRuleAssignmentHelpers";
+import { duplicateDocument } from "../../utils/modelHelpers";
 
 const modelGetter: ModelGetter<IParkingRuleAssignment> = (ctx) =>
   ctx.models.ParkingRuleAssignment;
@@ -48,43 +52,14 @@ const simulateRuleAssignmentApplication: Resolver = async (
 };
 
 // Mutation
-const __verifyNoCollisions = async (
-  args: any,
-  current: any,
-  ParkingRuleAssignment: Model<IParkingRuleAssignment, {}>
-): Promise<{ collisions: IParkingRuleAssignment[] | number }> => {
-  if (
-    ["priority", "start", "end"].some(
-      (field) => field in args.input && args.input[field] !== current[field]
-    )
-  ) {
-    const newObj = { ...current, ...args.input };
-    // Start <= End
-    if (newObj.start.getTime() > newObj.end.getTime()) {
-      throw new Error("start > end!");
-    }
-    const idSearch = !!args.id ? { _id: { $ne: args.id } } : {};
-    const collisions = await ParkingRuleAssignment.find({
-      ...idSearch,
-      priority: newObj.priority,
-      start: { $lt: newObj.end }, // not equal because assignments can start when one ends
-      end: { $gt: newObj.start },
-    });
-    if (collisions.length > 0) {
-      return { collisions };
-    }
-  }
-  return { collisions: -1 };
-};
-
 const _createParkingRuleAssignment: Resolver = gqlCreate(modelGetter);
 const createParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
-  const { collisions } = await __verifyNoCollisions(
+  const collisions = await countCollisions(
     args,
     {},
     ctx.models.ParkingRuleAssignment
   );
-  if (collisions === -1) {
+  if (collisions.length === 0) {
     return await _createParkingRuleAssignment(obj, args, ctx, info);
   } else {
     return { collisions };
@@ -94,12 +69,12 @@ const createParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
 const _updateParkingRuleAssignment: Resolver = gqlFindByIdUpdate(modelGetter);
 const updateParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
   const current = await ctx.models.ParkingRuleAssignment.findById(args.id);
-  const { collisions } = await __verifyNoCollisions(
+  const collisions = await countCollisions(
     args,
     current.toObject(),
     ctx.models.ParkingRuleAssignment
   );
-  if (collisions === -1) {
+  if (collisions.length === 0) {
     return await _updateParkingRuleAssignment(obj, args, ctx, info);
   } else {
     return { collisions };
@@ -107,139 +82,17 @@ const updateParkingRuleAssignment: Resolver = async (obj, args, ctx, info) => {
 };
 const deleteParkingRuleAssignment: Resolver = gqlFindByIdDelete(modelGetter);
 
-const _duplicate = (doc: mongoose.Document) => {
-  // Delete id
-  const obj = doc.toObject();
-  delete obj["_id"];
-  delete obj["id"];
-  return obj;
-};
-
-class CollisionError extends Error {
-  collisions: IParkingRuleAssignment[] = null;
-  constructor(message: string, collisions: IParkingRuleAssignment[]) {
-    super(message);
-    this.collisions = collisions;
-
-    // Set the prototype explicitly.
-    Object.setPrototypeOf(this, CollisionError.prototype);
-  }
-}
-
-const p = (
-  filter: any,
-  ParkingRuleAssignment: mongoose.Model<IParkingRuleAssignment>,
-  start,
-  end,
-  difference: number,
-  onCollisionFail: boolean,
-  trim: boolean
-) => {
-  return ParkingRuleAssignment.find({
-    ...filter,
-    start: { $lte: end },
-    end: { $gte: start },
-  }).then((source) => {
-    return Promise.all(
-      source.map((assignment) => {
-        const copy = _duplicate(assignment);
-        if (trim) {
-          copy.start = new Date(Math.max(copy.start, start));
-          copy.end = new Date(Math.min(copy.end, end));
-        }
-        // Offset start and end
-        copy.start = new Date(copy.start.getTime() + difference);
-        copy.end = new Date(copy.end.getTime() + difference);
-
-        return __verifyNoCollisions(
-          { id: "000000000000000000000000", input: copy },
-          assignment,
-          ParkingRuleAssignment
-        ).then(({ collisions }) => {
-          if (collisions === -1) {
-            return copy;
-          } else if (onCollisionFail) {
-            const colls = <IParkingRuleAssignment[]>collisions;
-            return new CollisionError("There are collisions.", colls);
-          } else {
-            return null;
-          }
-        });
-      })
-    );
-  });
-};
-
-const duplicateParkingRuleAssignments: Resolver = async (
-  _,
-  { start, end, targetStarts, options },
-  ctx
-) => {
-  if (start.getTime() > end.getTime()) {
+const duplicateParkingRuleAssignments: Resolver = async (_, args, ctx) => {
+  if (args.start.getTime() > args.end.getTime()) {
     throw new Error("start > end");
-  } else if (targetStarts.length === 0) {
+  } else if (args.targetStarts.length === 0) {
     throw new Error("need to supply at least one targetStart");
   }
-  const trim = lodash.get(options, "trim", true);
-  const onCollisionFail = lodash.get(options, "onCollisionFail", true);
-  const filter = lodash.get(options, "filter", {});
-  // Required arg
-  const mode = options.mode;
-  let allResults = [];
 
-  const collisions = [];
-  if (mode === "REPEAT") {
-    const targetStart = targetStarts[0];
-    const repeat = lodash.get(options, "repeat", 1);
-    const diff = end.getTime() - start.getTime();
-    for (let i = 0; i < repeat; i++) {
-      const difference = targetStart.getTime() - start.getTime() + i * diff;
-      const promise = p(
-        filter,
-        ctx.models.ParkingRuleAssignment,
-        start,
-        end,
-        difference,
-        onCollisionFail,
-        trim
-      );
-      const result = await promise;
-      result.forEach((res) => {
-        if (res instanceof CollisionError) {
-          collisions.push(res.collisions);
-        }
-      });
-      if (collisions.length > 0) {
-        break;
-      } else {
-        allResults.push(await ctx.models.ParkingRuleAssignment.create(result));
-      }
-    }
-  } else {
-    // MULTI
-    for (const targetStart of targetStarts) {
-      const difference = targetStart.getTime() - start.getTime();
-      const result = await p(
-        filter,
-        ctx.models.ParkingRuleAssignment,
-        start,
-        end,
-        difference,
-        onCollisionFail,
-        trim
-      );
-      result.forEach((res) => {
-        if (res instanceof CollisionError) {
-          collisions.push(res.collisions);
-        }
-      });
-      if (collisions.length > 0) {
-        break;
-      } else {
-        allResults.push(await ctx.models.ParkingRuleAssignment.create(result));
-      }
-    }
-  }
+  const [assignmentCreators, collisions] = await checkCollisionsWhenDuplicating(
+    args,
+    ctx
+  );
 
   if (collisions.length > 0) {
     return {
@@ -247,9 +100,13 @@ const duplicateParkingRuleAssignments: Resolver = async (
       collisions: collisions.flat(1),
     };
   }
+
+  const newAssignments = await Promise.all(
+    assignmentCreators.map((creator) => creator())
+  );
   return {
     _t: "ParkingRuleAssignmentDuplicationResult",
-    newAssignments: allResults,
+    newAssignments,
   };
 };
 
@@ -297,7 +154,7 @@ const deleteParkingRuleAssignments: Resolver = async (
         start: { $lt: deleteStart },
       }).then((results) => {
         const copies = results.map((a) => {
-          const copy = _duplicate(a);
+          const copy = duplicateDocument(a);
           copy.start = deleteEnd;
           return copy;
         });
@@ -372,10 +229,8 @@ export default {
     },
   },
   ParkingRuleAssignmentResultError: {
-    collisions: (obj, _, __, ___) => {
-      // It should already be populated
-      return obj.collisions;
-    },
+    // It should already be populated
+    collisions: (obj, _, __, ___) => obj.collisions,
   },
   ParkingRuleAssignmentsResult: {
     __resolveType: (obj) => obj._t,

@@ -259,8 +259,6 @@ enum ParkingRuleAssignmentDuplicationTargetMode {
 input ParkingRuleAssignmentDuplicationOptions {
   # Default is true
   trim: Boolean
-  # Default is true
-  onCollisionFail: Boolean
   # Default is 1
   repeat: PositiveInt
   filter: ParkingRuleAssignmentManipulationFilter
