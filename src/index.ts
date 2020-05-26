@@ -30,6 +30,11 @@ const getRandomPassword = (): Promise<[string, string]> => {
   });
 };
 
+const credentialsLogString = (user: string, password: string) => {
+  const divider = `======================================`;
+  return `${divider}\n> ADMIN ACCOUNT: ${user}:${password}\ndivider\n`;
+};
+
 (async () => {
   if (process.env.NODE_ENV === "development") {
     const user1 = await User.findOne({ name: "admin" });
@@ -44,23 +49,19 @@ const getRandomPassword = (): Promise<[string, string]> => {
             method: AuthenticationMethod.PASSWORD,
             payload: {
               h: await hashPassword("1234", "NaCl"),
-              s: "NaCl"
-            }
-          }
-        ]
-      }
+              s: "NaCl",
+            },
+          },
+        ],
+      },
     ]);
-    console.log("======================================");
-    console.log(`> ADMIN ACCOUNT: admin:1234`);
-    console.log("======================================");
+    console.log(credentialsLogString("admin", "1234"));
   } else if (process.env.NODE_ENV === "production") {
     if ((await User.count({})) === 0) {
       // No user - create
       const username = "admin";
       const [password, salt] = await getRandomPassword();
-      console.log("======================================");
-      console.log(`> ADMIN ACCOUNT: ${username}:${password}`);
-      console.log("======================================");
+      console.log(credentialsLogString(username, password));
       await User.create({
         name: username,
         email: "tmscer@gmail.com",
@@ -70,10 +71,10 @@ const getRandomPassword = (): Promise<[string, string]> => {
             method: AuthenticationMethod.PASSWORD,
             payload: {
               h: await hashPassword(password, salt),
-              s: salt
-            }
-          }
-        ]
+              s: salt,
+            },
+          },
+        ],
       });
     }
   }
